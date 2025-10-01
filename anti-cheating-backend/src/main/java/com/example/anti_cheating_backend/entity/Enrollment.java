@@ -31,4 +31,9 @@ public class Enrollment {
     private LocalDateTime enrollmentDate;
     @Column(name = "last_verification")
     private LocalDateTime lastVerification;
+
+    @PrePersist
+    protected void onCreate(){
+        enrollmentDate = LocalDateTime.now();
+    }
 }

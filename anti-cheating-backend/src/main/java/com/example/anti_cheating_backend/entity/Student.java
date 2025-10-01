@@ -23,6 +23,7 @@ public class Student {
     @Column(unique = true,nullable = false)
     private String email;
     @Column(nullable = false)
+    @Transient
     private String password;
     private String firstName;
     private String lastName;
@@ -37,4 +38,14 @@ public class Student {
     private List<Event> events;
     @OneToMany(mappedBy = "student",cascade = CascadeType.ALL)
     private List<Enrollment> enrollments;
+
+    @PrePersist
+    protected void onCreated(){
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    @PreUpdate
+    protected void onUpdate(){
+        updatedAt = LocalDateTime.now();
+    }
 }

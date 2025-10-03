@@ -1,0 +1,116 @@
+2025-08-24 14:00:14,466 - INFO - Verification attempt 1/3 for user user12
+2025-08-24 14:00:19,735 - INFO - Starting live face capture for verification
+2025-08-24 14:00:40,404 - INFO - Live image captured: data\temp\verify_20250824_140040.jpg
+2025-08-24 14:00:40,921 - INFO - Verification FAILURE for user12: 0.000
+2025-08-24 14:00:40,921 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-08-24 14:00:40,921 - INFO - Verification attempt 2/3 for user user12
+2025-08-24 14:00:46,124 - INFO - Starting live face capture for verification
+2025-08-24 14:01:07,789 - INFO - Live image captured: data\temp\verify_20250824_140107.jpg
+2025-08-24 14:01:08,263 - INFO - Verification FAILURE for user12: 0.000
+2025-08-24 14:01:08,263 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-08-24 14:01:08,263 - INFO - Verification attempt 3/3 for user user12
+2025-08-24 14:01:13,438 - INFO - Starting live face capture for verification
+2025-08-24 14:01:36,590 - INFO - Live image captured: data\temp\verify_20250824_140136.jpg
+2025-08-24 14:01:37,057 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:01:37,057 - INFO - Verification FAILURE for user12: 0.000
+2025-08-24 14:23:53,675 - INFO - Verification attempt 1/3 for user user1
+2025-08-24 14:23:59,230 - INFO - Starting live face capture for verification
+2025-08-24 14:24:19,912 - WARNING - Potential liveness check failure - minimal movement detected
+2025-08-24 14:24:19,912 - INFO - Live image captured: data\temp\verify_20250824_142419.jpg
+2025-08-24 14:24:20,487 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:24:20,488 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:24:20,489 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-08-24 14:24:20,489 - INFO - Verification attempt 2/3 for user user1
+2025-08-24 14:24:25,564 - INFO - Starting live face capture for verification
+2025-08-24 14:24:45,794 - WARNING - Potential liveness check failure - minimal movement detected
+2025-08-24 14:24:45,794 - INFO - Live image captured: data\temp\verify_20250824_142445.jpg
+2025-08-24 14:24:46,335 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:24:46,336 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:24:46,338 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-08-24 14:24:46,338 - INFO - Verification attempt 3/3 for user user1
+2025-08-24 14:24:51,506 - INFO - Starting live face capture for verification
+2025-08-24 14:25:11,370 - INFO - Live image captured: data\temp\verify_20250824_142511.jpg
+2025-08-24 14:25:11,900 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:25:11,900 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:28:23,726 - INFO - Verification attempt 1/3 for user user1
+2025-08-24 14:28:29,058 - INFO - Starting live face capture for verification
+2025-08-24 14:28:48,878 - WARNING - Potential liveness check failure - minimal movement detected
+2025-08-24 14:28:48,878 - INFO - Live image captured: data\temp\verify_20250824_142848.jpg
+2025-08-24 14:28:49,424 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:28:49,425 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:28:49,426 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-08-24 14:28:49,426 - INFO - Verification attempt 2/3 for user user1
+2025-08-24 14:28:54,432 - INFO - Starting live face capture for verification
+2025-08-24 14:29:14,462 - INFO - Live image captured: data\temp\verify_20250824_142914.jpg
+2025-08-24 14:29:15,041 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:29:15,041 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:29:15,043 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-08-24 14:29:15,043 - INFO - Verification attempt 3/3 for user user1
+2025-08-24 14:29:20,215 - INFO - Starting live face capture for verification
+2025-08-24 14:29:40,450 - INFO - Live image captured: data\temp\verify_20250824_142940.jpg
+2025-08-24 14:29:40,995 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:29:40,996 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:39:29,755 - INFO - Verification attempt 1/3 for user user1
+2025-08-24 14:39:35,002 - INFO - Starting live face capture for verification
+2025-08-24 14:39:54,676 - WARNING - Potential liveness check failure - minimal movement detected
+2025-08-24 14:39:54,681 - INFO - Live image captured: data\temp\verify_20250824_143954.jpg
+2025-08-24 14:39:55,234 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:39:55,234 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:39:55,235 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-08-24 14:39:55,236 - INFO - Verification attempt 2/3 for user user1
+2025-08-24 14:40:00,345 - INFO - Starting live face capture for verification
+2025-08-24 14:40:19,585 - INFO - Live image captured: data\temp\verify_20250824_144019.jpg
+2025-08-24 14:40:20,113 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:40:20,113 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:40:20,113 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-08-24 14:40:20,113 - INFO - Verification attempt 3/3 for user user1
+2025-08-24 14:40:25,224 - INFO - Starting live face capture for verification
+2025-08-24 14:40:44,089 - INFO - Live image captured: data\temp\verify_20250824_144044.jpg
+2025-08-24 14:40:44,580 - ERROR - Verification error: '>=' not supported between instances of 'NoneType' and 'float'
+2025-08-24 14:40:44,582 - INFO - Verification FAILURE for user1: 0.000
+2025-08-24 14:46:20,677 - INFO - Verification attempt 1/3 for user user1
+2025-08-24 14:46:26,901 - INFO - Starting live face capture for verification
+2025-08-24 14:46:47,742 - WARNING - Potential liveness check failure - minimal movement detected
+2025-08-24 14:46:47,742 - INFO - Live image captured: data\temp\verify_20250824_144647.jpg
+2025-08-24 14:46:48,293 - INFO - Verification SUCCESS for user1: 0.943
+2025-08-24 15:52:42,971 - INFO - Verification attempt 1/3 for user user12
+2025-08-24 15:52:49,841 - INFO - Starting live face capture for verification
+2025-08-24 15:53:15,035 - INFO - Live image captured: data\temp\verify_20250824_155315.jpg
+2025-08-24 15:53:15,660 - INFO - Verification SUCCESS for user12: 0.973
+2025-09-18 20:44:32,287 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 20:44:35,314 - INFO - Starting live face capture for verification
+2025-09-18 20:44:35,372 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 20:44:37,940 - INFO - Starting live face capture for verification
+2025-09-18 20:44:37,963 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 20:44:40,605 - INFO - Starting live face capture for verification
+2025-09-18 20:45:46,675 - INFO - Verification attempt 1/3 for user 12
+2025-09-18 20:45:49,556 - INFO - Starting live face capture for verification
+2025-09-18 20:45:49,590 - INFO - Verification attempt 2/3 for user 12
+2025-09-18 20:45:51,929 - INFO - Starting live face capture for verification
+2025-09-18 20:45:51,950 - INFO - Verification attempt 3/3 for user 12
+2025-09-18 20:45:54,210 - INFO - Starting live face capture for verification
+2025-09-18 20:48:18,631 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 20:48:21,373 - INFO - Starting live face capture for verification
+2025-09-18 20:48:21,410 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 20:48:23,859 - INFO - Starting live face capture for verification
+2025-09-18 20:48:23,874 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 20:48:26,190 - INFO - Starting live face capture for verification
+2025-09-18 21:03:20,042 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 21:03:20,779 - INFO - Using camera index 0 with DirectShow
+2025-09-18 21:03:21,806 - INFO - Starting live face capture for verification
+2025-09-18 21:03:43,543 - WARNING - Potential liveness check failure - minimal movement detected
+2025-09-18 21:03:43,555 - INFO - Live image captured: data\temp\verify_20250918_210343.jpg
+2025-09-18 21:03:44,203 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.982
+2025-09-18 22:14:30,159 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 22:14:30,644 - INFO - Using camera index 0 with DirectShow
+2025-09-18 22:14:30,972 - INFO - Starting live face capture for verification
+2025-09-18 22:17:26,893 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 22:17:27,245 - INFO - Using camera index 0 with DirectShow
+2025-09-18 22:17:28,255 - INFO - Starting live face capture for verification
+2025-09-18 22:17:48,737 - INFO - Live image captured: data\temp\verify_20250918_221748.jpg
+2025-09-18 22:17:49,658 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.974
+2025-09-18 22:32:59,475 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 22:33:00,081 - INFO - Using camera index 0 with DirectShow
+2025-09-18 22:33:01,074 - INFO - Starting live face capture for verification
+2025-09-18 22:33:22,631 - INFO - Live image captured: data\temp\verify_20250918_223322.jpg
+2025-09-18 22:33:23,324 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.979

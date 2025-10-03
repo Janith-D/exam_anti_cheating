@@ -1,0 +1,11 @@
+{
+  
+  "host": "127.0.0.1",
+  "port": 5000,
+  "debug": false,
+  "max_file_size": 5242880,
+  "allowed_extensions": ["jpg", "jpeg", "png"],
+  "rate_limit_per_minute": 60,
+  "enable_api_key": false,
+  "api_key": null
+}

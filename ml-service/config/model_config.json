@@ -1,0 +1,16 @@
+{
+  "similarity_threshold": 0.75,
+  "image_size": [640, 480],
+  "face_size": [224, 224],
+  "min_face_size": [80, 80],
+  "min_blur_score": 100,
+  "max_verification_attempts": 3,
+  "enable_liveness_detection": true,
+  "max_file_size": 5242880,
+  "allowed_extensions": ["jpg", "jpeg", "png"],
+  "rate_limit_per_minute": 60,
+  "host": "127.0.0.1",
+  "port": 5000,
+  "debug": true,
+  "version": "1.0"
+}

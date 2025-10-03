@@ -1,0 +1,198 @@
+2025-08-31 00:09:20,177 - INFO - Face recognition systems initialized successfully
+2025-08-31 00:09:20,189 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-08-31 00:09:20,265 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-08-31 00:09:20,265 - INFO - [33mPress CTRL+C to quit[0m
+2025-08-31 00:18:09,113 - INFO - 127.0.0.1 - - [31/Aug/2025 00:18:09] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-08-31 00:22:17,058 - INFO - 127.0.0.1 - - [31/Aug/2025 00:22:17] "POST /enroll HTTP/1.1" 200 -
+2025-08-31 00:23:17,387 - INFO - 127.0.0.1 - - [31/Aug/2025 00:23:17] "POST /verify HTTP/1.1" 200 -
+2025-08-31 00:23:44,480 - INFO - 127.0.0.1 - - [31/Aug/2025 00:23:44] "[33mPOST /e HTTP/1.1[0m" 404 -
+2025-08-31 00:23:51,172 - INFO - 127.0.0.1 - - [31/Aug/2025 00:23:51] "POST /enroll HTTP/1.1" 200 -
+2025-08-31 00:24:39,341 - INFO - 127.0.0.1 - - [31/Aug/2025 00:24:39] "POST /verify HTTP/1.1" 200 -
+2025-10-03 19:50:20,791 - INFO - Starting face capture sequence
+2025-10-03 19:50:23,173 - INFO - Live image captured: data\temp\live_20251003_195023.jpg
+2025-10-03 19:50:23,572 - INFO - Processing enrollment for user: 4
+2025-10-03 19:50:23,818 - ERROR - Enrollment failed for user 4: 'tuple' object has no attribute 'size'
+2025-10-03 20:01:02,884 - INFO - Starting face capture sequence...
+2025-10-03 20:01:08,294 - INFO - Live image saved: data\temp\live_20251003_200108.jpg
+2025-10-03 20:01:08,862 - ERROR - Enrollment failed for 4: 'tuple' object has no attribute 'size'
+2025-10-03 20:03:54,109 - INFO - Starting face capture sequence...
+2025-10-03 20:03:59,551 - INFO - Live image saved: data\temp\live_20251003_200359.jpg
+2025-10-03 20:04:00,085 - INFO - Metadata saved: data\metadata\4_metadata.json
+2025-10-03 20:04:00,085 - INFO - User 4 enrolled successfully (quality 176.296)
+2025-10-03 20:08:55,483 - INFO - Verification attempt 1/3 for 4
+2025-10-03 20:08:56,400 - INFO - Starting face capture sequence...
+2025-10-03 20:09:01,813 - INFO - Live image saved: data\temp\verify_20251003_200901.jpg
+2025-10-03 20:09:02,363 - INFO - Verification SUCCESS for 4: 0.977
+2025-10-03 20:36:43,472 - INFO - Face recognition systems initialized successfully
+2025-10-03 20:41:03,718 - INFO - Face recognition systems initialized successfully
+2025-10-03 20:41:03,734 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 20:41:04,253 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-03 20:41:04,253 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-03 20:41:04,269 - INFO -  * Restarting with stat
+2025-10-03 20:41:04,575 - INFO - Face recognition systems initialized successfully
+2025-10-03 20:41:04,575 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 20:41:04,575 - WARNING -  * Debugger is active!
+2025-10-03 20:41:04,595 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 20:43:07,921 - INFO - 127.0.0.1 - - [03/Oct/2025 20:43:07] "GET /health HTTP/1.1" 200 -
+2025-10-03 20:48:50,997 - ERROR - Unexpected error during enrollment: 415 Unsupported Media Type: Did not attempt to load JSON data because the request Content-Type was not 'application/json'.
+2025-10-03 20:48:50,997 - INFO - 127.0.0.1 - - [03/Oct/2025 20:48:50] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 20:53:22,787 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\api.py', reloading
+2025-10-03 20:53:22,906 - INFO -  * Restarting with stat
+2025-10-03 20:53:25,591 - INFO - Face recognition systems initialized successfully
+2025-10-03 20:53:25,593 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 20:53:25,616 - WARNING -  * Debugger is active!
+2025-10-03 20:53:25,616 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 20:53:35,418 - ERROR - Enrollment failed for 123: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'detectMultiScale'
+> Overload resolution failed:
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+
+2025-10-03 20:53:35,418 - ERROR - Unexpected error during enrollment: 'bool' object is not subscriptable
+2025-10-03 20:53:35,418 - INFO - 127.0.0.1 - - [03/Oct/2025 20:53:35] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 20:59:55,621 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\api.py', reloading
+2025-10-03 20:59:55,685 - INFO -  * Restarting with stat
+2025-10-03 20:59:56,141 - INFO - Face recognition systems initialized successfully
+2025-10-03 20:59:56,141 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 20:59:56,159 - WARNING -  * Debugger is active!
+2025-10-03 20:59:56,164 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:00:14,069 - ERROR - Enrollment failed for 123: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'detectMultiScale'
+> Overload resolution failed:
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+
+2025-10-03 21:00:14,069 - ERROR - Unexpected error during enrollment: 'bool' object is not subscriptable
+2025-10-03 21:00:14,069 - INFO - 127.0.0.1 - - [03/Oct/2025 21:00:14] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 21:06:44,654 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\utils.py', reloading
+2025-10-03 21:06:44,713 - INFO -  * Restarting with stat
+2025-10-03 21:06:45,104 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:06:45,106 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:06:45,118 - WARNING -  * Debugger is active!
+2025-10-03 21:06:45,125 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:09:06,253 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\enroll.py', reloading
+2025-10-03 21:09:06,328 - INFO -  * Restarting with stat
+2025-10-03 21:09:06,827 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:09:06,829 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:09:06,844 - WARNING -  * Debugger is active!
+2025-10-03 21:09:06,847 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:09:12,901 - ERROR - Enrollment failed for 123: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'detectMultiScale'
+> Overload resolution failed:
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+
+2025-10-03 21:09:12,901 - ERROR - Unexpected error during enrollment: 'bool' object is not subscriptable
+2025-10-03 21:09:12,901 - INFO - 127.0.0.1 - - [03/Oct/2025 21:09:12] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 21:09:50,981 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:09:50,981 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:09:51,008 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-03 21:09:51,008 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-03 21:09:51,009 - INFO -  * Restarting with stat
+2025-10-03 21:09:51,310 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:09:51,310 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:09:51,323 - WARNING -  * Debugger is active!
+2025-10-03 21:09:51,328 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:09:56,714 - ERROR - Enrollment failed for 123: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'detectMultiScale'
+> Overload resolution failed:
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+
+2025-10-03 21:09:56,716 - ERROR - Unexpected error during enrollment: 'bool' object is not subscriptable
+2025-10-03 21:09:56,718 - INFO - 127.0.0.1 - - [03/Oct/2025 21:09:56] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 21:12:45,838 - ERROR - No stored embedding for student 5
+2025-10-03 21:16:35,641 - INFO - Starting face capture sequence...
+2025-10-03 21:16:41,052 - INFO - Live image saved: data\temp\live_20251003_211641.jpg
+2025-10-03 21:16:41,600 - INFO - Metadata saved: data\metadata\5_metadata.json
+2025-10-03 21:16:41,600 - INFO - User 5 enrolled successfully (quality 171.775)
+2025-10-03 21:16:46,347 - INFO - Verification attempt 1/3 for 5
+2025-10-03 21:16:47,254 - INFO - Starting face capture sequence...
+2025-10-03 21:16:52,723 - INFO - Live image saved: data\temp\verify_20251003_211652.jpg
+2025-10-03 21:16:53,245 - INFO - Verification SUCCESS for 5: 0.989
+2025-10-03 21:22:34,481 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\api.py', reloading
+2025-10-03 21:22:34,619 - INFO -  * Restarting with stat
+2025-10-03 21:22:35,026 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:22:35,033 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:22:35,036 - WARNING -  * Debugger is active!
+2025-10-03 21:22:35,049 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:23:28,788 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\api.py', reloading
+2025-10-03 21:23:28,834 - INFO -  * Restarting with stat
+2025-10-03 21:23:29,182 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:23:29,182 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:23:29,198 - WARNING -  * Debugger is active!
+2025-10-03 21:23:29,212 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:23:41,886 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:23:41,886 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:23:41,909 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-03 21:23:41,910 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-03 21:23:41,910 - INFO -  * Restarting with stat
+2025-10-03 21:23:42,211 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:23:42,211 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:23:42,211 - WARNING -  * Debugger is active!
+2025-10-03 21:23:42,226 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:24:05,649 - ERROR - Enrollment failed for 123: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'detectMultiScale'
+> Overload resolution failed:
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+
+2025-10-03 21:24:05,649 - ERROR - Unexpected error during enrollment: 'bool' object is not subscriptable
+2025-10-03 21:24:05,652 - INFO - 127.0.0.1 - - [03/Oct/2025 21:24:05] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 21:26:26,764 - ERROR - Enrollment failed for 123: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'detectMultiScale'
+> Overload resolution failed:
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'minSize'. Sequence item with index 0 has a wrong type
+
+2025-10-03 21:26:26,765 - ERROR - Unexpected error during enrollment: 'bool' object is not subscriptable
+2025-10-03 21:26:26,767 - INFO - 127.0.0.1 - - [03/Oct/2025 21:26:26] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 21:34:42,001 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\enroll.py', reloading
+2025-10-03 21:34:42,059 - INFO -  * Restarting with stat
+2025-10-03 21:34:42,485 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:34:42,487 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:34:42,487 - WARNING -  * Debugger is active!
+2025-10-03 21:34:42,501 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:34:55,543 - ERROR - Unexpected error during enrollment: 'FaceEnrollmentSystem' object has no attribute 'enroll_face'
+2025-10-03 21:34:55,543 - INFO - 127.0.0.1 - - [03/Oct/2025 21:34:55] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-10-03 21:40:21,780 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\enroll.py', reloading
+2025-10-03 21:40:21,835 - INFO -  * Restarting with stat
+2025-10-03 21:41:50,892 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:41:50,892 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:41:50,918 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-03 21:41:50,918 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-03 21:41:50,919 - INFO -  * Restarting with stat
+2025-10-03 21:41:51,209 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:41:51,209 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:41:51,240 - WARNING -  * Debugger is active!
+2025-10-03 21:41:51,242 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:42:03,699 - INFO - Metadata saved: data\metadata\123_metadata.json
+2025-10-03 21:42:03,699 - INFO - User 123 enrolled successfully (quality 140.099)
+2025-10-03 21:42:03,715 - INFO - 127.0.0.1 - - [03/Oct/2025 21:42:03] "POST /enroll HTTP/1.1" 200 -
+2025-10-03 21:45:16,343 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\api.py', reloading
+2025-10-03 21:45:16,414 - INFO -  * Restarting with stat
+2025-10-03 21:45:16,765 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:45:16,765 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:45:16,783 - WARNING -  * Debugger is active!
+2025-10-03 21:45:16,792 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:45:30,800 - INFO - 127.0.0.1 - - [03/Oct/2025 21:45:30] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-10-03 21:47:25,167 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\api.py', reloading
+2025-10-03 21:47:25,214 - INFO -  * Restarting with stat
+2025-10-03 21:47:25,565 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:47:25,565 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:47:25,586 - WARNING -  * Debugger is active!
+2025-10-03 21:47:25,588 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:47:30,186 - ERROR - Unexpected error during verification: 'FaceVerificationSystem' object has no attribute 'verify_with_embedding'
+2025-10-03 21:47:30,196 - INFO - 127.0.0.1 - - [03/Oct/2025 21:47:30] "[35m[1mPOST /verify HTTP/1.1[0m" 500 -
+2025-10-03 21:52:33,670 - INFO -  * Detected change in 'D:\\PROJECT\\Exam-Anti-Cheating\\ml-service\\src\\api.py', reloading
+2025-10-03 21:52:33,708 - INFO -  * Restarting with stat
+2025-10-03 21:52:34,082 - INFO - Face recognition systems initialized successfully
+2025-10-03 21:52:34,082 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-03 21:52:34,098 - WARNING -  * Debugger is active!
+2025-10-03 21:52:34,112 - INFO -  * Debugger PIN: 379-097-252
+2025-10-03 21:52:43,111 - INFO - Verification attempt 1/3 for 123
+2025-10-03 21:52:43,288 - INFO - Verification SUCCESS for 123: 1.000
+2025-10-03 21:52:43,289 - INFO - 127.0.0.1 - - [03/Oct/2025 21:52:43] "POST /verify HTTP/1.1" 200 -
+2025-10-03 21:53:01,802 - INFO - Verification attempt 1/3 for 5
+2025-10-03 21:53:02,981 - INFO - Starting face capture sequence...
+2025-10-03 21:53:08,527 - INFO - Live image saved: data\temp\verify_20251003_215308.jpg
+2025-10-03 21:53:09,091 - INFO - Verification SUCCESS for 5: 0.984

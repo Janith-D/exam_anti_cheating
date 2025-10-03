@@ -1,0 +1,1088 @@
+2025-08-24 14:12:59,763 - WARNING - User user1 already enrolled. Use --overwrite to replace.
+2025-08-24 14:13:45,026 - INFO - Starting face capture sequence
+2025-08-24 14:13:47,348 - INFO - Live image captured: data\temp\live_20250824_141347.jpg
+2025-08-24 14:13:47,731 - INFO - Processing enrollment for user: user1
+2025-08-24 14:13:47,877 - ERROR - Enrollment failed for user user1: No face detected in the image
+2025-08-24 14:14:29,465 - INFO - Starting face capture sequence
+2025-08-24 14:14:31,779 - INFO - Live image captured: data\temp\live_20250824_141431.jpg
+2025-08-24 14:14:32,189 - INFO - Processing enrollment for user: user1
+2025-08-24 14:14:32,342 - ERROR - Enrollment failed for user user1: No face detected in the image
+2025-08-24 14:23:16,278 - INFO - Starting face capture sequence
+2025-08-24 14:23:18,660 - INFO - Live image captured: data\temp\live_20250824_142318.jpg
+2025-08-24 14:23:19,054 - INFO - Processing enrollment for user: user1
+2025-08-24 14:23:19,318 - INFO - Face quality check passed: Face quality acceptable
+2025-08-24 14:23:19,318 - INFO - Metadata saved: data\metadata\user1_metadata.json
+2025-08-24 14:23:19,318 - INFO - Successfully enrolled user user1 (quality score: 159.223)
+2025-08-24 15:06:41,330 - WARNING - Missing configuration parameter: image_size
+2025-08-24 15:06:41,330 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 15:06:41,330 - INFO - Face recognition systems initialized successfully
+2025-08-24 15:06:41,330 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 15:06:41,393 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.10.2:5000
+2025-08-24 15:06:41,393 - INFO - [33mPress CTRL+C to quit[0m
+2025-08-24 15:06:41,393 - INFO -  * Restarting with stat
+2025-08-24 15:06:41,685 - WARNING - Missing configuration parameter: image_size
+2025-08-24 15:06:41,686 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 15:06:41,687 - INFO - Face recognition systems initialized successfully
+2025-08-24 15:06:41,688 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 15:06:41,696 - WARNING -  * Debugger is active!
+2025-08-24 15:06:41,706 - INFO -  * Debugger PIN: 518-365-180
+2025-08-24 15:07:42,640 - INFO - 127.0.0.1 - - [24/Aug/2025 15:07:42] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-08-24 15:08:42,824 - INFO - 127.0.0.1 - - [24/Aug/2025 15:08:42] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-08-24 15:14:14,041 - ERROR - Unexpected error during enrollment: 'FaceEnrollmentSystem' object has no attribute 'enroll_with_quality_checks'
+2025-08-24 15:14:14,052 - INFO - 127.0.0.1 - - [24/Aug/2025 15:14:14] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-08-24 15:19:20,744 - INFO - 127.0.0.1 - - [24/Aug/2025 15:19:20] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-08-24 15:25:42,986 - ERROR - Unexpected error during enrollment: 'FaceEnrollmentSystem' object has no attribute 'enroll_with_quality_checks'
+2025-08-24 15:25:43,004 - INFO - 127.0.0.1 - - [24/Aug/2025 15:25:43] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-08-24 15:27:24,541 - ERROR - Unexpected error during enrollment: 'FaceEnrollmentSystem' object has no attribute 'enroll_with_quality_checks'
+2025-08-24 15:27:24,549 - INFO - 127.0.0.1 - - [24/Aug/2025 15:27:24] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-08-24 15:34:24,987 - INFO - 127.0.0.1 - - [24/Aug/2025 15:34:24] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-08-24 15:37:14,519 - INFO - 127.0.0.1 - - [24/Aug/2025 15:37:14] "GET /health HTTP/1.1" 200 -
+2025-08-24 15:39:11,255 - INFO - 127.0.0.1 - - [24/Aug/2025 15:39:11] "[31m[1mPOST /health HTTP/1.1[0m" 405 -
+2025-08-24 15:39:19,403 - ERROR - Unexpected error during enrollment: 'FaceEnrollmentSystem' object has no attribute 'enroll_with_quality_checks'
+2025-08-24 15:39:19,406 - INFO - 127.0.0.1 - - [24/Aug/2025 15:39:19] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-08-24 15:40:49,573 - WARNING - Missing configuration parameter: image_size
+2025-08-24 15:40:49,573 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 15:40:49,573 - INFO - Face recognition systems initialized successfully
+2025-08-24 15:40:49,584 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 15:40:49,689 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:5000
+ * Running on http://172.20.10.2:5000
+2025-08-24 15:40:49,689 - INFO - [33mPress CTRL+C to quit[0m
+2025-08-24 15:40:49,697 - INFO -  * Restarting with stat
+2025-08-24 15:40:50,116 - WARNING - Missing configuration parameter: image_size
+2025-08-24 15:40:50,116 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 15:40:50,116 - INFO - Face recognition systems initialized successfully
+2025-08-24 15:40:50,125 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 15:40:50,141 - WARNING -  * Debugger is active!
+2025-08-24 15:40:50,141 - INFO -  * Debugger PIN: 518-365-180
+2025-08-24 15:41:54,637 - INFO - 127.0.0.1 - - [24/Aug/2025 15:41:54] "[33mGET /hea HTTP/1.1[0m" 404 -
+2025-08-24 15:41:58,705 - INFO - 127.0.0.1 - - [24/Aug/2025 15:41:58] "GET /health HTTP/1.1" 200 -
+2025-08-24 15:43:32,696 - INFO - 127.0.0.1 - - [24/Aug/2025 15:43:32] "GET /health HTTP/1.1" 200 -
+2025-08-24 15:43:47,050 - ERROR - Unexpected error during enrollment: 'FaceEnrollmentSystem' object has no attribute 'enroll_with_quality_checks'
+2025-08-24 15:43:47,054 - INFO - 127.0.0.1 - - [24/Aug/2025 15:43:47] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-08-24 15:49:55,841 - INFO -  * Detected change in 'D:\\PROJECT\\SecureVote\\ai\\src\\enroll.py', reloading
+2025-08-24 15:49:55,930 - INFO -  * Restarting with stat
+2025-08-24 15:49:56,531 - WARNING - Missing configuration parameter: image_size
+2025-08-24 15:49:56,532 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 15:49:56,532 - INFO - Face recognition systems initialized successfully
+2025-08-24 15:49:56,533 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 15:49:56,562 - WARNING -  * Debugger is active!
+2025-08-24 15:49:56,565 - INFO -  * Debugger PIN: 518-365-180
+2025-08-24 15:50:29,379 - INFO - Starting face capture sequence
+2025-08-24 15:50:31,718 - INFO - Live image captured: data\temp\live_20250824_155031.jpg
+2025-08-24 15:50:32,135 - INFO - Processing enrollment for user: user12
+2025-08-24 15:50:32,450 - INFO - Face quality check passed: Face quality acceptable
+2025-08-24 15:50:32,457 - INFO - Metadata saved: data\metadata\user12_metadata.json
+2025-08-24 15:50:32,457 - INFO - Successfully enrolled user user12 (quality score: 200.536)
+2025-08-24 15:51:22,246 - INFO - Verification attempt 1/3 for user user12
+2025-08-24 15:51:22,711 - INFO - Verification SUCCESS for user12: 1.000
+2025-08-24 15:51:22,719 - ERROR - Unexpected error during verification: Object of type float32 is not JSON serializable
+2025-08-24 15:51:22,719 - INFO - 127.0.0.1 - - [24/Aug/2025 15:51:22] "[35m[1mPOST /verify HTTP/1.1[0m" 500 -
+2025-08-24 16:05:09,059 - INFO -  * Detected change in 'D:\\PROJECT\\SecureVote\\ai\\src\\enroll.py', reloading
+2025-08-24 16:05:09,311 - INFO -  * Restarting with stat
+2025-08-24 16:05:10,019 - WARNING - Missing configuration parameter: image_size
+2025-08-24 16:05:10,019 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 16:05:10,019 - INFO - Face recognition systems initialized successfully
+2025-08-24 16:05:10,030 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 16:05:10,053 - WARNING -  * Debugger is active!
+2025-08-24 16:05:10,060 - INFO -  * Debugger PIN: 518-365-180
+2025-08-24 16:05:16,214 - INFO -  * Detected change in 'D:\\PROJECT\\SecureVote\\ai\\src\\enroll.py', reloading
+2025-08-24 16:05:16,295 - INFO -  * Restarting with stat
+2025-08-24 16:05:16,890 - WARNING - Missing configuration parameter: image_size
+2025-08-24 16:05:16,890 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 16:05:16,899 - INFO - Face recognition systems initialized successfully
+2025-08-24 16:05:16,899 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 16:05:16,924 - WARNING -  * Debugger is active!
+2025-08-24 16:05:16,931 - INFO -  * Debugger PIN: 518-365-180
+2025-08-24 16:05:34,456 - ERROR - Unexpected error during enrollment: 'FaceEnrollmentSystem' object has no attribute 'enrollment_dir'
+2025-08-24 16:05:34,461 - INFO - 127.0.0.1 - - [24/Aug/2025 16:05:34] "[35m[1mPOST /enroll HTTP/1.1[0m" 500 -
+2025-08-24 16:06:27,612 - INFO -  * Detected change in 'D:\\PROJECT\\SecureVote\\ai\\src\\enroll.py', reloading
+2025-08-24 16:06:27,672 - INFO -  * Restarting with stat
+2025-08-24 16:06:28,123 - WARNING - Missing configuration parameter: image_size
+2025-08-24 16:06:28,123 - WARNING - Missing configuration parameter: similarity_threshold
+2025-08-24 16:06:28,123 - INFO - Face recognition systems initialized successfully
+2025-08-24 16:06:28,129 - INFO - Starting Face Verification API on 0.0.0.0:5000
+2025-08-24 16:06:28,145 - WARNING -  * Debugger is active!
+2025-08-24 16:06:28,149 - INFO -  * Debugger PIN: 518-365-180
+2025-09-01 23:44:05,316 - WARNING - Missing configuration parameter: image_size
+2025-09-01 23:44:05,317 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-01 23:44:05,328 - INFO - Face recognition systems initialized successfully
+2025-09-01 23:44:05,331 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-01 23:44:05,368 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-01 23:44:05,368 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-01 23:45:24,577 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-01 23:45:25,737 - INFO - Face quality check passed: Face quality acceptable
+2025-09-01 23:45:25,761 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-01 23:45:25,764 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 153.009)
+2025-09-01 23:45:25,835 - INFO - 127.0.0.1 - - [01/Sep/2025 23:45:25] "POST /enroll HTTP/1.1" 200 -
+2025-09-01 23:46:44,565 - INFO - 127.0.0.1 - - [01/Sep/2025 23:46:44] "[33mPOST /ver HTTP/1.1[0m" 404 -
+2025-09-01 23:46:50,012 - INFO - Verification attempt 1/3 for user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-01 23:46:50,684 - INFO - Verification SUCCESS for 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f: 1.000
+2025-09-01 23:46:50,692 - INFO - 127.0.0.1 - - [01/Sep/2025 23:46:50] "POST /verify HTTP/1.1" 200 -
+2025-09-02 00:22:45,337 - WARNING - Missing configuration parameter: image_size
+2025-09-02 00:22:45,337 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-02 00:22:45,337 - INFO - Face recognition systems initialized successfully
+2025-09-02 00:22:45,337 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-02 00:22:45,373 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-02 00:22:45,375 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-02 00:23:05,258 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-02 00:23:06,241 - INFO - Face quality check passed: Face quality acceptable
+2025-09-02 00:23:06,258 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-02 00:23:06,258 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 153.009)
+2025-09-02 00:23:06,761 - INFO - 127.0.0.1 - - [02/Sep/2025 00:23:06] "POST /enroll HTTP/1.1" 200 -
+2025-09-02 00:23:21,996 - INFO - Verification attempt 1/3 for user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-02 00:23:22,552 - INFO - Verification SUCCESS for 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f: 1.000
+2025-09-02 00:23:22,740 - INFO - 127.0.0.1 - - [02/Sep/2025 00:23:22] "POST /verify HTTP/1.1" 200 -
+2025-09-02 00:39:52,280 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-02 00:39:53,026 - INFO - Face quality check passed: Face quality acceptable
+2025-09-02 00:39:53,046 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-02 00:39:53,055 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 153.009)
+2025-09-02 00:39:53,517 - INFO - 127.0.0.1 - - [02/Sep/2025 00:39:53] "POST /enroll HTTP/1.1" 200 -
+2025-09-02 01:07:29,653 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-02 01:07:30,429 - INFO - Face quality check passed: Face quality acceptable
+2025-09-02 01:07:30,473 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-02 01:07:30,473 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 153.009)
+2025-09-02 01:07:31,137 - INFO - 127.0.0.1 - - [02/Sep/2025 01:07:31] "POST /enroll HTTP/1.1" 200 -
+2025-09-02 01:08:00,336 - INFO - Verification attempt 1/3 for user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-02 01:08:00,929 - INFO - Verification SUCCESS for 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f: 1.000
+2025-09-02 01:08:01,052 - INFO - 127.0.0.1 - - [02/Sep/2025 01:08:01] "POST /verify HTTP/1.1" 200 -
+2025-09-02 01:17:33,387 - INFO - 127.0.0.1 - - [02/Sep/2025 01:17:33] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-02 01:17:59,510 - INFO - 127.0.0.1 - - [02/Sep/2025 01:17:59] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-02 01:34:46,639 - INFO - 127.0.0.1 - - [02/Sep/2025 01:34:46] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-03 00:13:01,813 - WARNING - Missing configuration parameter: image_size
+2025-09-03 00:13:01,813 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-03 00:13:01,813 - INFO - Face recognition systems initialized successfully
+2025-09-03 00:13:01,813 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-03 00:13:01,853 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-03 00:13:01,853 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-03 00:15:43,373 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-03 00:15:44,253 - INFO - Face quality check passed: Face quality acceptable
+2025-09-03 00:15:44,272 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-03 00:15:44,272 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 153.009)
+2025-09-03 00:15:44,575 - INFO - 127.0.0.1 - - [03/Sep/2025 00:15:44] "POST /enroll HTTP/1.1" 200 -
+2025-09-03 00:16:19,593 - INFO - Verification attempt 1/3 for user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-03 00:16:19,952 - INFO - Verification SUCCESS for 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f: 1.000
+2025-09-03 00:16:20,068 - INFO - 127.0.0.1 - - [03/Sep/2025 00:16:20] "POST /verify HTTP/1.1" 200 -
+2025-09-03 00:33:21,674 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-03 00:33:22,209 - INFO - Face quality check passed: Face quality acceptable
+2025-09-03 00:33:22,220 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-03 00:33:22,220 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 153.009)
+2025-09-03 00:33:22,689 - INFO - 127.0.0.1 - - [03/Sep/2025 00:33:22] "POST /enroll HTTP/1.1" 200 -
+2025-09-03 00:35:04,735 - INFO - Verification attempt 1/3 for user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-03 00:35:05,094 - INFO - Verification SUCCESS for 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f: 1.000
+2025-09-03 00:35:05,285 - INFO - 127.0.0.1 - - [03/Sep/2025 00:35:05] "POST /verify HTTP/1.1" 200 -
+2025-09-03 00:37:26,543 - INFO - Verification attempt 1/3 for user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-03 00:37:26,778 - INFO - Verification SUCCESS for 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f: 1.000
+2025-09-03 00:37:26,895 - INFO - 127.0.0.1 - - [03/Sep/2025 00:37:26] "POST /verify HTTP/1.1" 200 -
+2025-09-03 00:51:23,688 - INFO - 127.0.0.1 - - [03/Sep/2025 00:51:23] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-03 01:35:10,095 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-03 01:35:10,616 - INFO - Face quality check passed: Face quality acceptable
+2025-09-03 01:35:10,634 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-03 01:35:10,634 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-03 01:35:10,886 - INFO - 127.0.0.1 - - [03/Sep/2025 01:35:10] "POST /enroll HTTP/1.1" 200 -
+2025-09-03 01:35:53,601 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-03 01:35:53,869 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-03 01:35:53,951 - INFO - 127.0.0.1 - - [03/Sep/2025 01:35:53] "POST /verify HTTP/1.1" 200 -
+2025-09-07 18:34:02,654 - WARNING - Missing configuration parameter: image_size
+2025-09-07 18:34:02,654 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-07 18:34:02,680 - INFO - Face recognition systems initialized successfully
+2025-09-07 18:34:02,680 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-07 18:34:02,708 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-07 18:34:02,708 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-07 18:36:17,025 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 18:36:18,174 - INFO - Face quality check passed: Face quality acceptable
+2025-09-07 18:36:18,207 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-07 18:36:18,208 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-07 18:36:19,178 - INFO - 127.0.0.1 - - [07/Sep/2025 18:36:19] "POST /enroll HTTP/1.1" 200 -
+2025-09-07 18:37:37,653 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 18:37:38,013 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-07 18:37:38,112 - INFO - 127.0.0.1 - - [07/Sep/2025 18:37:38] "POST /verify HTTP/1.1" 200 -
+2025-09-07 20:00:33,953 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 20:00:34,734 - INFO - Face quality check passed: Face quality acceptable
+2025-09-07 20:00:34,768 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-07 20:00:34,768 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-07 20:00:35,285 - INFO - 127.0.0.1 - - [07/Sep/2025 20:00:35] "POST /enroll HTTP/1.1" 200 -
+2025-09-07 20:00:49,524 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 20:00:50,095 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-07 20:00:50,198 - INFO - 127.0.0.1 - - [07/Sep/2025 20:00:50] "POST /verify HTTP/1.1" 200 -
+2025-09-07 20:07:41,630 - INFO - 127.0.0.1 - - [07/Sep/2025 20:07:41] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-07 20:07:52,103 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 20:07:52,816 - INFO - Face quality check passed: Face quality acceptable
+2025-09-07 20:07:52,841 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-07 20:07:52,849 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-07 20:07:53,250 - INFO - 127.0.0.1 - - [07/Sep/2025 20:07:53] "POST /enroll HTTP/1.1" 200 -
+2025-09-07 20:08:05,904 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 20:08:06,377 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-07 20:08:06,487 - INFO - 127.0.0.1 - - [07/Sep/2025 20:08:06] "POST /verify HTTP/1.1" 200 -
+2025-09-07 21:28:13,574 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 21:28:14,370 - INFO - Face quality check passed: Face quality acceptable
+2025-09-07 21:28:14,424 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-07 21:28:14,426 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-07 21:28:15,052 - INFO - 127.0.0.1 - - [07/Sep/2025 21:28:15] "POST /enroll HTTP/1.1" 200 -
+2025-09-07 21:33:33,781 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 21:33:34,626 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-07 21:33:35,343 - INFO - 127.0.0.1 - - [07/Sep/2025 21:33:35] "POST /verify HTTP/1.1" 200 -
+2025-09-07 22:00:18,461 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 22:00:18,838 - INFO - Face quality check passed: Face quality acceptable
+2025-09-07 22:00:18,844 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-07 22:00:18,844 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-07 22:00:19,211 - INFO - 127.0.0.1 - - [07/Sep/2025 22:00:19] "POST /enroll HTTP/1.1" 200 -
+2025-09-07 22:02:18,169 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 22:02:18,396 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-07 22:02:18,472 - INFO - 127.0.0.1 - - [07/Sep/2025 22:02:18] "POST /verify HTTP/1.1" 200 -
+2025-09-07 22:35:41,848 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 22:35:42,599 - INFO - Face quality check passed: Face quality acceptable
+2025-09-07 22:35:42,630 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-07 22:35:42,630 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-07 22:35:43,130 - INFO - 127.0.0.1 - - [07/Sep/2025 22:35:43] "POST /enroll HTTP/1.1" 200 -
+2025-09-07 22:38:19,205 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 22:38:19,821 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-07 22:38:19,955 - INFO - 127.0.0.1 - - [07/Sep/2025 22:38:19] "POST /verify HTTP/1.1" 200 -
+2025-09-07 22:46:03,397 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-07 22:46:03,913 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-07 22:46:04,147 - INFO - 127.0.0.1 - - [07/Sep/2025 22:46:04] "POST /verify HTTP/1.1" 200 -
+2025-09-08 00:04:02,660 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 00:04:03,066 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 00:04:03,093 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 00:04:03,094 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 00:04:03,684 - INFO - 127.0.0.1 - - [08/Sep/2025 00:04:03] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 00:19:30,271 - INFO - 127.0.0.1 - - [08/Sep/2025 00:19:30] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-08 00:19:42,182 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 00:19:42,464 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 00:19:42,474 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 00:19:42,475 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 00:19:42,772 - INFO - 127.0.0.1 - - [08/Sep/2025 00:19:42] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 00:24:21,875 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 00:24:22,220 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 00:24:22,242 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 00:24:22,242 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 00:24:22,737 - INFO - 127.0.0.1 - - [08/Sep/2025 00:24:22] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 12:35:04,112 - WARNING - Missing configuration parameter: image_size
+2025-09-08 12:35:04,112 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-08 12:35:04,112 - INFO - Face recognition systems initialized successfully
+2025-09-08 12:35:04,120 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-08 12:35:04,141 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-08 12:35:04,142 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-08 12:36:23,663 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 12:36:24,312 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 12:36:24,331 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 12:36:24,331 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 12:36:25,243 - INFO - 127.0.0.1 - - [08/Sep/2025 12:36:25] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 17:20:11,692 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 17:20:12,009 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 17:20:12,009 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 17:20:12,009 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 17:20:12,458 - INFO - 127.0.0.1 - - [08/Sep/2025 17:20:12] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 17:21:00,353 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 17:21:00,500 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 17:21:00,503 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 17:21:00,504 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 17:21:00,615 - INFO - 127.0.0.1 - - [08/Sep/2025 17:21:00] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 19:12:57,047 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 19:12:57,373 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 19:12:57,385 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 19:12:57,386 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 19:12:58,064 - INFO - 127.0.0.1 - - [08/Sep/2025 19:12:58] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 19:25:40,461 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 19:25:40,694 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 19:25:40,711 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 19:25:40,711 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 19:25:41,132 - INFO - 127.0.0.1 - - [08/Sep/2025 19:25:41] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 19:29:33,477 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 19:29:33,677 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 19:29:33,694 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 19:29:33,694 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 19:29:34,061 - INFO - 127.0.0.1 - - [08/Sep/2025 19:29:34] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 20:18:20,122 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 20:18:20,438 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 20:18:20,452 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 20:18:20,453 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 20:18:20,905 - INFO - 127.0.0.1 - - [08/Sep/2025 20:18:20] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 20:30:25,616 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 20:30:26,165 - INFO - Face quality check passed: Face quality acceptable
+2025-09-08 20:30:26,182 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-08 20:30:26,182 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-08 20:30:26,832 - INFO - 127.0.0.1 - - [08/Sep/2025 20:30:26] "POST /enroll HTTP/1.1" 200 -
+2025-09-08 20:31:43,138 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 20:31:43,454 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-08 20:31:43,582 - INFO - 127.0.0.1 - - [08/Sep/2025 20:31:43] "POST /verify HTTP/1.1" 200 -
+2025-09-08 20:33:28,136 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-08 20:33:28,449 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-08 20:33:28,534 - INFO - 127.0.0.1 - - [08/Sep/2025 20:33:28] "POST /verify HTTP/1.1" 200 -
+2025-09-09 18:51:53,867 - WARNING - Missing configuration parameter: image_size
+2025-09-09 18:51:53,867 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-09 18:51:53,885 - INFO - Face recognition systems initialized successfully
+2025-09-09 18:51:53,893 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-09 18:51:53,958 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-09 18:51:53,958 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-09 20:43:25,152 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-09 20:43:25,868 - INFO - Face quality check passed: Face quality acceptable
+2025-09-09 20:43:25,885 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-09 20:43:25,885 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-09 20:43:26,585 - INFO - 127.0.0.1 - - [09/Sep/2025 20:43:26] "POST /enroll HTTP/1.1" 200 -
+2025-09-09 20:45:31,883 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-09 20:45:32,199 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-09 20:45:32,433 - INFO - 127.0.0.1 - - [09/Sep/2025 20:45:32] "POST /verify HTTP/1.1" 200 -
+2025-09-09 20:59:31,397 - INFO - Processing enrollment for user: 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-09 20:59:31,963 - INFO - Face quality check passed: Face quality acceptable
+2025-09-09 20:59:31,980 - INFO - Metadata saved: data\metadata\0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33_metadata.json
+2025-09-09 20:59:31,995 - INFO - Successfully enrolled user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33 (quality score: 153.009)
+2025-09-09 20:59:32,488 - INFO - 127.0.0.1 - - [09/Sep/2025 20:59:32] "POST /enroll HTTP/1.1" 200 -
+2025-09-09 21:05:54,558 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-09 21:05:55,046 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 1.000
+2025-09-09 21:05:55,321 - INFO - 127.0.0.1 - - [09/Sep/2025 21:05:55] "POST /verify HTTP/1.1" 200 -
+2025-09-16 19:05:01,029 - WARNING - Missing configuration parameter: image_size
+2025-09-16 19:05:01,029 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-16 19:05:01,038 - INFO - Face recognition systems initialized successfully
+2025-09-16 19:05:01,038 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-16 19:05:01,090 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-16 19:05:01,090 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-16 19:08:45,603 - WARNING - Missing configuration parameter: image_size
+2025-09-16 19:08:45,603 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-16 19:08:45,612 - INFO - Face recognition systems initialized successfully
+2025-09-16 19:08:45,612 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-16 19:08:45,633 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-16 19:08:45,633 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-16 19:25:29,057 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-16 19:25:31,092 - INFO - Face quality check passed: Face quality acceptable
+2025-09-16 19:25:31,132 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-16 19:25:31,142 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 153.009)
+2025-09-16 19:25:32,191 - INFO - 127.0.0.1 - - [16/Sep/2025 19:25:32] "POST /enroll HTTP/1.1" 200 -
+2025-09-17 21:33:00,835 - WARNING - Missing configuration parameter: image_size
+2025-09-17 21:33:00,835 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-17 21:33:00,848 - INFO - Face recognition systems initialized successfully
+2025-09-17 21:33:00,865 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-17 21:33:00,890 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-17 21:33:00,890 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 09:26:58,213 - INFO - 127.0.0.1 - - [18/Sep/2025 09:26:58] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 09:26:58,213 - INFO - 127.0.0.1 - - [18/Sep/2025 09:26:58] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 09:26:58,213 - INFO - 127.0.0.1 - - [18/Sep/2025 09:26:58] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 09:28:07,469 - INFO - 127.0.0.1 - - [18/Sep/2025 09:28:07] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 09:39:22,521 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 09:39:24,301 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 09:39:24,389 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-18 09:39:24,391 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 153.009)
+2025-09-18 09:39:26,312 - INFO - 127.0.0.1 - - [18/Sep/2025 09:39:26] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 09:47:01,539 - INFO - 127.0.0.1 - - [18/Sep/2025 09:47:01] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 09:54:21,516 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 09:54:21,857 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 09:54:21,874 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-18 09:54:21,874 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 153.009)
+2025-09-18 09:54:22,629 - INFO - 127.0.0.1 - - [18/Sep/2025 09:54:22] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 09:56:18,361 - INFO - 127.0.0.1 - - [18/Sep/2025 09:56:18] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 09:56:34,751 - INFO - 127.0.0.1 - - [18/Sep/2025 09:56:34] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 09:56:42,525 - INFO - 127.0.0.1 - - [18/Sep/2025 09:56:42] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 10:17:41,475 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 10:17:41,775 - ERROR - Enrollment failed for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: No face detected in the image
+2025-09-18 10:17:41,783 - INFO - 127.0.0.1 - - [18/Sep/2025 10:17:41] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 10:36:38,549 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 10:36:39,548 - ERROR - Enrollment failed for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: No face detected in the image
+2025-09-18 10:36:39,660 - INFO - 127.0.0.1 - - [18/Sep/2025 10:36:39] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 10:38:43,076 - INFO - Starting face capture sequence
+2025-09-18 10:38:45,823 - INFO - Live image captured: data\temp\live_20250918_103845.jpg
+2025-09-18 10:38:46,287 - INFO - Processing enrollment for user: 3
+2025-09-18 10:38:46,780 - ERROR - Enrollment failed for user 3: No face detected in the image
+2025-09-18 10:39:10,018 - INFO - Starting face capture sequence
+2025-09-18 10:39:12,513 - INFO - Live image captured: data\temp\live_20250918_103912.jpg
+2025-09-18 10:39:12,993 - INFO - Processing enrollment for user: 3
+2025-09-18 10:39:13,321 - ERROR - Enrollment failed for user 3: No face detected in the image
+2025-09-18 11:22:00,082 - INFO - Starting face capture sequence
+2025-09-18 11:22:06,044 - ERROR - Enrollment failed for user 3: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'rectangle'
+> Overload resolution failed:
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+
+2025-09-18 11:22:27,588 - INFO - Starting face capture sequence
+2025-09-18 11:22:29,015 - ERROR - Enrollment failed for user 3: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'rectangle'
+> Overload resolution failed:
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+
+2025-09-18 11:24:58,004 - INFO - Starting face capture sequence
+2025-09-18 11:24:59,594 - ERROR - Enrollment failed for user 3: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'rectangle'
+> Overload resolution failed:
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+
+2025-09-18 11:27:47,399 - INFO - Starting face capture sequence
+2025-09-18 11:27:49,570 - ERROR - Enrollment failed for user 3: OpenCV(4.12.0) :-1: error: (-5:Bad argument) in function 'rectangle'
+> Overload resolution failed:
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+>  - Can't parse 'pt1'. Sequence item with index 0 has a wrong type
+>  - Can't parse 'rec'. Expected sequence length 4, got 2
+
+2025-09-18 11:36:31,764 - INFO - Starting face capture sequence
+2025-09-18 11:36:37,221 - ERROR - Enrollment failed for user 3: No face detected during capture sequence. Please try again with your face in view.
+2025-09-18 11:37:10,661 - INFO - Starting face capture sequence
+2025-09-18 11:37:12,177 - ERROR - Enrollment failed for user 3: too many values to unpack (expected 4)
+2025-09-18 11:37:24,735 - INFO - Starting face capture sequence
+2025-09-18 11:37:25,995 - ERROR - Enrollment failed for user 3: too many values to unpack (expected 4)
+2025-09-18 11:38:03,515 - INFO - Starting face capture sequence
+2025-09-18 11:38:04,858 - ERROR - Enrollment failed for user 3: too many values to unpack (expected 4)
+2025-09-18 11:38:43,368 - INFO - Starting face capture sequence
+2025-09-18 11:38:45,762 - INFO - Live image captured: data\temp\live_20250918_113845.jpg
+2025-09-18 11:38:46,189 - INFO - Processing enrollment for user: 3
+2025-09-18 11:38:46,597 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 11:38:46,603 - INFO - Metadata saved: data\metadata\3_metadata.json
+2025-09-18 11:38:46,605 - INFO - Successfully enrolled user 3 (quality score: 178.089)
+2025-09-18 11:39:20,684 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 11:39:21,433 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 11:39:21,492 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-18 11:39:21,492 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 184.759)
+2025-09-18 11:39:22,259 - INFO - 127.0.0.1 - - [18/Sep/2025 11:39:22] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 11:47:27,318 - INFO - Starting face capture sequence
+2025-09-18 11:47:29,997 - INFO - Live image captured: data\temp\live_20250918_114729.jpg
+2025-09-18 11:47:30,434 - INFO - Processing enrollment for user: 4
+2025-09-18 11:47:30,876 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 11:47:30,876 - INFO - Metadata saved: data\metadata\4_metadata.json
+2025-09-18 11:47:30,876 - INFO - Successfully enrolled user 4 (quality score: 204.583)
+2025-09-18 11:49:49,010 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 11:49:49,042 - ERROR - Enrollment failed for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: Failed to load image: data/temp\enroll_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250918_114948_178b9518.jpg
+2025-09-18 11:49:49,089 - INFO - 127.0.0.1 - - [18/Sep/2025 11:49:49] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 11:50:02,208 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 11:50:02,899 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 11:50:02,947 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-18 11:50:02,947 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 200.289)
+2025-09-18 11:50:03,648 - INFO - 127.0.0.1 - - [18/Sep/2025 11:50:03] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 13:40:28,447 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-18 13:40:29,173 - ERROR - Enrollment failed for user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f: No face detected in the image
+2025-09-18 13:40:29,204 - INFO - 127.0.0.1 - - [18/Sep/2025 13:40:29] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 13:43:17,860 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-18 13:43:18,418 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 13:43:18,466 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-18 13:43:18,466 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 186.761)
+2025-09-18 13:43:19,086 - INFO - 127.0.0.1 - - [18/Sep/2025 13:43:19] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 13:45:23,226 - INFO - Processing enrollment for user: 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f
+2025-09-18 13:45:23,673 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 13:45:23,684 - INFO - Metadata saved: data\metadata\0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f_metadata.json
+2025-09-18 13:45:23,700 - INFO - Successfully enrolled user 0xcdb4A15cEFCf48Ee49bA55797f8Ba77B5717E80f (quality score: 209.322)
+2025-09-18 13:45:23,959 - INFO - 127.0.0.1 - - [18/Sep/2025 13:45:23] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 13:46:33,538 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 13:46:33,993 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 13:46:33,995 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-18 13:46:34,007 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 177.388)
+2025-09-18 13:46:34,235 - INFO - 127.0.0.1 - - [18/Sep/2025 13:46:34] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 18:49:43,974 - INFO - Processing enrollment for user: 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-18 18:49:44,022 - ERROR - Enrollment failed for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: Failed to load image: data/temp\enroll_0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75_20250918_184943_1754ebc7.jpg
+2025-09-18 18:49:44,053 - INFO - 127.0.0.1 - - [18/Sep/2025 18:49:44] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-18 18:50:02,931 - INFO - Processing enrollment for user: 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-18 18:50:03,355 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 18:50:03,385 - INFO - Metadata saved: data\metadata\0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75_metadata.json
+2025-09-18 18:50:03,386 - INFO - Successfully enrolled user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75 (quality score: 192.825)
+2025-09-18 18:50:03,985 - INFO - 127.0.0.1 - - [18/Sep/2025 18:50:03] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 18:57:59,538 - INFO - Verification attempt 1/3 for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-18 18:58:00,160 - INFO - Verification SUCCESS for 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: 0.984
+2025-09-18 18:58:00,971 - ERROR - Unexpected error during verification: Object of type float32 is not JSON serializable
+2025-09-18 18:58:01,007 - INFO - 127.0.0.1 - - [18/Sep/2025 18:58:01] "[35m[1mPOST /verify HTTP/1.1[0m" 500 -
+2025-09-18 19:22:05,680 - INFO - 127.0.0.1 - - [18/Sep/2025 19:22:05] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 19:23:19,001 - WARNING - Missing configuration parameter: image_size
+2025-09-18 19:23:19,001 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-18 19:23:19,001 - INFO - Face recognition systems initialized successfully
+2025-09-18 19:23:19,001 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-18 19:23:19,039 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-18 19:23:19,039 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 19:25:12,082 - WARNING - Missing configuration parameter: image_size
+2025-09-18 19:25:12,082 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-18 19:25:12,082 - INFO - Face recognition systems initialized successfully
+2025-09-18 19:25:12,098 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-18 19:25:12,119 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-18 19:25:12,119 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 19:25:38,563 - INFO - 127.0.0.1 - - [18/Sep/2025 19:25:38] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 20:05:54,970 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 20:05:55,478 - INFO - Face quality check passed: Face quality acceptable
+2025-09-18 20:05:55,510 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-18 20:05:55,511 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 228.999)
+2025-09-18 20:05:56,278 - INFO - 127.0.0.1 - - [18/Sep/2025 20:05:56] "POST /enroll HTTP/1.1" 200 -
+2025-09-18 20:06:06,436 - INFO - 127.0.0.1 - - [18/Sep/2025 20:06:06] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 20:25:13,985 - INFO - 127.0.0.1 - - [18/Sep/2025 20:25:13] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 20:26:08,754 - INFO - 127.0.0.1 - - [18/Sep/2025 20:26:08] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 20:26:25,932 - INFO - 127.0.0.1 - - [18/Sep/2025 20:26:25] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 20:40:15,311 - INFO - 127.0.0.1 - - [18/Sep/2025 20:40:15] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 21:04:32,849 - INFO - 127.0.0.1 - - [18/Sep/2025 21:04:32] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 21:05:54,577 - INFO - 127.0.0.1 - - [18/Sep/2025 21:05:54] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 21:36:42,369 - INFO - 127.0.0.1 - - [18/Sep/2025 21:36:42] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 21:47:22,121 - INFO - 127.0.0.1 - - [18/Sep/2025 21:47:22] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 22:18:26,226 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 22:18:26,748 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.985
+2025-09-18 22:18:27,320 - ERROR - Unexpected error during verification: Object of type float32 is not JSON serializable
+2025-09-18 22:18:27,336 - INFO - 127.0.0.1 - - [18/Sep/2025 22:18:27] "[35m[1mPOST /verify HTTP/1.1[0m" 500 -
+2025-09-18 22:25:36,046 - WARNING - Missing configuration parameter: image_size
+2025-09-18 22:25:36,046 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-18 22:25:36,062 - INFO - Face recognition systems initialized successfully
+2025-09-18 22:25:36,066 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-18 22:25:36,101 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-18 22:25:36,101 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 22:29:05,655 - INFO - 127.0.0.1 - - [18/Sep/2025 22:29:05] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 22:31:05,465 - INFO - 127.0.0.1 - - [18/Sep/2025 22:31:05] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 22:31:23,777 - INFO - 127.0.0.1 - - [18/Sep/2025 22:31:23] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-18 22:46:08,593 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 22:46:09,758 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.979
+2025-09-18 22:46:09,768 - ERROR - Unexpected error during verification: Object of type float32 is not JSON serializable
+2025-09-18 22:46:09,787 - INFO - 127.0.0.1 - - [18/Sep/2025 22:46:09] "[35m[1mPOST /verify HTTP/1.1[0m" 500 -
+2025-09-18 23:02:24,659 - WARNING - Missing configuration parameter: image_size
+2025-09-18 23:02:24,660 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-18 23:02:24,663 - INFO - Face recognition systems initialized successfully
+2025-09-18 23:02:24,663 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-18 23:02:24,690 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-18 23:02:24,690 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 23:04:10,948 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 23:04:12,030 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.971
+2025-09-18 23:04:12,047 - ERROR - Unexpected error during verification: Object of type bool is not JSON serializable
+2025-09-18 23:04:12,069 - INFO - 127.0.0.1 - - [18/Sep/2025 23:04:12] "[35m[1mPOST /verify HTTP/1.1[0m" 500 -
+2025-09-18 23:19:20,891 - WARNING - Missing configuration parameter: image_size
+2025-09-18 23:19:20,891 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-18 23:19:20,891 - INFO - Face recognition systems initialized successfully
+2025-09-18 23:19:20,891 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-18 23:19:20,932 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-18 23:19:20,932 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 23:20:12,014 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 23:20:13,138 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.975
+2025-09-18 23:20:13,139 - ERROR - Unexpected error during verification: Object of type bool is not JSON serializable
+2025-09-18 23:20:13,179 - INFO - 127.0.0.1 - - [18/Sep/2025 23:20:13] "[35m[1mPOST /verify HTTP/1.1[0m" 500 -
+2025-09-18 23:26:16,604 - WARNING - Missing configuration parameter: image_size
+2025-09-18 23:26:16,604 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-18 23:26:16,604 - INFO - Face recognition systems initialized successfully
+2025-09-18 23:26:16,616 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-18 23:26:16,627 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-18 23:26:16,627 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-18 23:27:17,533 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 23:27:18,497 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.964
+2025-09-18 23:27:18,513 - INFO - 127.0.0.1 - - [18/Sep/2025 23:27:18] "POST /verify HTTP/1.1" 200 -
+2025-09-18 23:27:53,312 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-18 23:27:53,624 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.964
+2025-09-18 23:27:53,624 - INFO - 127.0.0.1 - - [18/Sep/2025 23:27:53] "POST /verify HTTP/1.1" 200 -
+2025-09-19 00:11:40,241 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-19 00:11:40,659 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-19 00:11:40,659 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-19 00:11:40,672 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-19 00:11:40,868 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-19 00:11:40,868 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-19 00:11:40,868 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-19 00:11:41,115 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-19 00:11:41,131 - INFO - 127.0.0.1 - - [19/Sep/2025 00:11:41] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-19 00:13:04,082 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-19 00:13:04,410 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.978
+2025-09-19 00:13:04,410 - INFO - 127.0.0.1 - - [19/Sep/2025 00:13:04] "POST /verify HTTP/1.1" 200 -
+2025-09-19 00:13:09,667 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-19 00:13:09,985 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.978
+2025-09-19 00:13:09,989 - INFO - 127.0.0.1 - - [19/Sep/2025 00:13:09] "POST /verify HTTP/1.1" 200 -
+2025-09-19 00:14:13,581 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-19 00:14:14,051 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.975
+2025-09-19 00:14:14,051 - INFO - 127.0.0.1 - - [19/Sep/2025 00:14:14] "POST /verify HTTP/1.1" 200 -
+2025-09-19 00:15:26,773 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-19 00:15:27,169 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-19 00:15:27,171 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-19 00:15:27,171 - INFO - Verification attempt 2/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-19 00:15:27,435 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-19 00:15:27,435 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-19 00:15:27,435 - INFO - Verification attempt 3/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-19 00:15:27,716 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-19 00:15:27,716 - INFO - 127.0.0.1 - - [19/Sep/2025 00:15:27] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-19 00:16:08,026 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-19 00:16:08,340 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-19 00:16:08,341 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-19 00:16:08,341 - INFO - Verification attempt 2/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-19 00:16:08,574 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-19 00:16:08,576 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-19 00:16:08,576 - INFO - Verification attempt 3/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-19 00:16:08,812 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-19 00:16:08,817 - INFO - 127.0.0.1 - - [19/Sep/2025 00:16:08] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-19 00:17:46,039 - INFO - Processing enrollment for user: 0x12f3584db9a704Bd7254b87DA975d63D1361bc06
+2025-09-19 00:17:46,380 - INFO - Face quality check passed: Face quality acceptable
+2025-09-19 00:17:46,404 - INFO - Metadata saved: data\metadata\0x12f3584db9a704Bd7254b87DA975d63D1361bc06_metadata.json
+2025-09-19 00:17:46,404 - INFO - Successfully enrolled user 0x12f3584db9a704Bd7254b87DA975d63D1361bc06 (quality score: 185.220)
+2025-09-19 00:17:47,371 - INFO - 127.0.0.1 - - [19/Sep/2025 00:17:47] "POST /enroll HTTP/1.1" 200 -
+2025-09-19 00:18:12,058 - INFO - Verification attempt 1/3 for user 0x12f3584db9a704Bd7254b87DA975d63D1361bc06
+2025-09-19 00:18:12,365 - INFO - Verification FAILURE for 0x12f3584db9a704Bd7254b87DA975d63D1361bc06: 0.000
+2025-09-19 00:18:12,365 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-19 00:18:12,365 - INFO - Verification attempt 2/3 for user 0x12f3584db9a704Bd7254b87DA975d63D1361bc06
+2025-09-19 00:18:12,594 - INFO - Verification FAILURE for 0x12f3584db9a704Bd7254b87DA975d63D1361bc06: 0.000
+2025-09-19 00:18:12,594 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-19 00:18:12,594 - INFO - Verification attempt 3/3 for user 0x12f3584db9a704Bd7254b87DA975d63D1361bc06
+2025-09-19 00:18:12,846 - INFO - Verification FAILURE for 0x12f3584db9a704Bd7254b87DA975d63D1361bc06: 0.000
+2025-09-19 00:18:12,848 - INFO - 127.0.0.1 - - [19/Sep/2025 00:18:12] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-19 00:18:29,973 - INFO - Verification attempt 1/3 for user 0x12f3584db9a704Bd7254b87DA975d63D1361bc06
+2025-09-19 00:18:30,261 - INFO - Verification SUCCESS for 0x12f3584db9a704Bd7254b87DA975d63D1361bc06: 0.974
+2025-09-19 00:18:30,264 - INFO - 127.0.0.1 - - [19/Sep/2025 00:18:30] "POST /verify HTTP/1.1" 200 -
+2025-09-19 18:29:30,184 - WARNING - Missing configuration parameter: image_size
+2025-09-19 18:29:30,184 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-19 18:29:30,196 - INFO - Face recognition systems initialized successfully
+2025-09-19 18:29:30,201 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-19 18:29:30,239 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-19 18:29:30,239 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-19 18:31:10,971 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-19 18:31:12,570 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.968
+2025-09-19 18:31:12,593 - INFO - 127.0.0.1 - - [19/Sep/2025 18:31:12] "POST /verify HTTP/1.1" 200 -
+2025-09-20 00:31:00,021 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 00:31:00,295 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.966
+2025-09-20 00:31:00,311 - INFO - 127.0.0.1 - - [20/Sep/2025 00:31:00] "POST /verify HTTP/1.1" 200 -
+2025-09-20 00:31:22,790 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 00:31:22,914 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.972
+2025-09-20 00:31:22,916 - INFO - 127.0.0.1 - - [20/Sep/2025 00:31:22] "POST /verify HTTP/1.1" 200 -
+2025-09-20 00:34:26,816 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 00:34:26,948 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.963
+2025-09-20 00:34:26,950 - INFO - 127.0.0.1 - - [20/Sep/2025 00:34:26] "POST /verify HTTP/1.1" 200 -
+2025-09-20 13:54:26,816 - WARNING - Missing configuration parameter: image_size
+2025-09-20 13:54:26,816 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-20 13:54:26,816 - INFO - Face recognition systems initialized successfully
+2025-09-20 13:54:26,816 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-20 13:54:26,845 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-20 13:54:26,845 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-20 13:57:33,661 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 13:57:34,941 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.940
+2025-09-20 13:57:34,994 - INFO - 127.0.0.1 - - [20/Sep/2025 13:57:34] "POST /verify HTTP/1.1" 200 -
+2025-09-20 13:57:48,127 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 13:57:48,563 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.943
+2025-09-20 13:57:48,581 - INFO - 127.0.0.1 - - [20/Sep/2025 13:57:48] "POST /verify HTTP/1.1" 200 -
+2025-09-20 15:22:48,260 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 15:22:49,068 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.936
+2025-09-20 15:22:49,081 - INFO - 127.0.0.1 - - [20/Sep/2025 15:22:49] "POST /verify HTTP/1.1" 200 -
+2025-09-20 15:46:29,322 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 15:46:30,241 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.938
+2025-09-20 15:46:30,263 - INFO - 127.0.0.1 - - [20/Sep/2025 15:46:30] "POST /verify HTTP/1.1" 200 -
+2025-09-20 15:46:32,481 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 15:46:32,906 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.938
+2025-09-20 15:46:32,914 - INFO - 127.0.0.1 - - [20/Sep/2025 15:46:32] "POST /verify HTTP/1.1" 200 -
+2025-09-20 15:50:12,141 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 15:50:12,785 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.923
+2025-09-20 15:50:12,800 - INFO - 127.0.0.1 - - [20/Sep/2025 15:50:12] "POST /verify HTTP/1.1" 200 -
+2025-09-20 15:50:14,401 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 15:50:14,967 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.923
+2025-09-20 15:50:14,974 - INFO - 127.0.0.1 - - [20/Sep/2025 15:50:14] "POST /verify HTTP/1.1" 200 -
+2025-09-20 16:07:08,855 - INFO - 127.0.0.1 - - [20/Sep/2025 16:07:08] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-20 16:07:20,147 - INFO - 127.0.0.1 - - [20/Sep/2025 16:07:20] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-20 16:21:05,247 - INFO - Processing enrollment for user: 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-20 16:21:05,830 - ERROR - Enrollment failed for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: No face detected in the image
+2025-09-20 16:21:05,862 - INFO - 127.0.0.1 - - [20/Sep/2025 16:21:05] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-09-20 16:23:22,699 - INFO - Processing enrollment for user: 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-20 16:23:23,240 - INFO - Face quality check passed: Face quality acceptable
+2025-09-20 16:23:23,318 - INFO - Metadata saved: data\metadata\0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75_metadata.json
+2025-09-20 16:23:23,318 - INFO - Successfully enrolled user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75 (quality score: 196.923)
+2025-09-20 16:23:24,224 - INFO - 127.0.0.1 - - [20/Sep/2025 16:23:24] "POST /enroll HTTP/1.1" 200 -
+2025-09-20 16:23:43,375 - INFO - Verification attempt 1/3 for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-20 16:23:43,807 - INFO - Verification SUCCESS for 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: 0.987
+2025-09-20 16:23:43,823 - INFO - 127.0.0.1 - - [20/Sep/2025 16:23:43] "POST /verify HTTP/1.1" 200 -
+2025-09-20 16:24:00,079 - INFO - Verification attempt 1/3 for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-20 16:24:00,463 - INFO - Verification SUCCESS for 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: 0.984
+2025-09-20 16:24:00,463 - INFO - 127.0.0.1 - - [20/Sep/2025 16:24:00] "POST /verify HTTP/1.1" 200 -
+2025-09-20 16:24:00,876 - INFO - Verification attempt 1/3 for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-20 16:24:01,222 - INFO - Verification SUCCESS for 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: 0.984
+2025-09-20 16:24:01,228 - INFO - 127.0.0.1 - - [20/Sep/2025 16:24:01] "POST /verify HTTP/1.1" 200 -
+2025-09-20 16:24:19,189 - INFO - Verification attempt 1/3 for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-20 16:24:19,579 - INFO - Verification SUCCESS for 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: 0.975
+2025-09-20 16:24:19,588 - INFO - 127.0.0.1 - - [20/Sep/2025 16:24:19] "POST /verify HTTP/1.1" 200 -
+2025-09-20 16:24:19,878 - INFO - Verification attempt 1/3 for user 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75
+2025-09-20 16:24:20,187 - INFO - Verification SUCCESS for 0x28cae1f17Fd5f19df05Fc02DF8Eb15ade56bcb75: 0.975
+2025-09-20 16:24:20,187 - INFO - 127.0.0.1 - - [20/Sep/2025 16:24:20] "POST /verify HTTP/1.1" 200 -
+2025-09-20 16:57:19,020 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 16:57:19,303 - INFO - Face quality check passed: Face quality acceptable
+2025-09-20 16:57:19,335 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-20 16:57:19,336 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 153.009)
+2025-09-20 16:57:19,736 - INFO - 127.0.0.1 - - [20/Sep/2025 16:57:19] "POST /enroll HTTP/1.1" 200 -
+2025-09-20 17:17:27,967 - INFO - Processing enrollment for user: 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-20 17:17:28,218 - INFO - Face quality check passed: Face quality acceptable
+2025-09-20 17:17:28,234 - INFO - Metadata saved: data\metadata\0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_metadata.json
+2025-09-20 17:17:28,234 - INFO - Successfully enrolled user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767 (quality score: 153.009)
+2025-09-20 17:17:28,646 - INFO - 127.0.0.1 - - [20/Sep/2025 17:17:28] "POST /enroll HTTP/1.1" 200 -
+2025-09-23 20:15:37,517 - WARNING - Missing configuration parameter: image_size
+2025-09-23 20:15:37,518 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-23 20:15:37,527 - INFO - Face recognition systems initialized successfully
+2025-09-23 20:15:37,530 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-23 20:15:37,560 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-23 20:15:37,560 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-23 21:55:18,005 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 21:55:19,586 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.800
+2025-09-23 21:55:19,617 - INFO - 127.0.0.1 - - [23/Sep/2025 21:55:19] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:24:33,600 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:24:33,697 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222433_5bbfa5e2.jpg
+2025-09-23 22:24:33,711 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:24:33,712 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:24:33,712 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:24:33,716 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222433_5bbfa5e2.jpg
+2025-09-23 22:24:33,719 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:24:33,720 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:24:33,721 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:24:33,724 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222433_5bbfa5e2.jpg
+2025-09-23 22:24:33,725 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:24:33,755 - INFO - 127.0.0.1 - - [23/Sep/2025 22:24:33] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:25:49,582 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:50,182 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.789
+2025-09-23 22:25:50,214 - INFO - 127.0.0.1 - - [23/Sep/2025 22:25:50] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:25:51,685 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:51,689 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222551_ba18292a.jpg
+2025-09-23 22:25:51,694 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:25:51,695 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:25:51,695 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:51,700 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222551_ba18292a.jpg
+2025-09-23 22:25:51,700 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:25:51,700 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:25:51,700 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:51,708 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222551_ba18292a.jpg
+2025-09-23 22:25:51,711 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:25:51,716 - INFO - 127.0.0.1 - - [23/Sep/2025 22:25:51] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:25:57,429 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:57,709 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.790
+2025-09-23 22:25:57,723 - INFO - 127.0.0.1 - - [23/Sep/2025 22:25:57] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:25:58,803 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:58,810 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222558_182ddef8.jpg
+2025-09-23 22:25:58,812 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:25:58,812 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:25:58,812 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:58,812 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222558_182ddef8.jpg
+2025-09-23 22:25:58,812 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:25:58,812 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:25:58,812 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:25:58,829 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222558_182ddef8.jpg
+2025-09-23 22:25:58,832 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:25:58,836 - INFO - 127.0.0.1 - - [23/Sep/2025 22:25:58] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:26:15,634 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:26:15,925 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.788
+2025-09-23 22:26:15,941 - INFO - 127.0.0.1 - - [23/Sep/2025 22:26:15] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:26:17,021 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:26:17,025 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222617_ed0678dc.jpg
+2025-09-23 22:26:17,028 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:26:17,028 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:26:17,028 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:26:17,028 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222617_ed0678dc.jpg
+2025-09-23 22:26:17,028 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:26:17,028 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:26:17,028 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:26:17,028 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222617_ed0678dc.jpg
+2025-09-23 22:26:17,045 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:26:17,050 - INFO - 127.0.0.1 - - [23/Sep/2025 22:26:17] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:26:19,173 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:26:19,178 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222619_38cf77b3.jpg
+2025-09-23 22:26:19,181 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:26:19,182 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:26:19,183 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:26:19,187 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222619_38cf77b3.jpg
+2025-09-23 22:26:19,190 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:26:19,191 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:26:19,192 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:26:19,203 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222619_38cf77b3.jpg
+2025-09-23 22:26:19,206 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:26:19,210 - INFO - 127.0.0.1 - - [23/Sep/2025 22:26:19] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:27:42,635 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:27:43,224 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.837
+2025-09-23 22:27:43,240 - INFO - 127.0.0.1 - - [23/Sep/2025 22:27:43] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:27:44,495 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:27:44,500 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222744_e8f0d363.jpg
+2025-09-23 22:27:44,504 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:27:44,505 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:27:44,505 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:27:44,512 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222744_e8f0d363.jpg
+2025-09-23 22:27:44,515 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:27:44,515 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:27:44,515 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:27:44,515 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_222744_e8f0d363.jpg
+2025-09-23 22:27:44,526 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:27:44,531 - INFO - 127.0.0.1 - - [23/Sep/2025 22:27:44] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:29:01,283 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:29:01,840 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.840
+2025-09-23 22:29:01,890 - INFO - 127.0.0.1 - - [23/Sep/2025 22:29:01] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:36:11,789 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:36:12,373 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.831
+2025-09-23 22:36:12,404 - INFO - 127.0.0.1 - - [23/Sep/2025 22:36:12] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:38:42,847 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:38:43,400 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.794
+2025-09-23 22:38:43,432 - INFO - 127.0.0.1 - - [23/Sep/2025 22:38:43] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:55:55,640 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:55:56,164 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.810
+2025-09-23 22:55:56,193 - INFO - 127.0.0.1 - - [23/Sep/2025 22:55:56] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:56:20,052 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-23 22:56:20,414 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.807
+2025-09-23 22:56:20,424 - INFO - 127.0.0.1 - - [23/Sep/2025 22:56:20] "POST /verify HTTP/1.1" 200 -
+2025-09-23 22:56:47,369 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:56:47,699 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:56:47,699 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:56:47,699 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:56:47,907 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:56:47,908 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:56:47,909 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:56:48,129 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:56:48,133 - INFO - 127.0.0.1 - - [23/Sep/2025 22:56:48] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:56:51,454 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:56:51,454 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225651_d825bf98.jpg
+2025-09-23 22:56:51,454 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:56:51,466 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:56:51,467 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:56:51,469 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225651_d825bf98.jpg
+2025-09-23 22:56:51,469 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:56:51,469 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:56:51,469 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:56:51,469 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225651_d825bf98.jpg
+2025-09-23 22:56:51,469 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:56:51,484 - INFO - 127.0.0.1 - - [23/Sep/2025 22:56:51] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:57:08,723 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:09,030 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:09,030 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:57:09,030 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:09,263 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:09,263 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:57:09,263 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:09,477 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:09,489 - INFO - 127.0.0.1 - - [23/Sep/2025 22:57:09] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:57:12,022 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:12,022 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225712_044b5d06.jpg
+2025-09-23 22:57:12,035 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:12,036 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:57:12,036 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:12,036 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225712_044b5d06.jpg
+2025-09-23 22:57:12,036 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:12,036 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:57:12,036 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:12,036 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225712_044b5d06.jpg
+2025-09-23 22:57:12,056 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:12,061 - INFO - 127.0.0.1 - - [23/Sep/2025 22:57:12] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:57:12,836 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:12,836 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225712_4b92e04d.jpg
+2025-09-23 22:57:12,836 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:12,836 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:57:12,849 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:12,857 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225712_4b92e04d.jpg
+2025-09-23 22:57:12,859 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:12,859 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:57:12,859 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:12,869 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225712_4b92e04d.jpg
+2025-09-23 22:57:12,870 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:12,875 - INFO - 127.0.0.1 - - [23/Sep/2025 22:57:12] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:57:13,560 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:13,567 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225713_7f480cc1.jpg
+2025-09-23 22:57:13,568 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:13,570 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-23 22:57:13,570 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:13,573 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225713_7f480cc1.jpg
+2025-09-23 22:57:13,573 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:13,573 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-23 22:57:13,573 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:13,584 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250923_225713_7f480cc1.jpg
+2025-09-23 22:57:13,586 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-23 22:57:13,592 - INFO - 127.0.0.1 - - [23/Sep/2025 22:57:13] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-23 22:57:40,101 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-23 22:57:40,394 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.808
+2025-09-23 22:57:40,396 - INFO - 127.0.0.1 - - [23/Sep/2025 22:57:40] "POST /verify HTTP/1.1" 200 -
+2025-09-24 00:09:51,041 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 00:09:51,601 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.809
+2025-09-24 00:09:51,639 - INFO - 127.0.0.1 - - [24/Sep/2025 00:09:51] "POST /verify HTTP/1.1" 200 -
+2025-09-24 00:51:12,295 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 00:51:12,928 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.808
+2025-09-24 00:51:12,970 - INFO - 127.0.0.1 - - [24/Sep/2025 00:51:12] "POST /verify HTTP/1.1" 200 -
+2025-09-24 16:54:00,233 - WARNING - Missing configuration parameter: image_size
+2025-09-24 16:54:00,235 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-24 16:54:00,251 - INFO - Face recognition systems initialized successfully
+2025-09-24 16:54:00,251 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-24 16:54:00,310 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-24 16:54:00,310 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-24 16:55:27,673 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:28,554 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:28,554 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-24 16:55:28,554 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:28,793 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:28,793 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-24 16:55:28,793 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:29,023 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:29,054 - INFO - 127.0.0.1 - - [24/Sep/2025 16:55:29] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-24 16:55:32,324 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:32,327 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250924_165532_a40d62b1.jpg
+2025-09-24 16:55:32,327 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:32,327 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-24 16:55:32,327 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:32,341 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250924_165532_a40d62b1.jpg
+2025-09-24 16:55:32,344 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:32,344 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-24 16:55:32,344 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:32,344 - ERROR - Verification error: Failed to load image: data/temp\verify_0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767_20250924_165532_a40d62b1.jpg
+2025-09-24 16:55:32,344 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:32,364 - INFO - 127.0.0.1 - - [24/Sep/2025 16:55:32] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-24 16:55:42,792 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:43,031 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:43,032 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-24 16:55:43,032 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:43,245 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:43,245 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-24 16:55:43,245 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:55:43,482 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:55:43,483 - INFO - 127.0.0.1 - - [24/Sep/2025 16:55:43] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-24 16:56:20,211 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:56:20,482 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:56:20,482 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-24 16:56:20,483 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:56:20,705 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:56:20,705 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-24 16:56:20,705 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:56:20,933 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-24 16:56:20,936 - INFO - 127.0.0.1 - - [24/Sep/2025 16:56:20] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-24 16:57:27,062 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-24 16:57:27,564 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.904
+2025-09-24 16:57:27,578 - INFO - 127.0.0.1 - - [24/Sep/2025 16:57:27] "POST /verify HTTP/1.1" 200 -
+2025-09-25 18:54:39,368 - WARNING - Missing configuration parameter: image_size
+2025-09-25 18:54:39,369 - WARNING - Missing configuration parameter: similarity_threshold
+2025-09-25 18:54:39,383 - INFO - Face recognition systems initialized successfully
+2025-09-25 18:54:39,386 - INFO - Starting Face Verification API on 127.0.0.1:5000
+2025-09-25 18:54:39,417 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-09-25 18:54:39,417 - INFO - [33mPress CTRL+C to quit[0m
+2025-09-25 18:58:57,063 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-25 18:58:58,007 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-25 18:58:58,007 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-25 18:58:58,007 - INFO - Verification attempt 2/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-25 18:58:58,230 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-25 18:58:58,230 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-25 18:58:58,230 - INFO - Verification attempt 3/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-25 18:58:58,419 - INFO - Verification FAILURE for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.000
+2025-09-25 18:58:58,459 - INFO - 127.0.0.1 - - [25/Sep/2025 18:58:58] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-25 18:59:40,437 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-25 18:59:40,920 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.830
+2025-09-25 18:59:40,920 - INFO - 127.0.0.1 - - [25/Sep/2025 18:59:40] "POST /verify HTTP/1.1" 200 -
+2025-09-25 19:53:44,445 - INFO - Verification attempt 1/3 for user 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767
+2025-09-25 19:53:45,114 - INFO - Verification SUCCESS for 0xbEeD2FEAB56AF69bA551ccf03Ae76cE129470767: 0.880
+2025-09-25 19:53:45,116 - INFO - 127.0.0.1 - - [25/Sep/2025 19:53:45] "POST /verify HTTP/1.1" 200 -
+2025-09-25 20:43:27,991 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 20:43:28,468 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.795
+2025-09-25 20:43:28,469 - INFO - 127.0.0.1 - - [25/Sep/2025 20:43:28] "POST /verify HTTP/1.1" 200 -
+2025-09-25 20:43:39,454 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 20:43:39,784 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.788
+2025-09-25 20:43:39,784 - INFO - 127.0.0.1 - - [25/Sep/2025 20:43:39] "POST /verify HTTP/1.1" 200 -
+2025-09-25 20:43:40,131 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 20:43:40,367 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.788
+2025-09-25 20:43:40,367 - INFO - 127.0.0.1 - - [25/Sep/2025 20:43:40] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:11:09,705 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:11:10,552 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.796
+2025-09-25 22:11:10,556 - INFO - 127.0.0.1 - - [25/Sep/2025 22:11:10] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:11:12,423 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:11:12,683 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.796
+2025-09-25 22:11:12,683 - INFO - 127.0.0.1 - - [25/Sep/2025 22:11:12] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:11:21,454 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:11:21,688 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.784
+2025-09-25 22:11:21,705 - INFO - 127.0.0.1 - - [25/Sep/2025 22:11:21] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:11:21,897 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:11:22,186 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.784
+2025-09-25 22:11:22,186 - INFO - 127.0.0.1 - - [25/Sep/2025 22:11:22] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:11:36,007 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:11:36,289 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.795
+2025-09-25 22:11:36,298 - INFO - 127.0.0.1 - - [25/Sep/2025 22:11:36] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:11:36,501 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:11:36,779 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.795
+2025-09-25 22:11:36,779 - INFO - 127.0.0.1 - - [25/Sep/2025 22:11:36] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:21:23,609 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:21:24,048 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.814
+2025-09-25 22:21:24,071 - INFO - 127.0.0.1 - - [25/Sep/2025 22:21:24] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:21:24,853 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:21:25,066 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.814
+2025-09-25 22:21:25,066 - INFO - 127.0.0.1 - - [25/Sep/2025 22:21:25] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:39:29,536 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:39:30,286 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.821
+2025-09-25 22:39:30,307 - INFO - 127.0.0.1 - - [25/Sep/2025 22:39:30] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:39:31,005 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:39:31,242 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.821
+2025-09-25 22:39:31,246 - INFO - 127.0.0.1 - - [25/Sep/2025 22:39:31] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:40:21,766 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:40:21,966 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.798
+2025-09-25 22:40:21,966 - INFO - 127.0.0.1 - - [25/Sep/2025 22:40:21] "POST /verify HTTP/1.1" 200 -
+2025-09-25 22:40:24,420 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 22:40:24,617 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.798
+2025-09-25 22:40:24,626 - INFO - 127.0.0.1 - - [25/Sep/2025 22:40:24] "POST /verify HTTP/1.1" 200 -
+2025-09-25 23:09:22,369 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:09:22,856 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:09:22,856 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-25 23:09:22,856 - INFO - Verification attempt 2/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:09:23,124 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:09:23,124 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-25 23:09:23,124 - INFO - Verification attempt 3/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:09:23,352 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:09:23,360 - INFO - 127.0.0.1 - - [25/Sep/2025 23:09:23] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-25 23:10:21,378 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:10:21,635 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:10:21,635 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-25 23:10:21,635 - INFO - Verification attempt 2/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:10:21,869 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:10:21,869 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-25 23:10:21,869 - INFO - Verification attempt 3/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:10:22,087 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:10:22,087 - INFO - 127.0.0.1 - - [25/Sep/2025 23:10:22] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-25 23:10:49,162 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:10:49,422 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:10:49,422 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-25 23:10:49,422 - INFO - Verification attempt 2/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:10:49,659 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:10:49,659 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-25 23:10:49,659 - INFO - Verification attempt 3/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:10:49,838 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:10:49,838 - INFO - 127.0.0.1 - - [25/Sep/2025 23:10:49] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-25 23:13:20,120 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:13:20,618 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.842
+2025-09-25 23:13:20,634 - INFO - 127.0.0.1 - - [25/Sep/2025 23:13:20] "POST /verify HTTP/1.1" 200 -
+2025-09-25 23:13:24,113 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:13:24,410 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.842
+2025-09-25 23:13:24,415 - INFO - 127.0.0.1 - - [25/Sep/2025 23:13:24] "POST /verify HTTP/1.1" 200 -
+2025-09-25 23:39:30,033 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:39:30,572 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:39:30,572 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-25 23:39:30,572 - INFO - Verification attempt 2/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:39:30,809 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:39:30,809 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-25 23:39:30,809 - INFO - Verification attempt 3/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:39:31,050 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:39:31,062 - INFO - 127.0.0.1 - - [25/Sep/2025 23:39:31] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-25 23:39:53,604 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:39:53,936 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.818
+2025-09-25 23:39:53,936 - INFO - 127.0.0.1 - - [25/Sep/2025 23:39:53] "POST /verify HTTP/1.1" 200 -
+2025-09-25 23:39:54,392 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:39:54,681 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.818
+2025-09-25 23:39:54,681 - INFO - 127.0.0.1 - - [25/Sep/2025 23:39:54] "POST /verify HTTP/1.1" 200 -
+2025-09-25 23:57:48,393 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:57:48,885 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:57:48,885 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-09-25 23:57:48,885 - INFO - Verification attempt 2/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:57:49,151 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:57:49,152 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-09-25 23:57:49,152 - INFO - Verification attempt 3/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:57:49,404 - INFO - Verification FAILURE for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.000
+2025-09-25 23:57:49,404 - INFO - 127.0.0.1 - - [25/Sep/2025 23:57:49] "[31m[1mPOST /verify HTTP/1.1[0m" 400 -
+2025-09-25 23:57:58,154 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:57:58,475 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.788
+2025-09-25 23:57:58,477 - INFO - 127.0.0.1 - - [25/Sep/2025 23:57:58] "POST /verify HTTP/1.1" 200 -
+2025-09-25 23:58:00,519 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-25 23:58:00,725 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.788
+2025-09-25 23:58:00,734 - INFO - 127.0.0.1 - - [25/Sep/2025 23:58:00] "POST /verify HTTP/1.1" 200 -
+2025-09-26 00:04:58,618 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-26 00:04:59,204 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.838
+2025-09-26 00:04:59,220 - INFO - 127.0.0.1 - - [26/Sep/2025 00:04:59] "POST /verify HTTP/1.1" 200 -
+2025-09-26 00:05:00,576 - INFO - Verification attempt 1/3 for user 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33
+2025-09-26 00:05:00,782 - INFO - Verification SUCCESS for 0x73CeBCb7BcF54858b0589950bd0734Ba4468ef33: 0.838
+2025-09-26 00:05:00,787 - INFO - 127.0.0.1 - - [26/Sep/2025 00:05:00] "POST /verify HTTP/1.1" 200 -
+2025-10-03 19:26:44,180 - WARNING - User 4 already enrolled. Use --overwrite to replace.
+2025-10-03 19:27:30,787 - INFO - Starting face capture sequence
+2025-10-03 19:27:33,297 - INFO - Live image captured: data\temp\live_20251003_192733.jpg
+2025-10-03 19:27:33,717 - INFO - Processing enrollment for user: 4
+2025-10-03 19:27:34,017 - ERROR - Enrollment failed for user 4: 'tuple' object has no attribute 'size'

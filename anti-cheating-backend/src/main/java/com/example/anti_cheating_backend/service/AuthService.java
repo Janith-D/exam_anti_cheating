@@ -13,6 +13,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -72,7 +73,7 @@ public class AuthService implements UserDetailsService {
         //Enroll face
         Enrollment enrollment = enrollFace(student.getId(),imageBase64);
         if (enrollment == null){
-            throw new RuntimeException("Face enrollment failed during register")
+            throw new RuntimeException("Face enrollment failed during register");
         }
         Map<String,Object> response = new HashMap<>();
         response.put("message","Register and enrollment successfully");
@@ -149,10 +150,19 @@ public class AuthService implements UserDetailsService {
             throw new RuntimeException("ML verification failed"+ response.getStatusCode());
         }
         Map<String,Object> result = response.getBody();
-        return Boolean.TRUE.equals(result.get("match") && Boolean.TRUE.equals(result.get("liveness")));
+        return Boolean.TRUE.equals(result.get("match")) && Boolean.TRUE.equals(result.get("liveness"));
     }
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return null;
+        Student student = studentRepo.findByUserName(username);
+        if (student == null){
+            throw new UsernameNotFoundException("User not found: "+username);
+        }
+        return User.builder()
+                .username(student.getUserName())
+                .password(student.getPassword())
+                .authorities(student.getRole().name())
+                .build();
+
     }
 }

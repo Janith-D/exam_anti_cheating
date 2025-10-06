@@ -4,6 +4,6 @@ import com.example.anti_cheating_backend.entity.Student;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface StudentRepo extends JpaRepository<Student,Long> {
-    Student findByUserName(Student userName);
+    Student findByUserName(String userName);
     Student findByEmail(Student email);
 }

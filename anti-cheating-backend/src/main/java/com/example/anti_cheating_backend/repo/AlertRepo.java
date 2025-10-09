@@ -8,4 +8,8 @@ import java.util.List;
 
 public interface AlertRepo extends JpaRepository<Alert, Long> {
     List<Alert> findByStatusAndTimestampAfter(String status, LocalDateTime timestamp);
+
+    List<Alert> findByStudentId(Long studentId);
+    List<Alert> findBySeverity(String severity);
+
 }

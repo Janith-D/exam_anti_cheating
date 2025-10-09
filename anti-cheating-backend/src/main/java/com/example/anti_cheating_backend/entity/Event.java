@@ -33,4 +33,5 @@ public class Event {
     private Integer severityLevel = 1;
     private Boolean isProcessed = false;
     private String snapshotPath;
+    private Long duration; // e.g., for BLUR events
 }

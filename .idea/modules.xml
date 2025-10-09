@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Exam-Anti-Cheating.iml" filepath="$PROJECT_DIR$/.idea/Exam-Anti-Cheating.iml" />
+      <module fileurl="file://$PROJECT_DIR$/anti-cheating-backend/anti-cheating-backend.iml" filepath="$PROJECT_DIR$/anti-cheating-backend/anti-cheating-backend.iml" />
     </modules>
   </component>
 </project>

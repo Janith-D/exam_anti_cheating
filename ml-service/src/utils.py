@@ -64,16 +64,18 @@ def preprocess_image(image_input: Union[str, bytes], size: Tuple[int,int]=(160,1
 
     return cv2.resize(img, size)
 
-def detect_face(image: np.ndarray, min_face_size: Tuple[int,int]=(80,80)) -> Optional[np.ndarray]:
+def detect_face(image: np.ndarray, min_face_size: tuple = (80, 80)) -> Optional[np.ndarray]:
     if image is None or image.size == 0:
         return None
 
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
 
-    # Ensure min_face_size is tuple of ints
-    if isinstance(min_face_size, list):
-        min_face_size = tuple(min_face_size)
+    # Ensure min_face_size is a tuple of ints
+    if isinstance(min_face_size, int):
+        min_face_size = (min_face_size, min_face_size)
+    elif isinstance(min_face_size, list):
+        min_face_size = tuple(int(x) for x in min_face_size)
 
     faces = face_cascade.detectMultiScale(
         gray, scaleFactor=1.1, minNeighbors=5, minSize=min_face_size
@@ -81,7 +83,7 @@ def detect_face(image: np.ndarray, min_face_size: Tuple[int,int]=(80,80)) -> Opt
     if len(faces) == 0:
         return None
 
-    x, y, w, h = faces[0]  # first face
+    x, y, w, h = faces[0]  # take first detected face
     padding = int(min(w, h) * 0.1)
     x1, y1 = max(0, x - padding), max(0, y - padding)
     x2, y2 = min(image.shape[1], x + w + padding), min(image.shape[0], y + h + padding)

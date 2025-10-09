@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -59,8 +60,8 @@ public class EventService {
         }
 
         //copy/paste rule
-        Long copyPasteCount = eventRepo.countByStudentIdAndTypeAndTimestampBetween(
-                event.getStudent().getId(),new Enums.EventType[]{Enums.EventType.COPY,Enums.EventType.PASTE},fiveMinutesAgo,LocalDateTime.now());
+        Long copyPasteCount = eventRepo.countByStudentIdAndTypesAndTimestampBetweens(
+                event.getStudent().getId(),List.of(Enums.EventType.COPY,Enums.EventType.PASTE),fiveMinutesAgo,LocalDateTime.now());
         if (copyPasteCount>2){
             createAlert(event,"Suspicious copy/paste Activity ("+ copyPasteCount+" events)",Enums.AlertSeverity.MEDIUM);
         }

@@ -53,7 +53,7 @@ public class EventService {
 
         //tab switch rule
         Long tabSwitchCount = eventRepo.countByStudentIdAndTypeAndTimestampBetween(
-                event.getStudent().getId(),Enums.EventType.TAB_SWITCH,fiveMinutesAgo,LocalDateTime.now());
+                event.getStudent().getId(), Enums.EventType.TAB_SWITCH,fiveMinutesAgo,LocalDateTime.now());
         if (tabSwitchCount > 2){
             createAlert(event,"Excessive tab switching ("+tabSwitchCount+"in 5 min)",Enums.AlertSeverity.HIGH);
         }

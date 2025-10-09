@@ -122,4 +122,13 @@ public class EventService {
 
         messagingTemplate.convertAndSend("/topic/alerts",alert);
     }
+    public List<Event> getEventsByStudent(Long studentId, LocalDateTime start, LocalDateTime end) {
+        // Validate input parameters
+        if (studentId == null || start == null || end == null || start.isAfter(end)) {
+            throw new IllegalArgumentException("Invalid input parameters for retrieving events.");
+        }
+
+        // Fetch events from the repository
+        return eventRepo.findByUserIdAAndTimestampBetween(studentId, start, end);
+    }
 }

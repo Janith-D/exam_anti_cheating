@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public interface EventRepo extends JpaRepository<Event,Long> {
-    List<Event> findByUserIdAAndTimestampBetween (Student studentId, LocalDateTime start, LocalDateTime end);
+    List<Event> findByUserIdAAndTimestampBetween (Long studentId, LocalDateTime start, LocalDateTime end);
 
     // Single type count
     @Query("SELECT COUNT(e) FROM Event e WHERE e.student.id = :studentId AND e.type = :type AND e.timestamp BETWEEN :start AND :end")

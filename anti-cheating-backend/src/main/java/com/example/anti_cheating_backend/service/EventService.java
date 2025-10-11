@@ -129,6 +129,6 @@ public class EventService {
         }
 
         // Fetch events from the repository
-        return eventRepo.findByUserIdAAndTimestampBetween(studentId, start, end);
+        return eventRepo.findByStudentIdAndTimestampBetween(studentId, start, end);
     }
 }

@@ -196,3 +196,119 @@
 2025-10-03 21:53:02,981 - INFO - Starting face capture sequence...
 2025-10-03 21:53:08,527 - INFO - Live image saved: data\temp\verify_20251003_215308.jpg
 2025-10-03 21:53:09,091 - INFO - Verification SUCCESS for 5: 0.984
+2025-10-10 23:36:54,847 - ERROR - Enrollment failed for 5: module 'cv2' has no attribute 'VideoCapture'
+2025-10-10 23:38:56,934 - INFO - Starting face capture sequence...
+2025-10-10 23:39:02,254 - INFO - Live image saved: data\temp\live_20251010_233902.jpg
+2025-10-10 23:39:23,300 - INFO - Starting face capture sequence...
+2025-10-10 23:39:28,557 - INFO - Live image saved: data\temp\live_20251010_233928.jpg
+2025-10-10 23:39:29,104 - INFO - Metadata saved: data\metadata\5_metadata.json
+2025-10-10 23:39:29,104 - INFO - User 5 enrolled successfully (quality 123.745)
+2025-10-10 23:39:51,896 - INFO - Verification attempt 1/3 for 5
+2025-10-10 23:39:52,899 - INFO - Starting face capture sequence...
+2025-10-10 23:39:58,365 - INFO - Live image saved: data\temp\verify_20251010_233958.jpg
+2025-10-10 23:39:58,924 - INFO - Verification SUCCESS for 5: 0.840
+2025-10-10 23:45:40,780 - INFO - Face recognition systems initialized successfully
+2025-10-10 23:45:40,796 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-10 23:45:40,835 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-10 23:45:40,836 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-10 23:45:40,836 - INFO -  * Restarting with stat
+2025-10-10 23:45:41,148 - INFO - Face recognition systems initialized successfully
+2025-10-10 23:45:41,148 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-10 23:45:41,169 - WARNING -  * Debugger is active!
+2025-10-10 23:45:41,169 - INFO -  * Debugger PIN: 379-097-252
+2025-10-10 23:49:30,881 - INFO - Metadata saved: data\metadata\123_metadata.json
+2025-10-10 23:49:30,881 - INFO - User 123 enrolled successfully (quality 140.099)
+2025-10-10 23:49:30,898 - INFO - 127.0.0.1 - - [10/Oct/2025 23:49:30] "POST /enroll HTTP/1.1" 200 -
+2025-10-10 23:49:54,417 - INFO - Verification attempt 1/3 for 123
+2025-10-10 23:49:54,581 - INFO - Verification SUCCESS for 123: 1.000
+2025-10-10 23:49:54,581 - INFO - 127.0.0.1 - - [10/Oct/2025 23:49:54] "POST /verify HTTP/1.1" 200 -
+2025-10-11 09:30:25,941 - INFO - Verification attempt 1/3 for 5
+2025-10-11 09:30:27,220 - INFO - Starting face capture sequence...
+2025-10-11 09:30:32,560 - INFO - Live image saved: data\temp\verify_20251011_093032.jpg
+2025-10-11 09:30:33,313 - INFO - Verification FAILURE for 5: 0.000
+2025-10-11 09:30:33,313 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-11 09:30:33,313 - INFO - Verification attempt 2/3 for 5
+2025-10-11 09:30:33,354 - INFO - Verification FAILURE for 5: 0.000
+2025-10-11 09:30:33,354 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-11 09:30:33,354 - INFO - Verification attempt 3/3 for 5
+2025-10-11 09:30:33,394 - INFO - Verification FAILURE for 5: 0.000
+2025-10-11 09:30:42,712 - INFO - Verification attempt 1/3 for 5
+2025-10-11 09:30:43,599 - INFO - Starting face capture sequence...
+2025-10-11 09:30:48,784 - INFO - Live image saved: data\temp\verify_20251011_093048.jpg
+2025-10-11 09:30:49,371 - INFO - Verification FAILURE for 5: 0.738
+2025-10-11 09:30:49,371 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-11 09:30:49,371 - INFO - Verification attempt 2/3 for 5
+2025-10-11 09:30:49,407 - INFO - Verification FAILURE for 5: 0.738
+2025-10-11 09:30:49,408 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-11 09:30:49,408 - INFO - Verification attempt 3/3 for 5
+2025-10-11 09:30:49,440 - INFO - Verification FAILURE for 5: 0.738
+2025-10-11 09:31:10,313 - INFO - Verification attempt 1/3 for 5
+2025-10-11 09:31:11,200 - INFO - Starting face capture sequence...
+2025-10-11 09:31:16,415 - INFO - Live image saved: data\temp\verify_20251011_093116.jpg
+2025-10-11 09:31:16,958 - INFO - Verification FAILURE for 5: 0.704
+2025-10-11 09:31:16,958 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-11 09:31:16,958 - INFO - Verification attempt 2/3 for 5
+2025-10-11 09:31:16,990 - INFO - Verification FAILURE for 5: 0.704
+2025-10-11 09:31:16,992 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-11 09:31:16,992 - INFO - Verification attempt 3/3 for 5
+2025-10-11 09:31:17,025 - INFO - Verification FAILURE for 5: 0.704
+2025-10-11 09:31:28,680 - INFO - Verification attempt 1/3 for 5
+2025-10-11 09:31:29,596 - INFO - Starting face capture sequence...
+2025-10-11 09:31:34,783 - INFO - Live image saved: data\temp\verify_20251011_093134.jpg
+2025-10-11 09:31:35,347 - INFO - Verification FAILURE for 5: 0.723
+2025-10-11 09:31:35,347 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-11 09:31:35,347 - INFO - Verification attempt 2/3 for 5
+2025-10-11 09:31:35,377 - INFO - Verification FAILURE for 5: 0.723
+2025-10-11 09:31:35,377 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-11 09:31:35,377 - INFO - Verification attempt 3/3 for 5
+2025-10-11 09:31:35,409 - INFO - Verification FAILURE for 5: 0.723
+2025-10-11 09:31:50,779 - INFO - Verification attempt 1/3 for 5
+2025-10-11 09:31:51,934 - INFO - Starting face capture sequence...
+2025-10-11 09:31:57,144 - INFO - Live image saved: data\temp\verify_20251011_093157.jpg
+2025-10-11 09:31:57,724 - INFO - Verification FAILURE for 5: 0.693
+2025-10-11 09:31:57,724 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-11 09:31:57,724 - INFO - Verification attempt 2/3 for 5
+2025-10-11 09:31:57,762 - INFO - Verification FAILURE for 5: 0.693
+2025-10-11 09:31:57,762 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-11 09:31:57,762 - INFO - Verification attempt 3/3 for 5
+2025-10-11 09:31:57,802 - INFO - Verification FAILURE for 5: 0.693
+2025-10-11 09:32:10,744 - WARNING - User 5 already enrolled.
+2025-10-11 09:32:18,623 - INFO - Starting face capture sequence...
+2025-10-11 09:32:22,411 - INFO - Live image saved: data\temp\live_20251011_093222.jpg
+2025-10-11 09:32:22,923 - INFO - Metadata saved: data\metadata\6_metadata.json
+2025-10-11 09:32:22,931 - INFO - User 6 enrolled successfully (quality 162.563)
+2025-10-11 09:32:33,641 - INFO - Verification attempt 1/3 for 6
+2025-10-11 09:32:35,563 - INFO - Starting face capture sequence...
+2025-10-11 09:32:40,844 - INFO - Live image saved: data\temp\verify_20251011_093240.jpg
+2025-10-11 09:32:41,570 - INFO - Verification SUCCESS for 6: 0.970
+2025-10-11 09:32:52,152 - INFO - Face recognition systems initialized successfully
+2025-10-11 09:32:52,152 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-11 09:32:52,220 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-11 09:32:52,220 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-11 09:32:52,220 - INFO -  * Restarting with stat
+2025-10-11 09:32:52,660 - INFO - Face recognition systems initialized successfully
+2025-10-11 09:32:52,664 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-11 09:32:52,688 - WARNING -  * Debugger is active!
+2025-10-11 09:32:52,691 - INFO -  * Debugger PIN: 379-097-252
+2025-10-11 13:00:07,755 - INFO - Face recognition systems initialized successfully
+2025-10-11 13:00:07,755 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-11 13:00:07,831 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-11 13:00:07,833 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-11 13:00:07,834 - INFO -  * Restarting with stat
+2025-10-11 13:00:08,157 - INFO - Face recognition systems initialized successfully
+2025-10-11 13:00:08,157 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-11 13:00:08,157 - WARNING -  * Debugger is active!
+2025-10-11 13:00:08,173 - INFO -  * Debugger PIN: 379-097-252
+2025-10-11 18:23:31,414 - INFO - Face recognition systems initialized successfully
+2025-10-11 18:23:31,430 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-11 18:23:31,470 - INFO - [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+2025-10-11 18:23:31,470 - INFO - [33mPress CTRL+C to quit[0m
+2025-10-11 18:23:31,482 - INFO -  * Restarting with stat
+2025-10-11 18:23:31,891 - INFO - Face recognition systems initialized successfully
+2025-10-11 18:23:31,893 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
+2025-10-11 18:23:31,908 - WARNING -  * Debugger is active!
+2025-10-11 18:23:31,916 - INFO -  * Debugger PIN: 379-097-252

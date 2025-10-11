@@ -5,9 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
 
-public interface StudentRepo extends JpaRepository<Student,Long> {
+public interface StudentRepo extends JpaRepository<Student, Long> {
     Student findByUserName(String userName);
-    Student findByEmail(Student email);
-
+    Student findByEmail(String email);
+    Student findByStudentId(String studentId);
     List<Student> findByIsActiveTrue();
 }

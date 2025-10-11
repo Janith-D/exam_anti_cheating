@@ -32,8 +32,12 @@ build/
 ### VS Code ###
 .vscode/
 
-/ml-service/.venv
-/ml-service/data
-/ml-service/test
-/ml-service/truffle-config.js
+.venv/
+*.log
+*.tmp
+*.temp
+*.bak
+*.swp
+
+
 

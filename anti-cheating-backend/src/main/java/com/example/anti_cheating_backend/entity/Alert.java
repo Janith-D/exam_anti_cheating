@@ -35,4 +35,7 @@ public class Alert {
     @Column(name = "resolved_by")
     private String resolvedBy;
     private LocalDateTime timestamp;
+
+
+
 }

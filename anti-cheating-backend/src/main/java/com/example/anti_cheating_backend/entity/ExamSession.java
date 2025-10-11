@@ -31,4 +31,7 @@ public class ExamSession {
     private String createdBy;
     @OneToMany(mappedBy = "examSession",cascade = CascadeType.ALL)
     private List<Event> events;
+
+
+
 }

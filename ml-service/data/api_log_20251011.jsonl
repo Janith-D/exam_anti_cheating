@@ -1,0 +1,2 @@
+{"timestamp": "2025-10-11T20:41:24.285317", "endpoint": "enroll", "student_id": 7, "client_ip": "127.0.0.1", "success": true, "error_message": null, "user_agent": "Java/23.0.2"}
+{"timestamp": "2025-10-11T20:43:05.082456", "endpoint": "enroll", "student_id": 8, "client_ip": "127.0.0.1", "success": true, "error_message": null, "user_agent": "Java/23.0.2"}

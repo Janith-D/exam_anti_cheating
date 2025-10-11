@@ -1,0 +1,2 @@
+{"timestamp": "2025-10-10T23:39:58.924169", "student_id": "5", "similarity_score": 0.8402274250984192, "threshold": 0.75, "result": "SUCCESS", "attempt_number": 1, "notes": "Verification successful (similarity: 0.840)"}
+{"timestamp": "2025-10-10T23:49:54.581066", "student_id": "123", "similarity_score": 1.0, "threshold": 0.75, "result": "SUCCESS", "attempt_number": 1, "notes": "Verification successful (similarity: 1.000)"}

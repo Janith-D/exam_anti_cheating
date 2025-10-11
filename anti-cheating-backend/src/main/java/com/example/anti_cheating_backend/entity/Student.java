@@ -11,8 +11,6 @@ import java.util.List;
 @Entity
 @Data
 @Table(name = "students")
-@AllArgsConstructor
-@NoArgsConstructor
 public class Student {
 
     @Id
@@ -23,7 +21,6 @@ public class Student {
     @Column(unique = true,nullable = false)
     private String email;
     @Column(nullable = false)
-    @Transient
     private String password;
     private String firstName;
     private String lastName;
@@ -39,6 +36,7 @@ public class Student {
     @OneToMany(mappedBy = "student",cascade = CascadeType.ALL)
     private List<Enrollment> enrollments;
 
+
     @PrePersist
     protected void onCreated(){
         createdAt = LocalDateTime.now();
@@ -48,4 +46,6 @@ public class Student {
     protected void onUpdate(){
         updatedAt = LocalDateTime.now();
     }
+
+
 }

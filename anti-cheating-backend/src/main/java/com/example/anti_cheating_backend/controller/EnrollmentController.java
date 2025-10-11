@@ -3,10 +3,14 @@ package com.example.anti_cheating_backend.controller;
 import com.example.anti_cheating_backend.entity.Enrollment;
 import com.example.anti_cheating_backend.service.EnrollmentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -16,16 +20,23 @@ public class EnrollmentController {
     @Autowired
     private EnrollmentService enrollmentService;
 
-    @PostMapping("/enroll")
+    @PostMapping(value = "/enroll", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> enroll(@RequestBody Map<String,Object> payload){
-        try{
-            Long studentId = Long.parseLong(payload.get("studentId").toString());
-            String imageBase64 = (String) payload.get("image");
-            Enrollment enrollment = enrollmentService.enroll(studentId,imageBase64);
-            return ResponseEntity.ok(Map.of("message","Enrollment successful","enrollment",enrollment.getId()));
-        } catch (RuntimeException e){
-            return ResponseEntity.badRequest().body(Map.of("error",e.getMessage()));
+    public ResponseEntity<Map<String, Object>> enroll(
+            @RequestParam("studentId") Long studentId,
+            @RequestParam("image") MultipartFile image,
+            @RequestHeader("Authorization") String authorization) {
+        try {
+            String imageBase64 = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getBytes());
+            Enrollment enrollment = enrollmentService.enroll(studentId, imageBase64); // Assumes EnrollmentService method
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Enrolled successfully");
+            response.put("enrollmentId", enrollment.getId());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
         }
     }
 

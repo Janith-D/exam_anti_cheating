@@ -312,3 +312,22 @@
 2025-10-11 18:23:31,893 - INFO - Starting Anti-Cheating ML API on 127.0.0.1:5000
 2025-10-11 18:23:31,908 - WARNING -  * Debugger is active!
 2025-10-11 18:23:31,916 - INFO -  * Debugger PIN: 379-097-252
+2025-10-11 19:35:47,277 - INFO - Metadata saved: data\metadata\1_metadata.json
+2025-10-11 19:35:47,291 - INFO - User 1 enrolled successfully (quality 140.099)
+2025-10-11 19:35:47,325 - INFO - 127.0.0.1 - - [11/Oct/2025 19:35:47] "POST /enroll HTTP/1.1" 200 -
+2025-10-11 19:40:57,934 - INFO - Metadata saved: data\metadata\3_metadata.json
+2025-10-11 19:40:57,956 - INFO - User 3 enrolled successfully (quality 140.099)
+2025-10-11 19:40:57,967 - INFO - 127.0.0.1 - - [11/Oct/2025 19:40:57] "POST /enroll HTTP/1.1" 200 -
+2025-10-11 20:31:39,159 - INFO - Metadata saved: data\metadata\4_metadata.json
+2025-10-11 20:31:39,175 - INFO - User 4 enrolled successfully (quality 140.099)
+2025-10-11 20:31:39,191 - INFO - 127.0.0.1 - - [11/Oct/2025 20:31:39] "POST /enroll HTTP/1.1" 200 -
+2025-10-11 20:39:12,042 - WARNING - User 5 already enrolled.
+2025-10-11 20:39:12,052 - INFO - 127.0.0.1 - - [11/Oct/2025 20:39:12] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-10-11 20:39:50,387 - WARNING - User 6 already enrolled.
+2025-10-11 20:39:50,389 - INFO - 127.0.0.1 - - [11/Oct/2025 20:39:50] "[31m[1mPOST /enroll HTTP/1.1[0m" 400 -
+2025-10-11 20:41:24,273 - INFO - Metadata saved: data\metadata\7_metadata.json
+2025-10-11 20:41:24,277 - INFO - User 7 enrolled successfully (quality 140.099)
+2025-10-11 20:41:24,310 - INFO - 127.0.0.1 - - [11/Oct/2025 20:41:24] "POST /enroll HTTP/1.1" 200 -
+2025-10-11 20:43:05,049 - INFO - Metadata saved: data\metadata\8_metadata.json
+2025-10-11 20:43:05,065 - INFO - User 8 enrolled successfully (quality 140.099)
+2025-10-11 20:43:05,082 - INFO - 127.0.0.1 - - [11/Oct/2025 20:43:05] "POST /enroll HTTP/1.1" 200 -

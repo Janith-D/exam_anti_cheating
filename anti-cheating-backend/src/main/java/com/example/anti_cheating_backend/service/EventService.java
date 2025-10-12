@@ -1,12 +1,9 @@
 package com.example.anti_cheating_backend.service;
 
-import com.example.anti_cheating_backend.entity.Alert;
-import com.example.anti_cheating_backend.entity.Enrollment;
-import com.example.anti_cheating_backend.entity.Enums;
-import com.example.anti_cheating_backend.entity.Event;
-import com.example.anti_cheating_backend.repo.AlertRepo;
-import com.example.anti_cheating_backend.repo.EnrollmentRepo;
-import com.example.anti_cheating_backend.repo.EventRepo;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -14,9 +11,13 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import com.example.anti_cheating_backend.entity.Alert;
+import com.example.anti_cheating_backend.entity.Enrollment;
+import com.example.anti_cheating_backend.entity.Enums;
+import com.example.anti_cheating_backend.entity.Event;
+import com.example.anti_cheating_backend.repo.AlertRepo;
+import com.example.anti_cheating_backend.repo.EnrollmentRepo;
+import com.example.anti_cheating_backend.repo.EventRepo;
 
 @Service
 public class EventService {
@@ -128,7 +129,23 @@ public class EventService {
             throw new IllegalArgumentException("Invalid input parameters for retrieving events.");
         }
 
+        // Add logging
+        System.out.println("Fetching events for studentId: " + studentId);
+        System.out.println("Start time: " + start);
+        System.out.println("End time: " + end);
+        
         // Fetch events from the repository
-        return eventRepo.findByStudentIdAndTimestampBetween(studentId, start, end);
+        List<Event> events = eventRepo.findByStudentIdAndTimestampBetween(studentId, start, end);
+        
+        System.out.println("Found " + events.size() + " events");
+        
+        return events;
+    }
+    
+    public List<Event> getAllEventsByStudent(Long studentId) {
+        // Get all events for a student without date filtering
+        return eventRepo.findAll().stream()
+                .filter(event -> event.getStudent().getId().equals(studentId))
+                .toList();
     }
 }

@@ -1,7 +1,5 @@
 package com.example.anti_cheating_backend.config;
 
-import com.example.anti_cheating_backend.security.JwtAuthenticationEntryPoint;
-import com.example.anti_cheating_backend.security.JwtAuthenticationFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,6 +14,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import com.example.anti_cheating_backend.security.JwtAuthenticationEntryPoint;
+import com.example.anti_cheating_backend.security.JwtAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -45,10 +46,12 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable()) // Enable CORS
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/test").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()

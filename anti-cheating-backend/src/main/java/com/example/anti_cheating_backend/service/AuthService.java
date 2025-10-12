@@ -1,11 +1,10 @@
 package com.example.anti_cheating_backend.service;
 
-import com.example.anti_cheating_backend.entity.Enrollment;
-import com.example.anti_cheating_backend.entity.Student;
-import com.example.anti_cheating_backend.entity.Enums;
-import com.example.anti_cheating_backend.repo.EnrollmentRepo;
-import com.example.anti_cheating_backend.repo.StudentRepo;
-import com.example.anti_cheating_backend.security.JwtUtil;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
@@ -22,10 +21,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.example.anti_cheating_backend.entity.Enrollment;
+import com.example.anti_cheating_backend.entity.Enums;
+import com.example.anti_cheating_backend.entity.Student;
+import com.example.anti_cheating_backend.repo.EnrollmentRepo;
+import com.example.anti_cheating_backend.repo.StudentRepo;
+import com.example.anti_cheating_backend.security.JwtUtil;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -235,10 +236,11 @@ public class AuthService implements UserDetailsService {
         if (student == null) {
             throw new UsernameNotFoundException("User not found: " + userName);
         }
+        LOGGER.info("Loading user: " + userName + " with role: " + student.getRole().name());
         return org.springframework.security.core.userdetails.User.builder()
                 .username(student.getUserName())
                 .password(student.getPassword())
-                .authorities(student.getRole().name())
+                .authorities("ROLE_" + student.getRole().name())
                 .build();
     }
 }

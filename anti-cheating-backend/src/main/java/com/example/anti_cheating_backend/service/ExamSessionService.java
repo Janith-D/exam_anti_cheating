@@ -1,13 +1,14 @@
 package com.example.anti_cheating_backend.service;
 
-import com.example.anti_cheating_backend.entity.Enums;
-import com.example.anti_cheating_backend.entity.ExamSession;
-import com.example.anti_cheating_backend.repo.ExamSessionRepo;
+import java.time.LocalDateTime;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
-import java.util.List;
+import com.example.anti_cheating_backend.entity.Enums;
+import com.example.anti_cheating_backend.entity.ExamSession;
+import com.example.anti_cheating_backend.repo.ExamSessionRepo;
 
 @Service
 public class ExamSessionService {
@@ -39,5 +40,9 @@ public class ExamSessionService {
                 .orElseThrow(()-> new RuntimeException("Session not found"));
         session.setStatus(Enums.SessionStatus.COMPLETED);
         return examSessionRepo.save(session);
+    }
+    
+    public java.util.Optional<ExamSession> findById(Long sessionId){
+        return examSessionRepo.findById(sessionId);
     }
 }

@@ -1,11 +1,281 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Proctor Extension</title>
+  <meta charset="UTF-8">
+  <title>Anti-Cheating Extension</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      width: 350px;
+      min-height: 400px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 0;
+    }
+    
+    .container {
+      padding: 20px;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .header h1 {
+      font-size: 20px;
+      margin-bottom: 5px;
+    }
+    
+    .header p {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+    
+    .status-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .status-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    
+    .status-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .status-label {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+    
+    .status-value {
+      font-size: 14px;
+      font-weight: bold;
+      padding: 4px 10px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 5px;
+    }
+    
+    .status-indicator {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 8px;
+    }
+    
+    .status-active {
+      background-color: #4ade80;
+      box-shadow: 0 0 10px #4ade80;
+    }
+    
+    .status-inactive {
+      background-color: #ef4444;
+      box-shadow: 0 0 10px #ef4444;
+    }
+    
+    .info-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      margin-bottom: 15px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .info-row {
+      margin-bottom: 8px;
+      font-size: 13px;
+    }
+    
+    .info-row:last-child {
+      margin-bottom: 0;
+    }
+    
+    .info-label {
+      opacity: 0.8;
+      margin-right: 5px;
+    }
+    
+    .info-value {
+      font-weight: bold;
+    }
+    
+    .controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn-start {
+      background: #4ade80;
+      color: #1e293b;
+    }
+    
+    .btn-stop {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .login-section {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 15px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .login-section h3 {
+      font-size: 14px;
+      margin-bottom: 10px;
+      text-align: center;
+    }
+    
+    .input-group {
+      margin-bottom: 10px;
+    }
+    
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      margin-bottom: 5px;
+      opacity: 0.9;
+    }
+    
+    .input-group input {
+      width: 100%;
+      padding: 8px;
+      border: none;
+      border-radius: 5px;
+      font-size: 13px;
+      background: rgba(255, 255, 255, 0.9);
+      color: #1e293b;
+    }
+    
+    .btn-login {
+      width: 100%;
+      background: #3b82f6;
+      color: white;
+    }
+    
+    .message {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 10px;
+      border-radius: 5px;
+      font-size: 12px;
+      text-align: center;
+      margin-top: 10px;
+      display: none;
+    }
+    
+    .message.show {
+      display: block;
+    }
+    
+    .message.success {
+      background: rgba(74, 222, 128, 0.2);
+    }
+    
+    .message.error {
+      background: rgba(239, 68, 68, 0.2);
+    }
+  </style>
 </head>
 <body>
-  <h1>Anti-Cheating Proctor</h1>
-  <p>Monitoring exam activities...</p>
+  <div class="container">
+    <div class="header">
+      <h1>🛡️ Anti-Cheating Extension</h1>
+      <p>Exam Monitoring System</p>
+    </div>
+    
+    <div class="status-section">
+      <div class="status-row">
+        <span class="status-label">Status:</span>
+        <span class="status-value">
+          <span class="status-indicator" id="statusIndicator"></span>
+          <span id="status">Checking...</span>
+        </span>
+      </div>
+      <div class="status-row">
+        <span class="status-label">Events Logged:</span>
+        <span class="status-value" id="eventCount">0</span>
+      </div>
+    </div>
+    
+    <div class="info-section" id="studentInfo" style="display: none;">
+      <div class="info-row">
+        <span class="info-label">Student:</span>
+        <span class="info-value" id="studentName">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">ID:</span>
+        <span class="info-value" id="studentId">-</span>
+      </div>
+      <div class="info-row">
+        <span class="info-label">Role:</span>
+        <span class="info-value" id="studentRole">-</span>
+      </div>
+    </div>
+    
+    <div class="controls">
+      <button id="startBtn" class="btn btn-start">Start Monitoring</button>
+      <button id="stopBtn" class="btn btn-stop" disabled>Stop Monitoring</button>
+    </div>
+    
+    <div class="login-section" id="loginSection">
+      <h3>Quick Login</h3>
+      <div class="input-group">
+        <label>Student ID:</label>
+        <input type="text" id="quickStudentId" placeholder="Enter student ID">
+      </div>
+      <div class="input-group">
+        <label>JWT Token:</label>
+        <input type="text" id="quickToken" placeholder="Paste JWT token here">
+      </div>
+      <button id="loginBtn" class="btn btn-login">Save Credentials</button>
+    </div>
+    
+    <div id="message" class="message"></div>
+  </div>
+  
   <script src="popup.js"></script>
 </body>
 </html>

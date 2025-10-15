@@ -56,25 +56,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Start monitoring button
   startBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: "startMonitoring" }, (response) => {
-      if (response && response.success) {
-        showMessage('Monitoring started successfully!', 'success');
-        updateStatus();
-      } else {
-        showMessage('Failed to start monitoring', 'error');
+    // Check if credentials exist first
+    chrome.storage.local.get(['jwtToken', 'studentInfo'], (result) => {
+      if (!result.jwtToken || !result.studentInfo) {
+        showMessage('Please login first with Student ID and JWT Token', 'error');
+        return;
       }
+      
+      // Get exam session ID from input or use default
+      const examSessionIdInput = document.getElementById('examSessionId');
+      const examSessionId = examSessionIdInput ? examSessionIdInput.value : result.studentInfo.studentId;
+      
+      if (!examSessionId) {
+        showMessage('Please enter Exam Session ID', 'error');
+        return;
+      }
+      
+      // Save exam session ID to storage
+      chrome.storage.local.set({ 
+        isMonitoring: true,
+        examSessionId: examSessionId 
+      }, () => {
+        // Send message to background
+        chrome.runtime.sendMessage({ action: "startMonitoring" }, (response) => {
+          if (response && response.success) {
+            showMessage('Monitoring started successfully!', 'success');
+            updateStatus();
+            
+            // Notify all tabs to start monitoring
+            chrome.tabs.query({}, (tabs) => {
+              tabs.forEach((tab) => {
+                chrome.tabs.sendMessage(tab.id, { 
+                  action: "startMonitoring" 
+                }).catch(() => {
+                  // Ignore errors for tabs without content script
+                });
+                
+                // Also set exam session in each tab
+                chrome.tabs.sendMessage(tab.id, { 
+                  action: "setExamSession",
+                  examSessionId: examSessionId
+                }).catch(() => {});
+              });
+            });
+          } else {
+            showMessage('Failed to start monitoring', 'error');
+          }
+        });
+      });
     });
   });
 
   // Stop monitoring button
   stopBtn.addEventListener('click', () => {
-    chrome.runtime.sendMessage({ action: "stopMonitoring" }, (response) => {
-      if (response && response.success) {
-        showMessage('Monitoring stopped', 'success');
-        updateStatus();
-      } else {
-        showMessage('Failed to stop monitoring', 'error');
-      }
+    // Update storage first
+    chrome.storage.local.set({ 
+      isMonitoring: false 
+    }, () => {
+      // Send message to background
+      chrome.runtime.sendMessage({ action: "stopMonitoring" }, (response) => {
+        if (response && response.success) {
+          showMessage('Monitoring stopped', 'success');
+          updateStatus();
+          
+          // Notify all tabs to stop monitoring
+          chrome.tabs.query({}, (tabs) => {
+            tabs.forEach((tab) => {
+              chrome.tabs.sendMessage(tab.id, { action: "stopMonitoring" }).catch(() => {
+                // Ignore errors for tabs without content script
+              });
+            });
+          });
+        } else {
+          showMessage('Failed to stop monitoring', 'error');
+        }
+      });
     });
   });
 

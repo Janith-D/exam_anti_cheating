@@ -53,12 +53,27 @@ public class EventController {
             @RequestParam(value = "snapshotPath", required = false) String snapshotPath,
             @RequestParam(value = "examSessionId", required = false) Long examSessionId) {
         try {
+            LOGGER.info(String.format("Received event log request - studentId: %d, type: %s, details: %s, examSessionId: %s", 
+                studentId, type, details, examSessionId));
+            
             Student student = studentService.findById(studentId)
                     .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
 
+            // Validate and parse EventType
+            EventType eventType;
+            try {
+                eventType = EventType.valueOf(type.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                LOGGER.warning(String.format("Invalid event type received: %s. Valid types: %s", 
+                    type, java.util.Arrays.toString(EventType.values())));
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "Invalid event type: " + type, 
+                                 "validTypes", java.util.Arrays.toString(EventType.values())));
+            }
+
             Event event = new Event();
             event.setStudent(student);
-            event.setType(EventType.valueOf(type.toUpperCase()));
+            event.setType(eventType);
             event.setDetails(details);
             event.setSnapshotPath(snapshotPath);
 
@@ -77,9 +92,17 @@ public class EventController {
             }
 
             return ResponseEntity.ok(Map.of("message", "Event logged", "eventId", savedEvent.getId()));
+        } catch (IllegalArgumentException e) {
+            LOGGER.severe(String.format("Invalid argument: %s", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid input: " + e.getMessage()));
         } catch (RuntimeException e) {
             LOGGER.severe(String.format("Error logging event: %s", e.getMessage()));
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            LOGGER.severe(String.format("Unexpected error: %s", e.getMessage()));
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of("error", "Internal server error: " + e.getMessage()));
         }
     }
 

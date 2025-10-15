@@ -1,12 +1,23 @@
 package com.example.anti_cheating_backend.entity;
 
-import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Table(name = "exam_sessions")
@@ -30,6 +41,7 @@ public class ExamSession {
     @Column(name = "created_by")
     private String createdBy;
     @OneToMany(mappedBy = "examSession",cascade = CascadeType.ALL)
+    @JsonIgnore  // Prevent infinite recursion when serializing to JSON
     private List<Event> events;
 
 

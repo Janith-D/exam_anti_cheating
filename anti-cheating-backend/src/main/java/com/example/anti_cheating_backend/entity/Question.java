@@ -23,7 +23,7 @@ public class Question {
     @ElementCollection
     @CollectionTable(name = "question_option",joinColumns =
     @JoinColumn(name = "question_id"))
-    @@Column(name = "option")
+    @Column(name = "option")
     private List<String> options;
     private int correctOption;
     private String topic;

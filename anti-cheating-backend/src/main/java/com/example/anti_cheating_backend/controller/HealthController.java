@@ -21,7 +21,7 @@ public class HealthController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/api/test")
+    @GetMapping("/api/health-test")
     public ResponseEntity<Map<String, Object>> apiTest() {
         Map<String, Object> response = new HashMap<>();
         response.put("message", "API is accessible");

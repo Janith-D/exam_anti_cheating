@@ -15,7 +15,7 @@ public class TestService {
     private static final Logger LOGGER = Logger.getLogger
             (TestService.class.getName());
 
-    @@Autowired
+    @Autowired
     private TestRepo testRepo;
 
     public Test createTest(Test test,String createdBy){

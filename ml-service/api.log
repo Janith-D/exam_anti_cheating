@@ -331,3 +331,96 @@
 2025-10-11 20:43:05,049 - INFO - Metadata saved: data\metadata\8_metadata.json
 2025-10-11 20:43:05,065 - INFO - User 8 enrolled successfully (quality 140.099)
 2025-10-11 20:43:05,082 - INFO - 127.0.0.1 - - [11/Oct/2025 20:43:05] "POST /enroll HTTP/1.1" 200 -
+2025-10-21 00:17:10,339 - INFO - Starting face capture sequence...
+2025-10-21 00:17:15,759 - INFO - Live image saved: data\temp\live_20251021_001715.jpg
+2025-10-21 00:17:46,825 - ERROR - No stored embedding for student 6
+2025-10-21 00:18:21,575 - ERROR - No stored embedding for student 6
+2025-10-21 00:18:37,245 - WARNING - User 7 already enrolled.
+2025-10-21 00:18:46,266 - WARNING - User 8 already enrolled.
+2025-10-21 00:19:02,422 - INFO - Starting face capture sequence...
+2025-10-21 00:19:07,834 - INFO - Live image saved: data\temp\live_20251021_001907.jpg
+2025-10-21 00:19:08,520 - INFO - Metadata saved: data\metadata\10_metadata.json
+2025-10-21 00:19:08,520 - INFO - User 10 enrolled successfully (quality 124.446)
+2025-10-21 00:19:31,694 - INFO - Verification attempt 1/3 for 10
+2025-10-21 00:19:33,050 - INFO - Starting face capture sequence...
+2025-10-21 00:19:38,265 - INFO - Live image saved: data\temp\verify_20251021_001938.jpg
+2025-10-21 00:19:38,860 - INFO - Verification FAILURE for 10: 0.429
+2025-10-21 00:19:38,860 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-21 00:19:38,860 - INFO - Verification attempt 2/3 for 10
+2025-10-21 00:19:38,890 - INFO - Verification FAILURE for 10: 0.429
+2025-10-21 00:19:38,891 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-21 00:19:38,892 - INFO - Verification attempt 3/3 for 10
+2025-10-21 00:19:38,912 - INFO - Verification FAILURE for 10: 0.429
+2025-10-21 00:19:51,280 - INFO - Verification attempt 1/3 for 10
+2025-10-21 00:19:52,162 - INFO - Starting face capture sequence...
+2025-10-21 00:19:57,402 - INFO - Live image saved: data\temp\verify_20251021_001957.jpg
+2025-10-21 00:19:57,961 - INFO - Verification FAILURE for 10: 0.397
+2025-10-21 00:19:57,961 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-21 00:19:57,963 - INFO - Verification attempt 2/3 for 10
+2025-10-21 00:19:57,991 - INFO - Verification FAILURE for 10: 0.397
+2025-10-21 00:19:57,991 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-21 00:19:57,991 - INFO - Verification attempt 3/3 for 10
+2025-10-21 00:19:58,022 - INFO - Verification FAILURE for 10: 0.397
+2025-10-21 00:20:05,042 - INFO - Verification attempt 1/3 for 10
+2025-10-21 00:20:05,942 - INFO - Starting face capture sequence...
+2025-10-21 00:20:11,150 - INFO - Live image saved: data\temp\verify_20251021_002011.jpg
+2025-10-21 00:20:11,690 - INFO - Verification FAILURE for 10: 0.430
+2025-10-21 00:20:11,695 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-21 00:20:11,695 - INFO - Verification attempt 2/3 for 10
+2025-10-21 00:20:11,724 - INFO - Verification FAILURE for 10: 0.430
+2025-10-21 00:20:11,724 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-21 00:20:11,725 - INFO - Verification attempt 3/3 for 10
+2025-10-21 00:20:11,741 - INFO - Verification FAILURE for 10: 0.430
+2025-10-21 00:20:27,223 - INFO - Verification attempt 1/3 for 10
+2025-10-21 00:20:28,130 - INFO - Starting face capture sequence...
+2025-10-21 00:20:33,321 - INFO - Live image saved: data\temp\verify_20251021_002033.jpg
+2025-10-21 00:20:33,889 - INFO - Verification FAILURE for 10: 0.000
+2025-10-21 00:20:33,889 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-21 00:20:33,889 - INFO - Verification attempt 2/3 for 10
+2025-10-21 00:20:33,914 - INFO - Verification FAILURE for 10: 0.000
+2025-10-21 00:20:33,917 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-21 00:20:33,917 - INFO - Verification attempt 3/3 for 10
+2025-10-21 00:20:33,940 - INFO - Verification FAILURE for 10: 0.000
+2025-10-21 00:20:40,299 - INFO - Verification attempt 1/3 for 10
+2025-10-21 00:20:41,189 - INFO - Starting face capture sequence...
+2025-10-21 00:20:46,478 - INFO - Live image saved: data\temp\verify_20251021_002046.jpg
+2025-10-21 00:20:47,039 - INFO - Verification FAILURE for 10: 0.520
+2025-10-21 00:20:47,039 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-21 00:20:47,039 - INFO - Verification attempt 2/3 for 10
+2025-10-21 00:20:47,068 - INFO - Verification FAILURE for 10: 0.520
+2025-10-21 00:20:47,069 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-21 00:20:47,070 - INFO - Verification attempt 3/3 for 10
+2025-10-21 00:20:47,100 - INFO - Verification FAILURE for 10: 0.520
+2025-10-21 00:20:55,477 - INFO - Verification attempt 1/3 for 10
+2025-10-21 00:20:56,349 - INFO - Starting face capture sequence...
+2025-10-21 00:21:01,522 - INFO - Live image saved: data\temp\verify_20251021_002101.jpg
+2025-10-21 00:21:02,089 - INFO - Verification FAILURE for 10: 0.665
+2025-10-21 00:21:02,089 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-21 00:21:02,089 - INFO - Verification attempt 2/3 for 10
+2025-10-21 00:21:02,118 - INFO - Verification FAILURE for 10: 0.665
+2025-10-21 00:21:02,119 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-21 00:21:02,119 - INFO - Verification attempt 3/3 for 10
+2025-10-21 00:21:02,147 - INFO - Verification FAILURE for 10: 0.665
+2025-10-21 00:21:11,113 - INFO - Verification attempt 1/3 for 10
+2025-10-21 00:21:11,977 - INFO - Starting face capture sequence...
+2025-10-21 00:21:17,101 - INFO - Live image saved: data\temp\verify_20251021_002117.jpg
+2025-10-21 00:21:17,674 - INFO - Verification FAILURE for 10: 0.642
+2025-10-21 00:21:17,674 - INFO - Attempt 1 failed. 2 attempts remaining.
+2025-10-21 00:21:17,674 - INFO - Verification attempt 2/3 for 10
+2025-10-21 00:21:17,699 - INFO - Verification FAILURE for 10: 0.642
+2025-10-21 00:21:17,701 - INFO - Attempt 2 failed. 1 attempts remaining.
+2025-10-21 00:21:17,701 - INFO - Verification attempt 3/3 for 10
+2025-10-21 00:21:17,719 - INFO - Verification FAILURE for 10: 0.642
+2025-10-21 00:21:30,390 - INFO - Starting face capture sequence...
+2025-10-21 00:21:35,692 - INFO - Live image saved: data\temp\live_20251021_002135.jpg
+2025-10-21 00:21:36,274 - INFO - Metadata saved: data\metadata\11_metadata.json
+2025-10-21 00:21:36,274 - INFO - User 11 enrolled successfully (quality 126.724)
+2025-10-21 00:21:44,025 - WARNING - User 11 already enrolled.
+2025-10-21 00:22:10,809 - INFO - Starting face capture sequence...
+2025-10-21 00:22:16,115 - INFO - Live image saved: data\temp\live_20251021_002216.jpg
+2025-10-21 00:22:16,631 - INFO - Metadata saved: data\metadata\11_metadata.json
+2025-10-21 00:22:16,631 - INFO - User 11 enrolled successfully (quality 124.574)
+2025-10-21 00:22:25,152 - INFO - Verification attempt 1/3 for 11
+2025-10-21 00:22:26,069 - INFO - Starting face capture sequence...
+2025-10-21 00:22:31,249 - INFO - Live image saved: data\temp\verify_20251021_002231.jpg
+2025-10-21 00:22:31,819 - INFO - Verification SUCCESS for 11: 0.978

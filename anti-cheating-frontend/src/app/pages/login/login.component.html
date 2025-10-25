@@ -1,1 +1,140 @@
-<p>login works!</p>
+<div class="login-container">
+  <!-- LEFT SIDE - Illustration -->
+  <div class="login-left">
+    <div class="illustration-wrapper">
+      <div class="illustration-content">
+        <h1 class="brand-title">Online Exam AntiCheating</h1>
+        <p class="brand-tagline">Secure Examination Platform with AI-Powered Proctoring and Real-Time Monitoring</p>
+        
+        <!-- Animated illustration elements -->
+        <div class="illustration-decorations">
+          <div class="decoration-item clock">🕐</div>
+          <div class="decoration-item formula">√x</div>
+          <div class="decoration-item angle">∠</div>
+          <div class="decoration-item music">🎵</div>
+          <div class="decoration-item function">f(x)</div>
+          <div class="decoration-item pi">π</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT SIDE - Login Form -->
+  <div class="login-right">
+    <div class="login-form-wrapper">
+      <!-- Logo and Title -->
+      <div class="login-header">
+        <div class="logo">
+          <h2 class="logo-text">Online Exam <span class="text-primary">AntiCheating</span></h2>
+        </div>
+      </div>
+
+      <!-- Error Alert -->
+      <div class="alert alert-danger" *ngIf="errorMessage">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Success Alert -->
+      <div class="alert alert-success" *ngIf="successMessage">
+        {{ successMessage }}
+      </div>
+
+      <!-- Login Form -->
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <!-- Username/Email -->
+        <div class="form-group">
+          <label class="form-label">Username or email</label>
+          <input
+            type="text"
+            formControlName="username"
+            class="form-control"
+            placeholder="Enter your username or email"
+            [class.error]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
+          />
+          <div class="form-error" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
+            Username is required
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input
+            type="password"
+            formControlName="password"
+            class="form-control"
+            placeholder="••••••••••••"
+            [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
+          />
+          <div class="form-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
+            Password is required
+          </div>
+          <a href="#" class="forgot-password">Forgot password?</a>
+        </div>
+
+        <!-- Face Verification Section -->
+        <div class="form-group">
+          <label class="form-label">📸 Face Verification (Required)</label>
+          <p class="help-text">Please capture your face to verify your identity</p>
+          <div class="face-capture-section">
+            <video 
+              #videoElement 
+              class="face-video" 
+              [class.hidden]="!showCamera"
+              width="640"
+              height="480"
+              autoplay
+              muted
+            ></video>
+            <canvas #canvasElement class="face-canvas hidden"></canvas>
+            
+            <div class="captured-image" *ngIf="capturedImage">
+              <img [src]="capturedImage" alt="Captured face" />
+              <button type="button" class="btn-retake" (click)="retakePhoto()">Retake</button>
+            </div>
+            
+            <button
+              type="button"
+              class="btn btn-outline btn-block"
+              (click)="toggleCamera()"
+              *ngIf="!capturedImage"
+            >
+              {{ showCamera ? '📷 Capture Face' : '📹 Start Camera' }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Sign In Button -->
+        <button
+          type="submit"
+          class="btn btn-primary btn-block btn-lg"
+          [disabled]="loginForm.invalid || !capturedImage || loading"
+        >
+          <span *ngIf="!loading">{{ capturedImage ? '✅ Sign in with Face Verification' : '📸 Capture Face First' }}</span>
+          <span *ngIf="loading" class="spinner spinner-sm"></span>
+        </button>
+      </form>
+
+      <!-- Divider -->
+      <div class="divider">
+        <span>or</span>
+      </div>
+
+      <!-- Google Sign In -->
+      <button type="button" class="btn btn-outline btn-block google-btn">
+        <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
+          <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/>
+          <path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
+          <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
+        </svg>
+        Sign in with Google
+      </button>
+
+      <!-- Register Link -->
+      <p class="register-link">
+        Are you new? <a routerLink="/register">Create an Account</a>
+      </p>
+    </div>
+  </div>
+</div>

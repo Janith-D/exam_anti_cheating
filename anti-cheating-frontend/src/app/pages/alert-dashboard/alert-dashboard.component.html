@@ -1,1 +1,327 @@
-<p>alert-dashboard works!</p>
+<div class="alert-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1>🚨 Real-Time Alert Monitoring</h1>
+      <p class="subtitle">Live student activity tracking and alert management</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" (click)="toggleSound()" [title]="soundEnabled ? 'Mute alerts' : 'Enable alert sounds'">
+        {{ soundEnabled ? '🔔' : '🔕' }}
+      </button>
+      <button class="btn-icon" (click)="refresh()" title="Refresh data">
+        🔄
+      </button>
+      <button class="btn btn-outline" (click)="goBack()">
+        ← Back to Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  <div class="stats-section">
+    <div class="stat-card stat-primary">
+      <div class="stat-icon">👥</div>
+      <div class="stat-content">
+        <h3>{{ stats.totalStudentsInTest }}</h3>
+        <p>Students in Test</p>
+        <span class="stat-status online">● Live</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-danger">
+      <div class="stat-icon">🔴</div>
+      <div class="stat-content">
+        <h3>{{ stats.criticalAlerts }}</h3>
+        <p>Critical Alerts</p>
+        <span class="stat-status" [class.critical]="stats.criticalAlerts > 0">
+          {{ stats.criticalAlerts > 0 ? '● Action Required' : '✓ All Clear' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-success">
+      <div class="stat-icon">🎓</div>
+      <div class="stat-content">
+        <h3>{{ stats.activeTests }}</h3>
+        <p>Active Tests</p>
+        <span class="stat-status active">● Running</span>
+      </div>
+    </div>
+
+    <div class="stat-card stat-info">
+      <div class="stat-icon">📊</div>
+      <div class="stat-content">
+        <h3>{{ stats.totalAlerts }}</h3>
+        <p>Total Alerts</p>
+        <span class="stat-sub">{{ stats.recentActivities }} recent activities</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading real-time data...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error" class="error-message">
+    <span class="error-icon">⚠️</span>
+    <span>{{ error }}</span>
+    <button class="btn btn-sm" (click)="refresh()">Retry</button>
+  </div>
+
+  <!-- Main Content -->
+  <div class="dashboard-content" *ngIf="!loading">
+    <!-- Filters -->
+    <div class="filters-section">
+      <div class="filter-group">
+        <label>Severity:</label>
+        <div class="filter-buttons">
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedSeverity === 'ALL'"
+            (click)="filterBySeverity('ALL')"
+          >
+            All
+          </button>
+          <button 
+            class="filter-btn severity-red" 
+            [class.active]="selectedSeverity === 'RED'"
+            (click)="filterBySeverity('RED')"
+          >
+            🔴 Critical
+          </button>
+          <button 
+            class="filter-btn severity-orange" 
+            [class.active]="selectedSeverity === 'ORANGE'"
+            (click)="filterBySeverity('ORANGE')"
+          >
+            🟠 High
+          </button>
+          <button 
+            class="filter-btn severity-yellow" 
+            [class.active]="selectedSeverity === 'YELLOW'"
+            (click)="filterBySeverity('YELLOW')"
+          >
+            🟡 Medium
+          </button>
+          <button 
+            class="filter-btn severity-green" 
+            [class.active]="selectedSeverity === 'GREEN'"
+            (click)="filterBySeverity('GREEN')"
+          >
+            🟢 Low
+          </button>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <label>Status:</label>
+        <div class="filter-buttons">
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedStatus === 'ALL'"
+            (click)="filterByStatus('ALL')"
+          >
+            All
+          </button>
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedStatus === 'UNRESOLVED'"
+            (click)="filterByStatus('UNRESOLVED')"
+          >
+            ⚠️ Unresolved
+          </button>
+          <button 
+            class="filter-btn" 
+            [class.active]="selectedStatus === 'RESOLVED'"
+            (click)="filterByStatus('RESOLVED')"
+          >
+            ✅ Resolved
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alerts List -->
+    <div class="alerts-section">
+      <div class="section-header">
+        <h2>🚨 Live Alerts ({{ filteredAlerts.length }})</h2>
+        <span class="live-indicator">● LIVE</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="filteredAlerts.length === 0" class="empty-state">
+        <div class="empty-icon">✅</div>
+        <h3>No Alerts</h3>
+        <p>All students are following exam protocols. System monitoring continues...</p>
+      </div>
+
+      <!-- Alerts Grid -->
+      <div class="alerts-grid">
+        <div 
+          *ngFor="let alert of filteredAlerts" 
+          class="alert-card"
+          [class]="getSeverityClass(alert.severity)"
+        >
+          <!-- Alert Header -->
+          <div class="alert-header">
+            <div class="alert-header-left">
+              <span class="severity-icon">{{ getSeverityIcon(alert.severity) }}</span>
+              <span class="severity-badge" [class]="getSeverityClass(alert.severity)">
+                {{ alert.severity }}
+              </span>
+              <span class="alert-time">{{ alert.timestamp || alert.createdAt | date: 'short' }}</span>
+            </div>
+            <div class="alert-header-right">
+              <span 
+                class="status-badge" 
+                [class.resolved]="alert.resolved || alert.status === 'RESOLVED'"
+              >
+                {{ (alert.resolved || alert.status === 'RESOLVED') ? '✅ Resolved' : '⚠️ Active' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Alert Body -->
+          <div class="alert-body">
+            <h3 class="alert-title">Security Alert</h3>
+            <p class="alert-message">{{ alert.message }}</p>
+            
+            <!-- Student Info -->
+            <div class="alert-meta">
+              <div class="meta-item">
+                <span class="meta-icon">👤</span>
+                <span class="meta-label">Student:</span>
+                <span class="meta-value">{{ alert.student?.username || 'Unknown' }}</span>
+              </div>
+              <div class="meta-item" *ngIf="alert.student?.email">
+                <span class="meta-icon">📧</span>
+                <span class="meta-label">Email:</span>
+                <span class="meta-value">{{ alert.student?.email }}</span>
+              </div>
+              <div class="meta-item" *ngIf="alert.examSession?.id">
+                <span class="meta-icon">🎓</span>
+                <span class="meta-label">Session:</span>
+                <span class="meta-value">Exam #{{ alert.examSession?.id }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Alert Actions -->
+          <div class="alert-actions">
+            <button 
+              class="btn btn-sm btn-outline"
+              (click)="viewAlertDetails(alert)"
+            >
+              👁️ View Details
+            </button>
+            <button 
+              *ngIf="alert.student?.id"
+              class="btn btn-sm btn-outline"
+              (click)="viewStudentDetails(alert.student?.id!)"
+            >
+              📊 Student Report
+            </button>
+            <button 
+              *ngIf="!alert.resolved && alert.status !== 'RESOLVED'"
+              class="btn btn-sm btn-success"
+              (click)="resolveAlert(alert.id)"
+            >
+              ✓ Resolve
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Real-Time Student Activities -->
+    <div class="activities-section">
+      <div class="section-header">
+        <h2>🎬 Live Student Activity Feed</h2>
+        <span class="live-indicator">● LIVE</span>
+        <span class="activity-count">{{ studentActivities.length }} activities</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="studentActivities.length === 0" class="empty-state-small">
+        <p>No student activities yet. Waiting for students to start tests...</p>
+      </div>
+
+      <!-- Activities Timeline (Real-Time) -->
+      <div class="activities-timeline">
+        <div 
+          *ngFor="let activity of studentActivities.slice(0, 30)" 
+          class="activity-item"
+          [ngClass]="{
+            'activity-critical': activity.severity === 'CRITICAL',
+            'activity-high': activity.severity === 'HIGH',
+            'activity-medium': activity.severity === 'MEDIUM',
+            'activity-low': activity.severity === 'LOW'
+          }"
+        >
+          <div class="activity-icon">{{ getActivityIcon(activity.activityType) }}</div>
+          <div class="activity-content">
+            <div class="activity-header">
+              <span class="activity-type">{{ activity.activityType }}</span>
+              <span class="activity-severity" [ngClass]="'severity-' + activity.severity.toLowerCase()">
+                {{ activity.severity }}
+              </span>
+              <span class="activity-time">{{ activity.serverTimestamp || activity.timestamp | date: 'short' }}</span>
+            </div>
+            <p class="activity-description">{{ activity.description }}</p>
+            <div class="activity-meta">
+              <span class="student-badge">👤 {{ activity.studentName }}</span>
+              <span *ngIf="activity.testName" class="test-badge">🎓 {{ activity.testName }}</span>
+              <span *ngIf="activity.sessionId" class="session-badge">📋 Session #{{ activity.sessionId }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Exam Sessions -->
+    <div class="sessions-section">
+      <div class="section-header">
+        <h2>🎓 Active Exam Sessions</h2>
+        <span class="session-count">{{ activeSessions.length }} active</span>
+      </div>
+
+      <!-- Empty State -->
+      <div *ngIf="activeSessions.length === 0" class="empty-state-small">
+        <p>No active exam sessions</p>
+      </div>
+
+      <!-- Sessions Grid -->
+      <div class="sessions-grid">
+        <div 
+          *ngFor="let session of activeSessions" 
+          class="session-card"
+        >
+          <div class="session-header">
+            <h3>{{ session.test?.title || 'Exam Session' }}</h3>
+            <span class="status-badge active">● Active</span>
+          </div>
+          <div class="session-body">
+            <div class="session-info">
+              <div class="info-item">
+                <span class="info-icon">📅</span>
+                <span>{{ session.startTime | date: 'medium' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">⏱️</span>
+                <span>Started {{ session.startTime | date: 'relative' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">👥</span>
+                <span>~10 students</span> <!-- Would need actual enrollment count -->
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

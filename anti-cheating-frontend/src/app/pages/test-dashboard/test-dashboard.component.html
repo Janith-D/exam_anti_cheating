@@ -1,1 +1,335 @@
-<p>test-dashboard works!</p>
+<div class="dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1>📚 Student Dashboard</h1>
+      <p class="welcome-text">Welcome back, {{ currentUser?.username }}!</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="viewResults()">
+        📊 My Results
+      </button>
+      <button class="btn btn-outline" (click)="goBack()">
+        ← Back
+      </button>
+      <button class="btn btn-danger" (click)="logout()">
+        🚪 Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading available exams...</p>
+  </div>
+
+  <!-- Success Message -->
+  <div *ngIf="successMessage" class="alert alert-success">
+    {{ successMessage }}
+    <button class="close-btn" (click)="successMessage = ''">×</button>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+    <button class="btn btn-sm btn-outline" (click)="loadAvailableExams()">Retry</button>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading" class="dashboard-content">
+    
+    <!-- Enrolled Exams Section -->
+    <div class="section" *ngIf="enrolledExams.length > 0">
+      <div class="section-header">
+        <h2>🎓 My Enrolled Exams</h2>
+        <p>Exams you are enrolled in and can attempt</p>
+      </div>
+
+      <div class="exams-grid">
+        <div *ngFor="let exam of enrolledExams" class="exam-card enrolled">
+          <div class="exam-card-header">
+            <h3>{{ exam.title }}</h3>
+            <span class="exam-badge" [ngClass]="'badge-' + exam.status.toLowerCase()">
+              {{ exam.status }}
+            </span>
+          </div>
+          
+          <div class="exam-card-body">
+            <p class="exam-description">{{ exam.description }}</p>
+            
+            <div class="exam-info">
+              <div class="info-item">
+                <span class="info-icon">📅</span>
+                <span class="info-text">
+                  {{ exam.startDate | date: 'MMM d, y, h:mm a' }}
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">🎯</span>
+                <span class="info-text">Passing: {{ exam.passingScore }}%</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">👥</span>
+                <span class="info-text">Max: {{ exam.maxStudents }} students</span>
+              </div>
+            </div>
+
+            <!-- Enrollment Status -->
+            <div class="enrollment-status" [ngClass]="getEnrollmentStatusClass(exam.enrollmentStatus)">
+              <span class="status-icon">{{ getEnrollmentStatusIcon(exam.enrollmentStatus) }}</span>
+              <span class="status-text">{{ exam.enrollmentStatus }}</span>
+            </div>
+
+            <!-- Active Sessions -->
+            <div *ngIf="exam.activeSessions && exam.activeSessions.length > 0" class="sessions-section">
+              <h4>📋 Available Sessions</h4>
+              <div *ngFor="let session of exam.activeSessions" class="session-card">
+                <div class="session-info">
+                  <div class="session-detail">
+                    <span class="session-icon">🕐</span>
+                    <span>Start: {{ session.startTime | date: 'short' }}</span>
+                  </div>
+                  <div class="session-detail">
+                    <span class="session-icon">⏱️</span>
+                    <span>Duration: {{ session.durationMinutes }} min</span>
+                  </div>
+                  <div class="session-detail">
+                    <span class="session-icon">�</span>
+                    <span class="session-status" [ngClass]="'status-' + session.status.toLowerCase()">
+                      {{ session.status }}
+                    </span>
+                  </div>
+                </div>
+                
+                <button 
+                  *ngIf="canStartExam(exam) && session.status === 'ACTIVE'"
+                  class="btn btn-success btn-sm"
+                  (click)="startExam(exam.examId, session.sessionId)"
+                >
+                  🚀 Start Exam
+                </button>
+                
+                <span *ngIf="session.status === 'SCHEDULED'" class="badge badge-info">
+                  Scheduled
+                </span>
+              </div>
+            </div>
+
+            <!-- No Active Sessions -->
+            <div *ngIf="!exam.activeSessions || exam.activeSessions.length === 0" class="no-sessions">
+              <p>⏰ No active sessions at the moment</p>
+            </div>
+
+            <!-- Enrollment Not Approved -->
+            <div *ngIf="exam.enrollmentStatus !== 'APPROVED'" class="enrollment-notice">
+              <p>⚠️ Your enrollment is {{ exam.enrollmentStatus }}. 
+                <span *ngIf="exam.enrollmentStatus === 'PENDING'">
+                  Please wait for approval.
+                </span>
+                <span *ngIf="exam.enrollmentStatus === 'REJECTED'">
+                  Contact administrator for more information.
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Not Enrolled Exams Section -->
+    <div class="section" *ngIf="notEnrolledExams.length > 0">
+      <div class="section-header">
+        <h2>📝 Available Exams - Enrollment Required</h2>
+        <p>Exams you can enroll in</p>
+      </div>
+
+      <div class="exams-grid">
+        <div *ngFor="let exam of notEnrolledExams" class="exam-card not-enrolled">
+          <div class="exam-card-header">
+            <h3>{{ exam.title }}</h3>
+            <span class="exam-badge badge-secondary">Not Enrolled</span>
+          </div>
+          
+          <div class="exam-card-body">
+            <p class="exam-description">{{ exam.description }}</p>
+            
+            <div class="exam-info">
+              <div class="info-item">
+                <span class="info-icon">📅</span>
+                <span class="info-text">
+                  {{ exam.startDate | date: 'MMM d, y, h:mm a' }}
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">🎯</span>
+                <span class="info-text">Passing: {{ exam.passingScore }}%</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">�</span>
+                <span class="info-text">Max: {{ exam.maxStudents }} students</span>
+              </div>
+            </div>
+
+            <!-- Sessions Info -->
+            <div *ngIf="exam.activeSessions && exam.activeSessions.length > 0" class="sessions-info">
+              <p class="sessions-count">
+                📋 {{ exam.activeSessions.length }} session(s) available
+              </p>
+            </div>
+
+            <div class="enrollment-action">
+              <button 
+                class="btn btn-primary btn-block"
+                (click)="enrollInExam(exam.examId)"
+              >
+                📝 Enroll in this Exam
+              </button>
+              <p class="enrollment-note">
+                ⚠️ Enrollment requires face verification
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Exams Available -->
+    <div *ngIf="enrolledExams.length === 0 && notEnrolledExams.length === 0 && !loading" class="empty-state">
+      <div class="empty-icon">📭</div>
+      <h3>No Exams Available</h3>
+      <p>There are no exams available at the moment. Please check back later.</p>
+    </div>
+
+    <!-- Legacy Tests Section (keeping for backward compatibility) -->
+    <div class="section" *ngIf="tests.length > 0">
+      <div class="section-header">
+        <h2>📝 Quick Tests</h2>
+        <p>Practice tests available</p>
+      </div>
+
+      <div class="tests-grid">
+        <div *ngFor="let test of tests" class="test-card">
+          <div class="test-card-header">
+            <h3>{{ test.title }}</h3>
+            <span class="test-badge">{{ test.duration }} min</span>
+          </div>
+          
+          <div class="test-card-body">
+            <p class="test-description">{{ test.description }}</p>
+            
+            <div class="test-info">
+              <div class="info-item">
+                <span class="info-icon">⏱️</span>
+                <span class="info-text">Duration: {{ test.duration }} minutes</span>
+              </div>
+              <div class="info-item">
+                <span class="info-icon">📝</span>
+                <span class="info-text">Questions: {{ test.numberOfQuestions || 'Multiple' }}</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="test-card-footer">
+            <button 
+              class="btn btn-primary btn-block"
+              (click)="startTest(test.id!)"
+            >
+              🚀 Start Test
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Results Section -->
+    <div id="results-section" class="section" *ngIf="recentResults.length > 0">
+      <div class="section-header">
+        <h2>📊 Recent Test Results</h2>
+        <p>Your latest test performances</p>
+      </div>
+
+      <div class="results-grid">
+        <div *ngFor="let result of recentResults" class="result-card">
+          <div class="result-card-header">
+            <h3>{{ result.test?.title || 'Test' }}</h3>
+            <span class="score-badge" [ngClass]="getScoreClass(result.scorePercentage)">
+              {{ result.scorePercentage }}%
+            </span>
+          </div>
+          
+          <div class="result-card-body">
+            <div class="result-stats">
+              <div class="stat-item">
+                <span class="stat-icon">✅</span>
+                <div class="stat-info">
+                  <span class="stat-label">Correct</span>
+                  <span class="stat-value">{{ result.correctAnswers }}</span>
+                </div>
+              </div>
+              
+              <div class="stat-item">
+                <span class="stat-icon">📝</span>
+                <div class="stat-info">
+                  <span class="stat-label">Total</span>
+                  <span class="stat-value">{{ result.totalQuestions }}</span>
+                </div>
+              </div>
+              
+              <div class="stat-item">
+                <span class="stat-icon">❌</span>
+                <div class="stat-info">
+                  <span class="stat-label">Wrong</span>
+                  <span class="stat-value">{{ result.totalQuestions - result.correctAnswers }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="result-progress">
+              <div class="progress-bar-container">
+                <div class="progress-bar-fill" 
+                     [ngClass]="getScoreClass(result.scorePercentage)"
+                     [style.width.%]="result.scorePercentage">
+                </div>
+              </div>
+            </div>
+
+            <div class="result-date" *ngIf="result.completedAt">
+              <span class="date-icon">🕐</span>
+              <span>{{ result.completedAt | date: 'MMM d, y, h:mm a' }}</span>
+            </div>
+          </div>
+          
+          <div class="result-card-footer">
+            <button 
+              class="btn btn-outline btn-sm"
+              (click)="viewTestResult(result.test?.id!)"
+            >
+              📄 View Details
+            </button>
+            <button 
+              class="btn btn-primary btn-sm"
+              (click)="retakeTest(result.test?.id!)"
+            >
+              🔄 Retake
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instructions Section -->
+  <div *ngIf="!loading && (enrolledExams.length > 0 || notEnrolledExams.length > 0)" class="instructions-section">
+    <h3>⚠️ Important Instructions</h3>
+    <ul>
+      <li>✅ Ensure stable internet connection before starting</li>
+      <li>✅ Your webcam must be working and enabled</li>
+      <li>✅ Do not switch tabs or leave the exam window</li>
+      <li>✅ Exams will auto-submit when time expires</li>
+      <li>✅ All activities are monitored and logged</li>
+      <li>✅ Enrollment requires face verification for security</li>
+      <li>✅ Wait for enrollment approval before attempting exams</li>
+    </ul>
+  </div>
+</div>

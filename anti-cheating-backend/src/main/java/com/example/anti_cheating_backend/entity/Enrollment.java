@@ -16,24 +16,42 @@ public class Enrollment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
-    @Column(name = "face_embedding",columnDefinition = "TEXT")
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exam_id", nullable = false)
+    private Exam exam;
+    
+    @Column(name = "face_embedding", columnDefinition = "TEXT")
     private String faceEmbedding;
-    @Column(name = "enrollment_images",columnDefinition = "TEXT")
+    
+    @Column(name = "enrollment_images", columnDefinition = "TEXT")
     private String enrollmentImages;
+    
     @Column(name = "verification_score")
     private Double verificationScore;
+    
     @Column(name = "is_verified")
     private Boolean isVerified = false;
+    
     @Column(name = "enrollment_date")
     private LocalDateTime enrollmentDate;
+    
     @Column(name = "last_verification")
     private LocalDateTime lastVerification;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    private Enums.EnrollmentStatus status = Enums.EnrollmentStatus.PENDING;
 
     @PrePersist
-    protected void onCreate(){
+    protected void onCreate() {
         enrollmentDate = LocalDateTime.now();
+        if (status == null) {
+            status = Enums.EnrollmentStatus.PENDING;
+        }
     }
 }

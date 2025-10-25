@@ -6,6 +6,7 @@ import java.util.logging.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -71,6 +72,19 @@ public class QuestionController {
         } catch (RuntimeException e) {
             LOGGER.severe("Error fetching question " + questionId + ": " + e.getMessage());
             return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    @DeleteMapping("/{questionId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteQuestion(@PathVariable Long questionId) {
+        try {
+            questionService.deleteQuestion(questionId);
+            LOGGER.info("Deleted question: " + questionId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            LOGGER.severe("Error deleting question " + questionId + ": " + e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
     }
 }

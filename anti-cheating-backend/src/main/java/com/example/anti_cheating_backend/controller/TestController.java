@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -59,6 +60,18 @@ public class TestController {
         }
     }
 
+    @DeleteMapping("/{testId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> deleteTest(@PathVariable Long testId) {
+        try {
+            testService.deleteTest(testId);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            LOGGER.severe("Error deleting test " + testId + ": " + e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
+    }
+
     @GetMapping
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public ResponseEntity<List<Test>> getAvailableTests() {
@@ -76,16 +89,26 @@ public class TestController {
     public ResponseEntity<TestResult> submitTest(@PathVariable Long testId, @RequestBody Map<Long, Integer> answers) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            // Fetch student by username
-            var student = studentRepo.findByEmail(username);
+            LOGGER.info("Submitting test " + testId + " for user: " + username);
+            
+            // Fetch student by username (not email)
+            var student = studentRepo.findByUserName(username);
             if (student == null) {
+                LOGGER.severe("Student not found with username: " + username);
                 throw new RuntimeException("Student not found: " + username);
             }
+            
+            LOGGER.info("Found student: ID=" + student.getId() + ", UserName=" + student.getUserName());
             Long studentId = student.getId();
+            
+            LOGGER.info("Creating test result with " + answers.size() + " answers");
             TestResult result = testResultService.createTestResult(testId, studentId, answers);
+            
+            LOGGER.info("Test submitted successfully for student " + studentId);
             return ResponseEntity.ok(result);
         } catch ( RuntimeException e) {
             LOGGER.severe("Error submitting test " + testId + ": " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(null);
         }
     }

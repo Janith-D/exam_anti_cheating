@@ -1,0 +1,139 @@
+<div class="exam-details-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading exam details...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+    <button class="btn btn-secondary mt-3" (click)="goBack()">
+      <i class="bi bi-arrow-left"></i> Back to Exams
+    </button>
+  </div>
+
+  <!-- Exam Details -->
+  <div *ngIf="!loading && exam" class="exam-content">
+    <!-- Header -->
+    <div class="exam-header">
+      <button class="btn btn-outline-light mb-3" (click)="goBack()">
+        <i class="bi bi-arrow-left"></i> Back to Exams
+      </button>
+      
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <h1 class="exam-title">{{ exam.title }}</h1>
+          <p class="exam-description">{{ exam.description }}</p>
+        </div>
+        <div class="status-badges">
+          <span class="badge bg-{{ getStatusColor(exam.status) }} status-badge">
+            {{ exam.status }}
+          </span>
+          <span 
+            *ngIf="enrollmentStatus" 
+            class="badge bg-{{ getEnrollmentStatusColor(enrollmentStatus) }} status-badge">
+            {{ getEnrollmentStatusText(enrollmentStatus) }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exam Information -->
+    <div class="exam-info-section">
+      <div class="row">
+        <div class="col-md-3">
+          <div class="info-card">
+            <i class="bi bi-calendar-event info-icon"></i>
+            <h6>Start Date</h6>
+            <p>{{ formatDate(exam.startDate) }}</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-card">
+            <i class="bi bi-calendar-check info-icon"></i>
+            <h6>End Date</h6>
+            <p>{{ formatDate(exam.endDate) }}</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-card">
+            <i class="bi bi-trophy info-icon"></i>
+            <h6>Passing Score</h6>
+            <p>{{ exam.passingScore }}%</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="info-card">
+            <i class="bi bi-people info-icon"></i>
+            <h6>Max Students</h6>
+            <p>{{ exam.maxStudents || 'Unlimited' }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Enrollment Status Notice -->
+    <div *ngIf="enrollmentStatus === EnrollmentStatus.PENDING || enrollmentStatus === EnrollmentStatus.VERIFIED" 
+         class="alert alert-warning">
+      <i class="bi bi-clock-history"></i> 
+      Your enrollment is pending approval. You will be able to access the tests once approved.
+    </div>
+
+    <div *ngIf="enrollmentStatus === EnrollmentStatus.REJECTED" 
+         class="alert alert-danger">
+      <i class="bi bi-x-circle"></i> 
+      Your enrollment was rejected. Please contact the administrator for more information.
+    </div>
+
+    <div *ngIf="!enrollmentStatus" 
+         class="alert alert-info">
+      <i class="bi bi-info-circle"></i> 
+      You are not enrolled in this exam. Please enroll from the exam dashboard to access the tests.
+    </div>
+
+    <!-- Tests Section -->
+    <div class="tests-section">
+      <h2 class="section-title">
+        <i class="bi bi-journal-text"></i> Tests in this Exam
+      </h2>
+
+      <div *ngIf="tests.length === 0" class="alert alert-info">
+        <i class="bi bi-info-circle"></i> No tests have been added to this exam yet.
+      </div>
+
+      <div class="row">
+        <div *ngFor="let test of tests; let i = index" class="col-md-6 col-lg-4 mb-3">
+          <div class="card test-card h-100">
+            <div class="card-body">
+              <div class="test-number">Test {{ i + 1 }}</div>
+              <h5 class="card-title">{{ test.title }}</h5>
+              <p class="card-text">{{ test.description }}</p>
+              
+              <div class="test-info">
+                <div class="info-item">
+                  <i class="bi bi-clock"></i>
+                  <span>{{ test.duration }} minutes</span>
+                </div>
+                <div class="info-item">
+                  <i class="bi bi-question-circle"></i>
+                  <span>{{ test.numberOfQuestions || 'N/A' }} questions</span>
+                </div>
+              </div>
+
+              <button 
+                class="btn btn-primary w-100 mt-3"
+                [disabled]="!canAccessTest()"
+                (click)="startTest(test)">
+                <i class="bi bi-play-circle"></i>
+                {{ canAccessTest() ? 'Start Test' : 'Access Restricted' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

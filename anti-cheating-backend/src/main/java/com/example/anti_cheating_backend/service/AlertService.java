@@ -26,6 +26,11 @@ public class AlertService {
     @Autowired
     private WebSocketService webSocketService;
 
+    // Get all alerts (resolved and unresolved)
+    public List<Alert> getAllAlerts() {
+        return alertRepo.findAll();
+    }
+
     public List<Alert> getActiveAlerts() {
         return alertRepo.findByStatusAndTimestampAfter(AlertStatus.ACTIVE, LocalDateTime.now().minusHours(24));
     }

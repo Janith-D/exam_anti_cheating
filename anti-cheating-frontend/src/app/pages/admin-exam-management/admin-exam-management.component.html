@@ -1,0 +1,324 @@
+<div class="admin-exam-container">
+  <!-- Header -->
+  <div class="admin-header">
+    <div class="header-content">
+      <h1>🎓 Exam Management</h1>
+      <p class="subtitle">Create and manage exams, monitor enrollments</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-success" (click)="openCreateModal()">
+        <i class="bi bi-plus-circle"></i> Create New Exam
+      </button>
+      <button class="btn btn-outline-light" routerLink="/admin/dashboard">
+        <i class="bi bi-speedometer2"></i> Dashboard
+      </button>
+      <button class="btn btn-outline-danger" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show mx-4 mt-3">
+    <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show mx-4 mt-3">
+    <i class="bi bi-check-circle"></i> {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <!-- Info Box - Exam Workflow -->
+  <div class="alert alert-info mx-4 mt-3" style="border-left: 4px solid #0dcaf0;">
+    <h5 class="alert-heading">
+      <i class="bi bi-info-circle-fill"></i> How Exam Visibility Works
+    </h5>
+    <p class="mb-2">
+      <strong>📝 DRAFT</strong> → Exam created but <strong class="text-danger">NOT visible to students</strong><br>
+      <strong>📤 PUBLISHED</strong> → <strong class="text-success">Students CAN see</strong> and enroll in the exam<br>
+      <strong>▶️ ONGOING</strong> → Exam is currently active/live<br>
+      <strong>✅ COMPLETED</strong> → Exam has ended
+    </p>
+    <hr>
+    <p class="mb-0 small">
+      <i class="bi bi-lightbulb-fill text-warning"></i> 
+      <strong>Important:</strong> After creating an exam, you MUST click the <span class="badge bg-success"><i class="bi bi-send-fill"></i> Publish</span> button to make it visible to students!
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading exams...</p>
+  </div>
+
+  <!-- Exams Table -->
+  <div *ngIf="!loading" class="table-container">
+    <table class="table table-hover">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Status</th>
+          <th>Start Date</th>
+          <th>End Date</th>
+          <th>Max Students</th>
+          <th>Passing Score</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let exam of exams">
+          <td>
+            <strong>{{ exam.title }}</strong>
+            <br>
+            <small class="text-muted">{{ exam.description }}</small>
+          </td>
+          <td>
+            <span class="badge bg-{{ getStatusColor(exam.status) }}">
+              {{ exam.status }}
+            </span>
+            <!-- Draft Warning -->
+            <div *ngIf="exam.status === ExamStatus.DRAFT" class="small text-danger mt-1">
+              <i class="bi bi-exclamation-circle"></i> Not visible to students
+            </div>
+            <!-- Published Info -->
+            <div *ngIf="exam.status === ExamStatus.PUBLISHED" class="small text-success mt-1">
+              <i class="bi bi-check-circle"></i> Visible to students
+            </div>
+            <!-- Ongoing Info -->
+            <div *ngIf="exam.status === ExamStatus.ONGOING" class="small text-info mt-1">
+              <i class="bi bi-broadcast"></i> Live now
+            </div>
+          </td>
+          <td>{{ formatDate(exam.startDate) }}</td>
+          <td>{{ formatDate(exam.endDate) }}</td>
+          <td>{{ exam.maxStudents || 'Unlimited' }}</td>
+          <td>{{ exam.passingScore }}%</td>
+          <td>
+            <div class="btn-group btn-group-sm" role="group">
+              <!-- Edit -->
+              <button 
+                class="btn btn-outline-primary" 
+                (click)="openEditModal(exam)"
+                title="Edit">
+                <i class="bi bi-pencil"></i>
+              </button>
+              
+              <!-- Publish (only for DRAFT) -->
+              <button 
+                *ngIf="exam.status === ExamStatus.DRAFT"
+                class="btn btn-success" 
+                (click)="publishExam(exam)"
+                title="Click to make this exam visible to students">
+                <i class="bi bi-send-fill"></i> Publish
+              </button>
+              
+              <!-- Start (only for PUBLISHED) -->
+              <button 
+                *ngIf="exam.status === ExamStatus.PUBLISHED"
+                class="btn btn-outline-info" 
+                (click)="startExam(exam)"
+                title="Start">
+                <i class="bi bi-play"></i>
+              </button>
+              
+              <!-- Complete (only for ONGOING) -->
+              <button 
+                *ngIf="exam.status === ExamStatus.ONGOING"
+                class="btn btn-outline-warning" 
+                (click)="completeExam(exam)"
+                title="Complete">
+                <i class="bi bi-stop"></i>
+              </button>
+              
+              <!-- Archive (only for COMPLETED) -->
+              <button 
+                *ngIf="exam.status === ExamStatus.COMPLETED"
+                class="btn btn-outline-secondary" 
+                (click)="archiveExam(exam)"
+                title="Archive">
+                <i class="bi bi-archive"></i>
+              </button>
+              
+              <!-- View Enrollments -->
+              <button 
+                class="btn btn-outline-info" 
+                (click)="openEnrollmentModal(exam)"
+                title="Enrollments">
+                <i class="bi bi-people"></i>
+              </button>
+              
+              <!-- Delete (only for DRAFT and ARCHIVED) -->
+              <button 
+                *ngIf="exam.status === ExamStatus.DRAFT || exam.status === ExamStatus.ARCHIVED"
+                class="btn btn-outline-danger" 
+                (click)="deleteExam(exam)"
+                title="Delete">
+                <i class="bi bi-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        <tr *ngIf="exams.length === 0">
+          <td colspan="7" class="text-center py-4">
+            <p class="text-muted mb-0">No exams found. Create your first exam to get started!</p>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Create/Edit Exam Modal -->
+<div class="modal" [class.show]="showExamModal" [style.display]="showExamModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-journal-plus"></i> {{ editingExam ? 'Edit' : 'Create' }} Exam
+        </h5>
+        <button type="button" class="btn-close" (click)="closeExamModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="mb-3">
+            <label class="form-label">Title <span class="text-danger">*</span></label>
+            <input 
+              type="text" 
+              class="form-control" 
+              [(ngModel)]="examForm.title"
+              name="title"
+              placeholder="e.g., Java Programming Fundamentals">
+          </div>
+          
+          <div class="mb-3">
+            <label class="form-label">Description <span class="text-danger">*</span></label>
+            <textarea 
+              class="form-control" 
+              [(ngModel)]="examForm.description"
+              name="description"
+              rows="3"
+              placeholder="Brief description of the exam"></textarea>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Start Date & Time <span class="text-danger">*</span></label>
+              <input 
+                type="datetime-local" 
+                class="form-control" 
+                [(ngModel)]="examForm.startDate"
+                name="startDate">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">End Date & Time <span class="text-danger">*</span></label>
+              <input 
+                type="datetime-local" 
+                class="form-control" 
+                [(ngModel)]="examForm.endDate"
+                name="endDate">
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Max Students (Optional)</label>
+              <input 
+                type="number" 
+                class="form-control" 
+                [(ngModel)]="examForm.maxStudents"
+                name="maxStudents"
+                placeholder="Leave empty for unlimited">
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Passing Score (%)</label>
+              <input 
+                type="number" 
+                class="form-control" 
+                [(ngModel)]="examForm.passingScore"
+                name="passingScore"
+                min="0"
+                max="100">
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeExamModal()">
+          Cancel
+        </button>
+        <button type="button" class="btn btn-primary" (click)="saveExam()" [disabled]="loading">
+          <i class="bi bi-save"></i> {{ editingExam ? 'Update' : 'Create' }} Exam
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enrollment Management Modal -->
+<div class="modal" [class.show]="showEnrollmentModal" [style.display]="showEnrollmentModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-people"></i> Enrollments for {{ selectedExam?.title }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeEnrollmentModal()"></button>
+      </div>
+      <div class="modal-body">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Email</th>
+              <th>Enrollment Date</th>
+              <th>Status</th>
+              <th>Verification Score</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let enrollment of enrollments">
+              <td>{{ enrollment.student?.username }}</td>
+              <td>{{ enrollment.student?.email }}</td>
+              <td>{{ formatDate(enrollment.enrollmentDate!) }}</td>
+              <td>
+                <span class="badge bg-{{ getEnrollmentStatusColor(enrollment.status) }}">
+                  {{ getEnrollmentStatusText(enrollment.status) }}
+                </span>
+              </td>
+              <td>{{ (enrollment.verificationScore || 0) * 100 | number:'1.0-0' }}%</td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <button 
+                    *ngIf="enrollment.status !== EnrollmentStatus.APPROVED"
+                    class="btn btn-success" 
+                    (click)="updateEnrollmentStatus(enrollment, EnrollmentStatus.APPROVED)">
+                    <i class="bi bi-check"></i> Approve
+                  </button>
+                  <button 
+                    *ngIf="enrollment.status !== EnrollmentStatus.REJECTED"
+                    class="btn btn-danger" 
+                    (click)="updateEnrollmentStatus(enrollment, EnrollmentStatus.REJECTED)">
+                    <i class="bi bi-x"></i> Reject
+                  </button>
+                </div>
+              </td>
+            </tr>
+            <tr *ngIf="enrollments.length === 0">
+              <td colspan="6" class="text-center py-4">
+                <p class="text-muted mb-0">No enrollments yet</p>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-backdrop" [class.show]="showExamModal || showEnrollmentModal" 
+     [style.display]="(showExamModal || showEnrollmentModal) ? 'block' : 'none'"></div>

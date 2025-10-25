@@ -1,15 +1,23 @@
 package com.example.anti_cheating_backend.controller;
 
-import com.example.anti_cheating_backend.entity.ExamSession;
-import com.example.anti_cheating_backend.service.ExamSessionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.anti_cheating_backend.entity.ExamSession;
+import com.example.anti_cheating_backend.service.ExamSessionService;
 
 @RestController
 @RequestMapping("/api/sessions")
@@ -18,6 +26,26 @@ public class ExamSessionController {
     @Autowired
     private ExamSessionService examSessionService;
 
+    // Get all exam sessions
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<ExamSession>> getAllSessions() {
+        return ResponseEntity.ok(examSessionService.getAllSessions());
+    }
+
+    // Get exam session by ID
+    @GetMapping("/{sessionId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    public ResponseEntity<?> getSessionById(@PathVariable Long sessionId) {
+        try {
+            ExamSession session = examSessionService.getSessionById(sessionId);
+            return ResponseEntity.ok(session);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Create exam session
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createSession(@RequestBody Map<String, Object> payload) {
@@ -39,6 +67,31 @@ public class ExamSessionController {
         return ResponseEntity.ok(examSessionService.getActiveSessions());
     }
 
+    // Update exam session
+    @PutMapping("/{sessionId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> updateSession(@PathVariable Long sessionId, @RequestBody Map<String, Object> payload) {
+        try {
+            ExamSession session = examSessionService.updateSession(sessionId, payload);
+            return ResponseEntity.ok(session);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Delete exam session
+    @DeleteMapping("/{sessionId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteSession(@PathVariable Long sessionId) {
+        try {
+            examSessionService.deleteSession(sessionId);
+            return ResponseEntity.ok(Map.of("message", "Session deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Start exam session
     @PutMapping("/start/{sessionId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> startSession(@PathVariable Long sessionId) {
@@ -56,6 +109,18 @@ public class ExamSessionController {
         try {
             ExamSession session = examSessionService.endSession(sessionId);
             return ResponseEntity.ok(Map.of("message", "Session ended", "sessionId", session.getId()));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Get or create exam session for a test (when student starts test)
+    @PostMapping("/test/{testId}")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
+    public ResponseEntity<?> getOrCreateSessionForTest(@PathVariable Long testId) {
+        try {
+            ExamSession session = examSessionService.getOrCreateSessionForTest(testId);
+            return ResponseEntity.ok(session);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

@@ -1,1 +1,322 @@
-<p>test-management works!</p>
+<div class="test-management-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">
+      <span>←</span> Back to Dashboard
+    </button>
+    <h1>Test Management</h1>
+    <button class="create-btn" *ngIf="currentView === 'list'" (click)="showCreateTest()">
+      <span>+</span> Create New Test
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="message success" *ngIf="success">
+    {{ success }}
+  </div>
+  <div class="message error" *ngIf="error">
+    {{ error }}
+  </div>
+  <div class="message error" *ngIf="formErrors.length > 0">
+    <ul>
+      <li *ngFor="let err of formErrors">{{ err }}</li>
+    </ul>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <!-- TEST LIST VIEW -->
+  <div class="tests-list" *ngIf="currentView === 'list' && !loading">
+    <div class="tests-grid" *ngIf="tests.length > 0">
+      <div class="test-card" *ngFor="let test of tests">
+        <div class="test-header">
+          <h3>{{ test.title }}</h3>
+          <span class="duration-badge">{{ test.duration }} min</span>
+        </div>
+        <p class="test-description">{{ test.description }}</p>
+        <div class="test-meta">
+          <span class="meta-item">
+            <strong>Questions:</strong> {{ test.numberOfQuestions || 0 }}
+          </span>
+          <span class="meta-item" *ngIf="test.createdAt">
+            <strong>Created:</strong> {{ test.createdAt | date:'short' }}
+          </span>
+        </div>
+        <div class="test-actions">
+          <button class="btn-view" (click)="viewTest(test)">View Details</button>
+          <button class="btn-edit" (click)="editTest(test)">Add Questions</button>
+          <button class="btn-delete" (click)="deleteTest(test.id)" [disabled]="!test.id">Delete</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="tests.length === 0">
+      <h3>No tests available</h3>
+      <p>Create your first test to get started</p>
+      <button class="create-btn" (click)="showCreateTest()">
+        <span>+</span> Create New Test
+      </button>
+    </div>
+  </div>
+
+  <!-- CREATE TEST VIEW -->
+  <div class="create-test-view" *ngIf="currentView === 'create' && !loading">
+    <div class="form-section">
+      <h2>Test Details</h2>
+      
+      <div class="form-group">
+        <label for="title">Test Title *</label>
+        <input 
+          type="text" 
+          id="title" 
+          [(ngModel)]="testForm.title"
+          placeholder="Enter test title"
+          class="form-control"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="description">Description *</label>
+        <textarea 
+          id="description" 
+          [(ngModel)]="testForm.description"
+          placeholder="Enter test description"
+          rows="4"
+          class="form-control"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="duration">Duration (minutes) *</label>
+        <input 
+          type="number" 
+          id="duration" 
+          [(ngModel)]="testForm.duration"
+          placeholder="60"
+          min="1"
+          class="form-control"
+        />
+      </div>
+    </div>
+
+    <!-- Questions Section -->
+    <div class="questions-section">
+      <h2>Questions ({{ questions.length }})</h2>
+
+      <!-- Added Questions List -->
+      <div class="added-questions" *ngIf="questions.length > 0">
+        <div class="question-item" *ngFor="let q of questions; let i = index">
+          <div class="question-header">
+            <span class="question-number">Question {{ i + 1 }}</span>
+            <span class="question-topic">{{ q.topic }}</span>
+          </div>
+          <p class="question-text">{{ q.text }}</p>
+          <ul class="options-list">
+            <li *ngFor="let opt of q.options; let j = index" 
+                [class.correct]="j === q.correctOption">
+              <span class="option-label">{{ ['A', 'B', 'C', 'D'][j] }}.</span>
+              {{ opt }}
+              <span class="correct-badge" *ngIf="j === q.correctOption">✓ Correct</span>
+            </li>
+          </ul>
+          <div class="question-actions">
+            <button class="btn-edit-sm" (click)="editQuestion(i)">Edit</button>
+            <button class="btn-delete-sm" (click)="removeQuestion(i)">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Question Form -->
+      <div class="add-question-form">
+        <h3>Add New Question</h3>
+        
+        <div class="form-group">
+          <label for="questionText">Question Text *</label>
+          <textarea 
+            id="questionText" 
+            [(ngModel)]="currentQuestion.text"
+            placeholder="Enter the question"
+            rows="3"
+            class="form-control"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="topic">Topic *</label>
+          <input 
+            type="text" 
+            id="topic" 
+            [(ngModel)]="currentQuestion.topic"
+            placeholder="e.g., Mathematics, History, Science"
+            class="form-control"
+          />
+        </div>
+
+        <div class="options-grid">
+          <div class="option-group" *ngFor="let opt of currentQuestion.options; let i = index">
+            <label>Option {{ ['A', 'B', 'C', 'D'][i] }} *</label>
+            <div class="option-input-group">
+              <input 
+                type="text" 
+                [(ngModel)]="currentQuestion.options[i]"
+                placeholder="Enter option {{ ['A', 'B', 'C', 'D'][i] }}"
+                class="form-control"
+              />
+              <label class="radio-label">
+                <input 
+                  type="radio" 
+                  [value]="i" 
+                  [(ngModel)]="currentQuestion.correctOption"
+                  name="correctOption"
+                />
+                <span>Correct</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-add-question" (click)="addQuestion()">
+          <span>+</span> Add Question
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button class="btn-cancel" (click)="showTestList()">Cancel</button>
+      <button class="btn-save" (click)="saveTest()" [disabled]="questions.length === 0">
+        Save Test ({{ questions.length }} questions)
+      </button>
+    </div>
+  </div>
+
+  <!-- EDIT TEST VIEW - ADD MORE QUESTIONS -->
+  <div class="edit-test-view" *ngIf="currentView === 'edit' && !loading">
+    <div class="test-info-card">
+      <h2>📝 {{ testForm.title }}</h2>
+      <p>{{ testForm.description }}</p>
+      <span class="duration-badge">{{ testForm.duration }} minutes</span>
+    </div>
+
+    <!-- Existing Questions -->
+    <div class="existing-questions-section" *ngIf="existingQuestions.length > 0">
+      <h3>Existing Questions ({{ existingQuestions.length }})</h3>
+      
+      <div class="question-list">
+        <div class="question-item" *ngFor="let q of existingQuestions; let i = index">
+          <div class="question-header">
+            <span class="question-number">Question {{ i + 1 }}</span>
+            <span class="question-topic">{{ q.topic }}</span>
+          </div>
+          <p class="question-text">{{ q.text }}</p>
+          <ul class="options-list">
+            <li *ngFor="let opt of q.options; let j = index" 
+                [class.correct]="j === q.correctOption">
+              <span class="option-label">{{ ['A', 'B', 'C', 'D'][j] }}.</span>
+              {{ opt }}
+              <span class="correct-badge" *ngIf="j === q.correctOption">✓ Correct</span>
+            </li>
+          </ul>
+          <div class="question-actions">
+            <button class="btn-delete-sm" (click)="deleteExistingQuestion(q.id!)">Delete</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- New Questions to Add -->
+    <div class="new-questions-section">
+      <h3>Add New Questions ({{ questions.length }} ready to save)</h3>
+
+      <!-- Added New Questions List -->
+      <div class="added-questions" *ngIf="questions.length > 0">
+        <div class="question-item new-question" *ngFor="let q of questions; let i = index">
+          <div class="question-header">
+            <span class="question-number">New Question {{ i + 1 }}</span>
+            <span class="question-topic">{{ q.topic }}</span>
+            <span class="new-badge">NEW</span>
+          </div>
+          <p class="question-text">{{ q.text }}</p>
+          <ul class="options-list">
+            <li *ngFor="let opt of q.options; let j = index" 
+                [class.correct]="j === q.correctOption">
+              <span class="option-label">{{ ['A', 'B', 'C', 'D'][j] }}.</span>
+              {{ opt }}
+              <span class="correct-badge" *ngIf="j === q.correctOption">✓ Correct</span>
+            </li>
+          </ul>
+          <div class="question-actions">
+            <button class="btn-edit-sm" (click)="editQuestion(i)">Edit</button>
+            <button class="btn-delete-sm" (click)="removeQuestion(i)">Remove</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Add New Question Form -->
+      <div class="add-question-form">
+        <h4>Create New Question</h4>
+        
+        <div class="form-group">
+          <label for="editQuestionText">Question Text *</label>
+          <textarea 
+            id="editQuestionText" 
+            [(ngModel)]="currentQuestion.text"
+            placeholder="Enter the question"
+            rows="3"
+            class="form-control"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="editTopic">Topic *</label>
+          <input 
+            type="text" 
+            id="editTopic" 
+            [(ngModel)]="currentQuestion.topic"
+            placeholder="e.g., Mathematics, History, Science"
+            class="form-control"
+          />
+        </div>
+
+        <div class="options-grid">
+          <div class="option-group" *ngFor="let opt of currentQuestion.options; let i = index">
+            <label>Option {{ ['A', 'B', 'C', 'D'][i] }} *</label>
+            <div class="option-input-group">
+              <input 
+                type="text" 
+                [(ngModel)]="currentQuestion.options[i]"
+                placeholder="Enter option {{ ['A', 'B', 'C', 'D'][i] }}"
+                class="form-control"
+              />
+              <label class="radio-label">
+                <input 
+                  type="radio" 
+                  [value]="i" 
+                  [(ngModel)]="currentQuestion.correctOption"
+                  name="editCorrectOption"
+                />
+                <span>Correct</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <button class="btn-add-question" (click)="addQuestion()">
+          <span>+</span> Add Question
+        </button>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button class="btn-cancel" (click)="showTestList()">Cancel</button>
+      <button class="btn-save" (click)="saveNewQuestions()" [disabled]="questions.length === 0">
+        💾 Save {{ questions.length }} New Question(s)
+      </button>
+    </div>
+  </div>
+</div>

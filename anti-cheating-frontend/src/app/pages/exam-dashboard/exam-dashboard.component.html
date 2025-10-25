@@ -1,0 +1,231 @@
+<div class="exam-dashboard-container">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <h1>📚 Available Exams</h1>
+      <p class="welcome-text">Welcome, {{ currentUser?.username || currentUser?.userName }}!</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="navigateToTestDashboard()">
+        <i class="bi bi-journal-text"></i> View Tests
+      </button>
+      <button class="btn btn-outline-danger" (click)="logout()">
+        <i class="bi bi-box-arrow-right"></i> Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
+    <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+    <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
+    <i class="bi bi-check-circle"></i> {{ successMessage }}
+    <button type="button" class="btn-close" (click)="successMessage = ''" aria-label="Close"></button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="text-center py-5">
+    <div class="spinner-border text-primary" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Loading available exams...</p>
+  </div>
+
+  <!-- My Enrolled Exams Section -->
+  <div *ngIf="!loading && enrolledExams.length > 0" class="enrolled-section mb-4">
+    <h2 class="section-title">
+      <i class="bi bi-bookmark-check"></i> My Enrolled Exams
+    </h2>
+    <div class="row">
+      <div *ngFor="let enrollment of enrolledExams" class="col-md-6 col-lg-4 mb-3">
+        <div class="card exam-card enrolled-card h-100">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title">{{ enrollment.exam?.title }}</h5>
+              <span class="badge bg-{{ getEnrollmentStatusColor(enrollment.status) }}">
+                {{ getEnrollmentStatusText(enrollment.status) }}
+              </span>
+            </div>
+            <p class="card-text text-muted">{{ enrollment.exam?.description }}</p>
+            
+            <div class="exam-info">
+              <p class="info-item">
+                <i class="bi bi-calendar-event"></i>
+                <strong>Start:</strong> {{ formatDate(enrollment.exam!.startDate) }}
+              </p>
+              <p class="info-item">
+                <i class="bi bi-calendar-check"></i>
+                <strong>End:</strong> {{ formatDate(enrollment.exam!.endDate) }}
+              </p>
+              <p class="info-item">
+                <i class="bi bi-trophy"></i>
+                <strong>Passing Score:</strong> {{ enrollment.exam?.passingScore }}%
+              </p>
+              <p class="info-item">
+                <i class="bi bi-person-check"></i>
+                <strong>Enrolled:</strong> {{ formatDate(enrollment.enrollmentDate!) }}
+              </p>
+            </div>
+
+            <div class="card-actions mt-3">
+              <button 
+                class="btn btn-primary w-100"
+                [disabled]="enrollment.status !== EnrollmentStatus.APPROVED"
+                (click)="viewExamDetails(enrollment.exam!)">
+                <i class="bi bi-arrow-right-circle"></i>
+                {{ enrollment.status === EnrollmentStatus.APPROVED ? 'View Exam' : 'Awaiting Approval' }}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Available Exams Section -->
+  <div *ngIf="!loading" class="available-section">
+    <h2 class="section-title">
+      <i class="bi bi-card-list"></i> Available Exams for Enrollment
+    </h2>
+    
+    <div *ngIf="publishedExams.length === 0" class="alert alert-info">
+      <i class="bi bi-info-circle"></i> No exams available for enrollment at this time.
+    </div>
+
+    <div class="row">
+      <div *ngFor="let exam of publishedExams" class="col-md-6 col-lg-4 mb-3">
+        <div class="card exam-card h-100" 
+             [ngClass]="{
+               'ongoing-exam-card': exam.status === ExamStatus.ONGOING,
+               'published-exam-card': exam.status === ExamStatus.PUBLISHED,
+               'draft-exam-card': exam.status === ExamStatus.DRAFT
+             }">
+          
+          <!-- Live Badge for Ongoing Exams -->
+          <div *ngIf="exam.status === ExamStatus.ONGOING" class="live-badge">
+            <span class="pulse-dot"></span>
+            <span class="live-text">🔴 LIVE NOW</span>
+          </div>
+
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+              <h5 class="card-title">{{ exam.title }}</h5>
+              <span class="badge bg-{{ getStatusColor(exam.status) }}">
+                {{ exam.status }}
+              </span>
+            </div>
+            <p class="card-text text-muted">{{ exam.description }}</p>
+            
+            <div class="exam-info">
+              <p class="info-item">
+                <i class="bi bi-calendar-event"></i>
+                <strong>Start:</strong> {{ formatDate(exam.startDate) }}
+              </p>
+              <p class="info-item">
+                <i class="bi bi-calendar-check"></i>
+                <strong>End:</strong> {{ formatDate(exam.endDate) }}
+              </p>
+              <p class="info-item">
+                <i class="bi bi-people"></i>
+                <strong>Max Students:</strong> {{ exam.maxStudents || 'Unlimited' }}
+              </p>
+              <p class="info-item">
+                <i class="bi bi-trophy"></i>
+                <strong>Passing Score:</strong> {{ exam.passingScore }}%
+              </p>
+            </div>
+
+            <div class="card-actions mt-3">
+              <button 
+                *ngIf="!isEnrolled(exam.id!)"
+                class="btn w-100"
+                [ngClass]="{
+                  'btn-success': exam.status !== ExamStatus.ONGOING,
+                  'btn-danger': exam.status === ExamStatus.ONGOING
+                }"
+                [disabled]="!canEnroll(exam)"
+                (click)="openEnrollmentModal(exam)">
+                <i class="bi bi-person-plus"></i> 
+                {{ exam.status === ExamStatus.ONGOING ? 'Enroll Now - Live!' : 'Enroll Now' }}
+              </button>
+              <button 
+                *ngIf="isEnrolled(exam.id!)"
+                class="btn btn-secondary w-100"
+                disabled>
+                <i class="bi bi-check-circle"></i> Already Enrolled
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Enrollment Modal -->
+<div class="modal" [class.show]="showEnrollmentModal" [style.display]="showEnrollmentModal ? 'block' : 'none'">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-camera"></i> Enroll in {{ selectedExam?.title }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeEnrollmentModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+        </div>
+        <div *ngIf="successMessage" class="alert alert-success">
+          <i class="bi bi-check-circle"></i> {{ successMessage }}
+        </div>
+
+        <div class="enrollment-instructions mb-3">
+          <h6><i class="bi bi-info-circle"></i> Face Verification Required</h6>
+          <p class="text-muted">
+            Please capture a clear photo of your face for identity verification. 
+            Make sure your face is well-lit and clearly visible.
+          </p>
+        </div>
+
+        <div class="camera-container">
+          <div *ngIf="!capturedImage" class="video-container">
+            <video id="enrollmentVideo" autoplay playsinline class="camera-feed"></video>
+            <button class="btn btn-primary capture-btn" (click)="capturePhoto()">
+              <i class="bi bi-camera"></i> Capture Photo
+            </button>
+          </div>
+
+          <div *ngIf="capturedImage" class="preview-container">
+            <img [src]="capturedImage" alt="Captured photo" class="captured-image">
+            <button class="btn btn-warning retake-btn" (click)="retakePhoto()">
+              <i class="bi bi-arrow-clockwise"></i> Retake Photo
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeEnrollmentModal()" [disabled]="enrolling">
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-success" 
+          (click)="enrollInExam()"
+          [disabled]="!capturedImage || enrolling">
+          <span *ngIf="!enrolling">
+            <i class="bi bi-check-circle"></i> Confirm Enrollment
+          </span>
+          <span *ngIf="enrolling">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Processing...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop" [class.show]="showEnrollmentModal" [style.display]="showEnrollmentModal ? 'block' : 'none'"></div>

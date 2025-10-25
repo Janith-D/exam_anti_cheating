@@ -1,1 +1,144 @@
-<p>test-page works!</p>
+<div class="test-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading test...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Test Content -->
+  <div *ngIf="!loading && !errorMessage && test" class="test-content">
+    <!-- Header with Timer -->
+    <div class="test-header">
+      <div class="test-info">
+        <h1>{{ test.title }}</h1>
+        <p>{{ test.description }}</p>
+      </div>
+      <div class="timer-container" [class.warning]="timeRemaining < 300">
+        <div class="timer-icon">⏰</div>
+        <div class="timer-display">{{ formattedTime }}</div>
+        <div class="timer-label">Time Remaining</div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="progress"></div>
+      </div>
+      <div class="progress-info">
+        <span>Question {{ currentQuestionIndex + 1 }} of {{ questions.length }}</span>
+        <span>{{ answeredCount }} / {{ questions.length }} Answered</span>
+      </div>
+    </div>
+
+    <!-- Suspicious Activity Warning -->
+    <div *ngIf="suspiciousActivityDetected" class="alert alert-warning">
+      ⚠️ Suspicious activity detected! All activities are being monitored and logged.
+      <span *ngIf="tabSwitchCount > 0"> (Tab switches: {{ tabSwitchCount }})</span>
+    </div>
+
+    <!-- Question Display -->
+    <div class="question-section" *ngIf="currentQuestion">
+      <div class="question-card">
+        <div class="question-header">
+          <h2>Question {{ currentQuestionIndex + 1 }}</h2>
+          <span class="question-status" [class.answered]="isAnswered(currentQuestionIndex)">
+            {{ isAnswered(currentQuestionIndex) ? '✓ Answered' : '○ Not Answered' }}
+          </span>
+        </div>
+        
+        <div class="question-text">
+          {{ currentQuestion.text }}
+        </div>
+        
+        <div class="options-container">
+          <div 
+            class="option-item" 
+            *ngFor="let option of currentQuestion.options; let i = index"
+            [class.selected]="answers[currentQuestion.id!] === i"
+            (click)="selectAnswer(i)"
+          >
+            <div class="option-radio">
+              <input 
+                type="radio" 
+                [id]="'option-' + i"
+                [name]="'question-' + currentQuestion.id"
+                [value]="i"
+                [checked]="answers[currentQuestion.id!] === i"
+                (change)="selectAnswer(i)"
+              />
+              <label [for]="'option-' + i"></label>
+            </div>
+            <div class="option-content">
+              <span class="option-letter">{{ ['A', 'B', 'C', 'D'][i] }}.</span>
+              <span class="option-text">{{ option }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation Buttons -->
+      <div class="navigation-buttons">
+        <button 
+          class="btn btn-outline"
+          (click)="previousQuestion()"
+          [disabled]="currentQuestionIndex === 0"
+        >
+          ← Previous
+        </button>
+        
+        <button 
+          class="btn btn-primary"
+          *ngIf="currentQuestionIndex < questions.length - 1"
+          (click)="nextQuestion()"
+        >
+          Next →
+        </button>
+        
+        <button 
+          class="btn btn-success"
+          *ngIf="currentQuestionIndex === questions.length - 1"
+          (click)="submitTest()"
+          [disabled]="submitting"
+        >
+          {{ submitting ? 'Submitting...' : '✓ Submit Test' }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Question Navigator -->
+    <div class="question-navigator">
+      <h3>Question Navigator</h3>
+      <div class="navigator-grid">
+        <button
+          *ngFor="let question of questions; let i = index"
+          class="navigator-item"
+          [class.current]="i === currentQuestionIndex"
+          [class.answered]="isAnswered(i)"
+          (click)="goToQuestion(i)"
+        >
+          {{ i + 1 }}
+        </button>
+      </div>
+      <div class="navigator-legend">
+        <div class="legend-item">
+          <span class="legend-dot current"></span>
+          <span>Current</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot answered"></span>
+          <span>Answered</span>
+        </div>
+        <div class="legend-item">
+          <span class="legend-dot not-answered"></span>
+          <span>Not Answered</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

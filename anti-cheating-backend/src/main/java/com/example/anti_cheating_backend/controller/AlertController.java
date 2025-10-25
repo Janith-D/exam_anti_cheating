@@ -18,6 +18,13 @@ public class AlertController {
     @Autowired
     private AlertService alertService;
 
+    // Get all alerts (including resolved and unresolved)
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<Alert>> getAllAlerts() {
+        return ResponseEntity.ok(alertService.getAllAlerts());
+    }
+
     @GetMapping("/active")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Alert>> getActiveAlerts(){

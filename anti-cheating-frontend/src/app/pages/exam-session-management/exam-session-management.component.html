@@ -1,0 +1,297 @@
+<div class="exam-session-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-btn" (click)="goBack()">
+      <span>←</span> Back to Dashboard
+    </button>
+    <h1>🎓 Exam Session Management</h1>
+    <button class="create-btn" *ngIf="currentView === 'list'" (click)="showCreateSession()">
+      <span>+</span> Create New Session
+    </button>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="message success" *ngIf="success">
+    {{ success }}
+  </div>
+  <div class="message error" *ngIf="error">
+    {{ error }}
+  </div>
+  <div class="message error" *ngIf="formErrors.length > 0">
+    <ul>
+      <li *ngFor="let err of formErrors">{{ err }}</li>
+    </ul>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Processing...</p>
+  </div>
+
+  <!-- SESSION LIST VIEW -->
+  <div class="sessions-list" *ngIf="currentView === 'list' && !loading">
+    <!-- Active Sessions -->
+    <div class="section" *ngIf="activeExamSessions.length > 0">
+      <h2>🔴 Active Sessions</h2>
+      <div class="sessions-grid">
+        <div class="session-card active" *ngFor="let session of activeExamSessions">
+          <div class="session-header">
+            <h3>{{ getTestName(session) }}</h3>
+            <span class="status-badge" [class]="getStatusClass(getSessionStatus(session))">
+              {{ getSessionStatus(session) }}
+            </span>
+          </div>
+          <div class="session-body">
+            <div class="session-info">
+              <div class="info-item">
+                <span class="icon">📅</span>
+                <div>
+                  <label>Start Time</label>
+                  <p>{{ session.startTime | date:'medium' }}</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="icon">⏰</span>
+                <div>
+                  <label>End Time</label>
+                  <p>{{ session.endTime | date:'medium' }}</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="icon">⏱️</span>
+                <div>
+                  <label>Duration</label>
+                  <p>{{ getDuration(session) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="session-actions">
+            <button class="btn-view" (click)="viewSessionDetails(session)">
+              View Details
+            </button>
+            <button class="btn-end" (click)="endSession(session.id)">
+              End Session
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- All Sessions -->
+    <div class="section">
+      <h2>📋 All Exam Sessions</h2>
+      
+      <div *ngIf="examSessions.length === 0" class="empty-state">
+        <div class="empty-icon">🎓</div>
+        <h3>No exam sessions created</h3>
+        <p>Create your first exam session to get started</p>
+        <button class="create-btn" (click)="showCreateSession()">
+          <span>+</span> Create Session
+        </button>
+      </div>
+
+      <div class="sessions-grid" *ngIf="examSessions.length > 0">
+        <div class="session-card" *ngFor="let session of examSessions">
+          <div class="session-header">
+            <h3>{{ getTestName(session) }}</h3>
+            <span class="status-badge" [class]="getStatusClass(getSessionStatus(session))">
+              {{ getSessionStatus(session) }}
+            </span>
+          </div>
+          <div class="session-body">
+            <div class="session-info">
+              <div class="info-item">
+                <span class="icon">📅</span>
+                <div>
+                  <label>Start Time</label>
+                  <p>{{ session.startTime | date:'medium' }}</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="icon">⏰</span>
+                <div>
+                  <label>End Time</label>
+                  <p>{{ session.endTime | date:'medium' }}</p>
+                </div>
+              </div>
+              <div class="info-item">
+                <span class="icon">⏱️</span>
+                <div>
+                  <label>Duration</label>
+                  <p>{{ getDuration(session) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="session-actions">
+            <button class="btn-view" (click)="viewSessionDetails(session)">
+              View Details
+            </button>
+            <button 
+              class="btn-start" 
+              *ngIf="getSessionStatus(session) === 'Scheduled'"
+              (click)="startSession(session.id)"
+            >
+              Start Now
+            </button>
+            <button 
+              class="btn-end" 
+              *ngIf="getSessionStatus(session) === 'Active'"
+              (click)="endSession(session.id)"
+            >
+              End Session
+            </button>
+            <button 
+              class="btn-delete" 
+              (click)="deleteSession(session.id)"
+              [disabled]="!session.id"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CREATE SESSION VIEW -->
+  <div class="create-session-view" *ngIf="currentView === 'create' && !loading">
+    <div class="form-section">
+      <h2>Create New Exam Session</h2>
+      <p class="info-text">Schedule a new exam session by selecting a test and setting the time window.</p>
+      
+      <div class="form-group">
+        <label for="test">Select Test *</label>
+        <select 
+          id="test" 
+          [(ngModel)]="selectedTestId"
+          class="form-control"
+        >
+          <option [ngValue]="null">-- Select a test --</option>
+          <option *ngFor="let test of availableTests" [ngValue]="test.id">
+            {{ test.title }} ({{ test.duration }} min, {{ test.numberOfQuestions || 0 }} questions)
+          </option>
+        </select>
+        <small class="form-hint">Choose the test that students will take during this session</small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="startTime">Start Time *</label>
+          <input 
+            type="datetime-local" 
+            id="startTime" 
+            [(ngModel)]="sessionForm.startTime"
+            class="form-control"
+          />
+          <small class="form-hint">When the exam will become available</small>
+        </div>
+
+        <div class="form-group">
+          <label for="endTime">End Time *</label>
+          <input 
+            type="datetime-local" 
+            id="endTime" 
+            [(ngModel)]="sessionForm.endTime"
+            class="form-control"
+          />
+          <small class="form-hint">When the exam will automatically close</small>
+        </div>
+      </div>
+
+      <div class="info-box" *ngIf="selectedTestId">
+        <h4>📝 Selected Test Information</h4>
+        <div class="test-details">
+          <p><strong>Test:</strong> {{ getSelectedTest()?.title }}</p>
+          <p><strong>Duration:</strong> {{ getSelectedTest()?.duration }} minutes</p>
+          <p><strong>Questions:</strong> {{ getSelectedTest()?.numberOfQuestions || 0 }}</p>
+          <p><strong>Description:</strong> {{ getSelectedTest()?.description }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Form Actions -->
+    <div class="form-actions">
+      <button class="btn-cancel" (click)="showSessionList()">Cancel</button>
+      <button class="btn-save" (click)="createSession()">
+        🚀 Create Exam Session
+      </button>
+    </div>
+  </div>
+
+  <!-- SESSION DETAILS VIEW -->
+  <div class="session-details-view" *ngIf="currentView === 'details' && selectedSession">
+    <div class="details-header">
+      <button class="back-btn-sm" (click)="showSessionList()">
+        ← Back to List
+      </button>
+      <h2>📊 Session Details</h2>
+      <span class="status-badge" [class]="getStatusClass(getSessionStatus(selectedSession))">
+        {{ getSessionStatus(selectedSession) }}
+      </span>
+    </div>
+
+    <div class="details-grid">
+      <div class="details-card">
+        <h3>📝 Test Information</h3>
+        <div class="details-content">
+          <p><strong>Title:</strong> {{ selectedSession.test?.title }}</p>
+          <p><strong>Description:</strong> {{ selectedSession.test?.description }}</p>
+          <p><strong>Duration:</strong> {{ selectedSession.test?.duration }} minutes</p>
+          <p><strong>Questions:</strong> {{ selectedSession.test?.numberOfQuestions || 0 }}</p>
+        </div>
+      </div>
+
+      <div class="details-card">
+        <h3>⏰ Schedule Information</h3>
+        <div class="details-content">
+          <p><strong>Start Time:</strong> {{ selectedSession.startTime | date:'full' }}</p>
+          <p><strong>End Time:</strong> {{ selectedSession.endTime | date:'full' }}</p>
+          <p><strong>Duration:</strong> {{ getDuration(selectedSession) }}</p>
+          <p><strong>Status:</strong> {{ getSessionStatus(selectedSession) }}</p>
+        </div>
+      </div>
+
+      <div class="details-card">
+        <h3>👥 Student Monitoring</h3>
+        <div class="details-content">
+          <p class="info-note">Real-time student monitoring will be available here</p>
+          <button class="btn-primary-sm">View Live Activity</button>
+        </div>
+      </div>
+
+      <div class="details-card">
+        <h3>🚨 Alerts & Activity</h3>
+        <div class="details-content">
+          <p class="info-note">Exam alerts and suspicious activities will appear here</p>
+          <button class="btn-primary-sm">View Alerts</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="details-actions">
+      <button 
+        class="btn-start" 
+        *ngIf="getSessionStatus(selectedSession) === 'Scheduled'"
+        (click)="startSession(selectedSession.id)"
+      >
+        🚀 Start Session Now
+      </button>
+      <button 
+        class="btn-end" 
+        *ngIf="getSessionStatus(selectedSession) === 'Active'"
+        (click)="endSession(selectedSession.id)"
+      >
+        🛑 End Session
+      </button>
+      <button 
+        class="btn-delete" 
+        (click)="deleteSession(selectedSession.id)"
+      >
+        🗑️ Delete Session
+      </button>
+    </div>
+  </div>
+</div>

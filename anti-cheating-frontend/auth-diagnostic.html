@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Diagnostic Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+        .status-card {
+            background: #f8f9fa;
+            border-left: 4px solid #dee2e6;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .status-card.success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+        .status-card.error {
+            background: #f8d7da;
+            border-left-color: #dc3545;
+        }
+        .status-card.warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+        .status-card h3 {
+            margin-bottom: 10px;
+            font-size: 18px;
+            color: #333;
+        }
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+        }
+        .info-row:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: 600;
+            color: #555;
+        }
+        .value {
+            color: #333;
+            font-family: 'Courier New', monospace;
+        }
+        .token-preview {
+            background: #2d2d2d;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            margin-top: 10px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: transform 0.2s;
+        }
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+        .btn.danger {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        pre {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            margin-top: 10px;
+        }
+        .icon {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Authentication Diagnostic Tool</h1>
+        <p class="subtitle">Check your authentication status and JWT token</p>
+
+        <div id="authStatus"></div>
+
+        <div style="margin-top: 30px;">
+            <button class="btn" onclick="refreshStatus()">🔄 Refresh Status</button>
+            <button class="btn" onclick="testAPI()">🧪 Test API Call</button>
+            <button class="btn danger" onclick="clearAuth()">🗑️ Clear Auth & Logout</button>
+        </div>
+
+        <div id="apiResult" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function checkAuthStatus() {
+            const token = localStorage.getItem('token');
+            const currentUser = localStorage.getItem('currentUser');
+            
+            let html = '';
+
+            // Check token status
+            if (token) {
+                const tokenParts = token.split('.');
+                let decoded = null;
+                
+                try {
+                    decoded = JSON.parse(atob(tokenParts[1]));
+                } catch (e) {
+                    console.error('Failed to decode token:', e);
+                }
+
+                const isExpired = decoded && decoded.exp * 1000 < Date.now();
+                const expiryDate = decoded ? new Date(decoded.exp * 1000) : null;
+
+                html += `
+                    <div class="status-card ${isExpired ? 'error' : 'success'}">
+                        <h3><span class="icon">${isExpired ? '❌' : '✅'}</span>JWT Token Status</h3>
+                        <div class="info-row">
+                            <span class="label">Status:</span>
+                            <span class="value">${isExpired ? 'EXPIRED' : 'VALID'}</span>
+                        </div>
+                        ${decoded ? `
+                            <div class="info-row">
+                                <span class="label">Username:</span>
+                                <span class="value">${decoded.sub || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Role:</span>
+                                <span class="value">${decoded.role || 'N/A'}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Issued At:</span>
+                                <span class="value">${new Date(decoded.iat * 1000).toLocaleString()}</span>
+                            </div>
+                            <div class="info-row">
+                                <span class="label">Expires At:</span>
+                                <span class="value">${expiryDate.toLocaleString()}</span>
+                            </div>
+                        ` : ''}
+                        <div class="token-preview">${token}</div>
+                    </div>
+                `;
+
+                if (isExpired) {
+                    html += `
+                        <div class="status-card warning">
+                            <h3><span class="icon">⚠️</span>Action Required</h3>
+                            <p>Your token has expired. You need to login again.</p>
+                        </div>
+                    `;
+                }
+            } else {
+                html += `
+                    <div class="status-card error">
+                        <h3><span class="icon">❌</span>Not Authenticated</h3>
+                        <p>No JWT token found in localStorage. You need to login first.</p>
+                    </div>
+                `;
+            }
+
+            // Check current user
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    html += `
+                        <div class="status-card success">
+                            <h3><span class="icon">👤</span>Current User</h3>
+                            <pre>${JSON.stringify(user, null, 2)}</pre>
+                        </div>
+                    `;
+                } catch (e) {
+                    html += `
+                        <div class="status-card error">
+                            <h3><span class="icon">⚠️</span>Invalid User Data</h3>
+                            <p>Current user data is corrupted.</p>
+                        </div>
+                    `;
+                }
+            }
+
+            // Check localStorage
+            html += `
+                <div class="status-card">
+                    <h3><span class="icon">💾</span>LocalStorage Keys</h3>
+                    <div class="info-row">
+                        <span class="label">token:</span>
+                        <span class="value">${localStorage.getItem('token') ? '✅ Present' : '❌ Missing'}</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">currentUser:</span>
+                        <span class="value">${localStorage.getItem('currentUser') ? '✅ Present' : '❌ Missing'}</span>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('authStatus').innerHTML = html;
+        }
+
+        async function testAPI() {
+            const resultDiv = document.getElementById('apiResult');
+            resultDiv.innerHTML = '<div class="status-card"><h3>⏳ Testing API...</h3></div>';
+
+            const token = localStorage.getItem('token');
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = 'Bearer ' + token;
+            }
+
+            try {
+                const response = await fetch('http://localhost:8080/api/sessions', {
+                    method: 'GET',
+                    headers: headers
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `
+                        <div class="status-card success">
+                            <h3><span class="icon">✅</span>API Test Success</h3>
+                            <p>Successfully fetched ${data.length} exam sessions.</p>
+                            <pre>${JSON.stringify(data, null, 2)}</pre>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="status-card error">
+                            <h3><span class="icon">❌</span>API Test Failed</h3>
+                            <div class="info-row">
+                                <span class="label">Status:</span>
+                                <span class="value">${response.status} ${response.statusText}</span>
+                            </div>
+                            <p style="margin-top: 10px;">
+                                ${response.status === 401 ? 
+                                    'Authentication failed. Token is missing, expired, or invalid.' : 
+                                    'Request failed. Check backend logs.'}
+                            </p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="status-card error">
+                        <h3><span class="icon">❌</span>API Test Failed</h3>
+                        <p>Error: ${error.message}</p>
+                        <p style="margin-top: 10px;">Make sure the backend is running on port 8080.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function clearAuth() {
+            if (confirm('Are you sure you want to clear all authentication data?')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                refreshStatus();
+                alert('Authentication data cleared. Please login again.');
+            }
+        }
+
+        function refreshStatus() {
+            checkAuthStatus();
+            document.getElementById('apiResult').innerHTML = '';
+        }
+
+        // Initial check
+        checkAuthStatus();
+    </script>
+</body>
+</html>

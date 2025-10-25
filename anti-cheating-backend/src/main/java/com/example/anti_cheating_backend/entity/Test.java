@@ -16,9 +16,28 @@ public class Test {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private String title;
+    
     private String description;
+    
     private String createdBy;
+    
     private LocalDateTime createdAt;
-    private int duration;
+    
+    private int duration; // in minutes
+    
+    // Many tests belong to one exam
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exam_id")
+    private Exam exam;
+    
+    @Column(name = "test_order")
+    private Integer testOrder; // Order of test within the exam
+    
+    @Column(name = "passing_score")
+    private Double passingScore;
+    
+    @Column(name = "total_marks")
+    private Double totalMarks;
 }

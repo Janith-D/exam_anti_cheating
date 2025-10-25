@@ -1,1 +1,311 @@
-<p>proctor-dashboard works!</p>
+<div class="admin-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-left">
+      <h1>👨‍💼 Admin Dashboard - Exam Monitoring System</h1>
+      <p class="welcome-text">Welcome, {{ currentUser?.username }}!</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-outline" (click)="goBack()">
+        ← Back
+      </button>
+      <button class="btn btn-danger" (click)="logout()">
+        🚪 Logout
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation Tabs -->
+  <div class="tabs-container">
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'overview'"
+      (click)="setActiveTab('overview')"
+    >
+      📊 Overview
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'alerts'"
+      (click)="setActiveTab('alerts')"
+    >
+      🚨 Alerts
+      <span *ngIf="unreadAlertsCount > 0" class="badge">{{ unreadAlertsCount }}</span>
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'tests'"
+      (click)="setActiveTab('tests')"
+    >
+      📝 Test Management
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'sessions'"
+      (click)="setActiveTab('sessions')"
+    >
+      🎓 Exam Sessions
+    </button>
+    <button 
+      class="tab-btn" 
+      [class.active]="activeTab === 'students'"
+      (click)="setActiveTab('students')"
+    >
+      👥 Students
+    </button>
+  </div>
+
+  <!-- Overview Tab -->
+  <div *ngIf="activeTab === 'overview'" class="tab-content">
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <div class="stat-card stat-primary">
+        <div class="stat-icon">📝</div>
+        <div class="stat-content">
+          <h3>{{ stats.totalTests }}</h3>
+          <p>Total Tests</p>
+        </div>
+      </div>
+      
+      <div class="stat-card stat-success">
+        <div class="stat-icon">🎓</div>
+        <div class="stat-content">
+          <h3>{{ stats.activeExams }}</h3>
+          <p>Active Exams</p>
+        </div>
+      </div>
+      
+      <div class="stat-card stat-info">
+        <div class="stat-icon">👥</div>
+        <div class="stat-content">
+          <h3>{{ stats.totalStudents }}</h3>
+          <p>Total Students</p>
+        </div>
+      </div>
+      
+      <div class="stat-card stat-danger">
+        <div class="stat-icon">🚨</div>
+        <div class="stat-content">
+          <h3>{{ stats.criticalAlerts }}</h3>
+          <p>Critical Alerts</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="section">
+      <h2>⚡ Quick Actions</h2>
+      <div class="actions-grid">
+        <button class="action-card" (click)="navigateToTestManagement()">
+          <div class="action-icon">➕</div>
+          <h3>Create New Test</h3>
+          <p>Add questions and configure test settings</p>
+        </button>
+        
+        <button class="action-card" (click)="navigateToSessions()">
+          <div class="action-icon">🚀</div>
+          <h3>Start Exam Session</h3>
+          <p>Begin monitoring a new exam</p>
+        </button>
+        
+        <button class="action-card" (click)="navigateToAlerts()">
+          <div class="action-icon">👁️</div>
+          <h3>View All Alerts</h3>
+          <p>Monitor suspicious activities</p>
+        </button>
+        
+        <button class="action-card" (click)="navigateToStudents()">
+          <div class="action-icon">📊</div>
+          <h3>Student Reports</h3>
+          <p>View student performance and activities</p>
+        </button>
+      </div>
+    </div>
+
+    <!-- Recent Alerts Preview -->
+    <div class="section" *ngIf="alerts.length > 0">
+      <div class="section-header">
+        <h2>🚨 Recent Alerts</h2>
+        <button class="btn btn-sm btn-primary" (click)="setActiveTab('alerts')">
+          View All
+        </button>
+      </div>
+      <div class="alerts-list">
+        <div 
+          *ngFor="let alert of alerts.slice(0, 5)" 
+          class="alert-item"
+          [class]="getSeverityClass(alert.severity)"
+        >
+          <div class="alert-header">
+            <span class="alert-severity">{{ alert.severity }}</span>
+            <span class="alert-time">{{ alert.timestamp || alert.createdAt | date: 'short' }}</span>
+          </div>
+          <div class="alert-message">{{ alert.message }}</div>
+          <div class="alert-footer">
+            <span class="alert-student">{{ alert.student?.username || 'Unknown' }}</span>
+            <button 
+              *ngIf="alert.status !== 'RESOLVED' && !alert.resolved"
+              class="btn btn-xs btn-success" 
+              (click)="resolveAlert(alert.id!)"
+            >
+              ✓ Resolve
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Alerts Tab -->
+  <div *ngIf="activeTab === 'alerts'" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>🚨 All Alerts</h2>
+        <div class="filter-buttons">
+          <button class="btn btn-sm btn-danger">RED</button>
+          <button class="btn btn-sm btn-warning">ORANGE</button>
+          <button class="btn btn-sm btn-info">YELLOW</button>
+          <button class="btn btn-sm btn-success">GREEN</button>
+        </div>
+      </div>
+      
+      <div *ngIf="alerts.length === 0" class="empty-state">
+        <div class="empty-icon">✅</div>
+        <h3>No Alerts</h3>
+        <p>All systems running smoothly!</p>
+      </div>
+
+      <div class="alerts-grid">
+        <div 
+          *ngFor="let alert of alerts" 
+          class="alert-card"
+          [class]="getSeverityClass(alert.severity)"
+        >
+          <div class="alert-card-header">
+            <span class="severity-badge" [class]="getSeverityClass(alert.severity)">
+              {{ alert.severity }}
+            </span>
+            <span class="status-badge" [class.resolved]="alert.status === 'RESOLVED' || alert.resolved">
+              {{ alert.status === 'RESOLVED' || alert.resolved ? '✓ Resolved' : '⚠ Active' }}
+            </span>
+          </div>
+          
+          <div class="alert-card-body">
+            <p class="alert-message">{{ alert.message }}</p>
+            <div class="alert-details">
+              <div class="detail-item">
+                <strong>Student:</strong> {{ alert.student?.username || 'N/A' }}
+              </div>
+              <div class="detail-item">
+                <strong>Time:</strong> {{ alert.timestamp || alert.createdAt | date: 'short' }}
+              </div>
+            </div>
+          </div>
+          
+          <div class="alert-card-footer">
+            <button 
+              class="btn btn-sm btn-primary" 
+              (click)="viewAlertDetails(alert.id!)"
+            >
+              View Details
+            </button>
+            <button 
+              *ngIf="alert.status !== 'RESOLVED' && !alert.resolved"
+              class="btn btn-sm btn-success" 
+              (click)="resolveAlert(alert.id!)"
+            >
+              ✓ Resolve
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Test Management Tab -->
+  <div *ngIf="activeTab === 'tests'" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>📝 Test Management</h2>
+        <button class="btn btn-primary" (click)="navigateToTestManagement()">
+          ➕ Create New Test
+        </button>
+      </div>
+
+      <div *ngIf="tests.length === 0" class="empty-state">
+        <div class="empty-icon">📝</div>
+        <h3>No Tests Created</h3>
+        <p>Create your first test to get started</p>
+        <button class="btn btn-primary" (click)="navigateToTestManagement()">
+          Create Test
+        </button>
+      </div>
+
+      <div class="tests-grid">
+        <div *ngFor="let test of tests" class="test-card">
+          <div class="test-card-header">
+            <h3>{{ test.title }}</h3>
+            <span class="duration-badge">{{ test.duration }} min</span>
+          </div>
+          <div class="test-card-body">
+            <p>{{ test.description }}</p>
+            <div class="test-meta">
+              <span>📝 {{ test.numberOfQuestions || 0 }} questions</span>
+              <span>📅 {{ test.createdAt | date: 'short' }}</span>
+            </div>
+          </div>
+          <div class="test-card-footer">
+            <button class="btn btn-sm btn-primary" (click)="viewTestDetails(test.id!)">
+              View/Edit
+            </button>
+            <button class="btn btn-sm btn-success" (click)="navigateToSessions()">
+              Start Session
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Exam Sessions Tab -->
+  <div *ngIf="activeTab === 'sessions'" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>🎓 Exam Session Management</h2>
+        <button class="btn btn-primary" (click)="navigateToSessions()">
+          🚀 Create New Session
+        </button>
+      </div>
+      <p class="info-text">Create, start, and end exam sessions. Monitor real-time student activities.</p>
+      <div class="empty-state">
+        <div class="empty-icon">🎓</div>
+        <h3>Session Management</h3>
+        <p>Navigate to dedicated session management page</p>
+        <button class="btn btn-primary" (click)="navigateToSessions()">
+          Go to Sessions
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Students Tab -->
+  <div *ngIf="activeTab === 'students'" class="tab-content">
+    <div class="section">
+      <div class="section-header">
+        <h2>👥 Student Management</h2>
+        <button class="btn btn-primary" (click)="navigateToStudents()">
+          View All Students
+        </button>
+      </div>
+      <p class="info-text">View student profiles, test results, and activity logs.</p>
+      <div class="empty-state">
+        <div class="empty-icon">👥</div>
+        <h3>Student Reports</h3>
+        <p>View detailed student information and performance analytics</p>
+        <button class="btn btn-primary" (click)="navigateToStudents()">
+          Go to Students
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

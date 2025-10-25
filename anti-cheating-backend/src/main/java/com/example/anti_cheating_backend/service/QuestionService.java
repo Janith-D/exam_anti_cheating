@@ -1,14 +1,15 @@
 package com.example.anti_cheating_backend.service;
 
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.example.anti_cheating_backend.entity.Question;
 import com.example.anti_cheating_backend.entity.Test;
 import com.example.anti_cheating_backend.repo.QuestionRepo;
 import com.example.anti_cheating_backend.repo.TestRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.util.List;
-import java.util.logging.Logger;
 
 @Service
 public class QuestionService {
@@ -52,5 +53,12 @@ public class QuestionService {
     public Question getQuestion(Long questionId) {
         return questionRepo.findById(questionId)
                 .orElseThrow(() -> new RuntimeException("Question not found: " + questionId));
+    }
+
+    public void deleteQuestion(Long questionId) {
+        Question question = questionRepo.findById(questionId)
+                .orElseThrow(() -> new RuntimeException("Question not found: " + questionId));
+        questionRepo.delete(question);
+        LOGGER.info("Deleted question: " + questionId);
     }
 }

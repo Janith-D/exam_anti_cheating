@@ -138,4 +138,20 @@ public class EventController {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
+    
+    @GetMapping("/session/{sessionId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getEventsBySession(@PathVariable Long sessionId) {
+        try {
+            List<Event> events = eventService.getEventsBySession(sessionId);
+            return ResponseEntity.ok(Map.of(
+                    "sessionId", sessionId,
+                    "eventCount", events.size(),
+                    "events", events
+            ));
+        } catch (RuntimeException e) {
+            LOGGER.severe(String.format("Error fetching events for session: %s", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 }

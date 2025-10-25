@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Debug - Exam Anti-Cheating</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ecf4e8 0%, #cbf3bb 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #2d5016;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .section {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        .section h2 {
+            color: #2d5016;
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid #ecf4e8;
+            padding-bottom: 10px;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status.warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+
+        .info-box {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #93bfc7;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #2d5016;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #666;
+            word-break: break-all;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            background: white;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+
+        .btn {
+            background: #93bfc7;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-top: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #7aa5ad;
+            transform: translateY(-2px);
+        }
+
+        .btn.danger {
+            background: #ff6b6b;
+        }
+
+        .btn.danger:hover {
+            background: #ff5252;
+        }
+
+        .instructions {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+            margin-top: 20px;
+        }
+
+        .instructions h3 {
+            color: #1976d2;
+            margin-bottom: 10px;
+        }
+
+        .instructions ol {
+            margin-left: 20px;
+            color: #666;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            background: #f5f5f5;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            color: #d63384;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔍 Authentication Debugger</h1>
+            <p class="subtitle">Diagnose 401 Unauthorized errors in Exam Anti-Cheating System</p>
+        </div>
+
+        <div class="section">
+            <h2>📊 Authentication Status</h2>
+            <div id="authStatus"></div>
+        </div>
+
+        <div class="section">
+            <h2>🔑 JWT Token Details</h2>
+            <div id="tokenDetails"></div>
+        </div>
+
+        <div class="section">
+            <h2>👤 User Information</h2>
+            <div id="userInfo"></div>
+        </div>
+
+        <div class="section">
+            <h2>🧪 API Test</h2>
+            <button class="btn" onclick="testAPI()">Test API Request</button>
+            <button class="btn danger" onclick="clearAuth()">Clear Authentication</button>
+            <div id="apiTestResult" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="instructions">
+            <h3>🛠️ How to Fix 401 Errors:</h3>
+            <ol>
+                <li>Check if token exists (should show ✅ above)</li>
+                <li>Check if token is expired (should show "Valid" above)</li>
+                <li>Check if role is ADMIN (should show "ADMIN" above)</li>
+                <li>Click "Test API Request" to verify backend connection</li>
+                <li>If token is missing or expired, login again at <code>http://localhost:4200/login</code></li>
+                <li>If you're not ADMIN, update database: <code>UPDATE students SET role = 'ADMIN' WHERE username = 'your_username'</code></li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const userStr = localStorage.getItem('currentUser');
+            
+            // Check token
+            const authStatusDiv = document.getElementById('authStatus');
+            if (!token) {
+                authStatusDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ No JWT Token Found
+                        <div style="margin-top: 10px; font-weight: normal;">
+                            You need to login first at <a href="http://localhost:4200/login">http://localhost:4200/login</a>
+                        </div>
+                    </div>
+                `;
+            } else {
+                authStatusDiv.innerHTML = `
+                    <div class="status success">
+                        ✅ JWT Token Exists
+                    </div>
+                `;
+            }
+
+            // Decode and display token
+            const tokenDetailsDiv = document.getElementById('tokenDetails');
+            if (!token) {
+                tokenDetailsDiv.innerHTML = `
+                    <div class="info-box">
+                        <div class="info-label">Token Status:</div>
+                        <div class="info-value">No token in localStorage</div>
+                    </div>
+                `;
+            } else {
+                try {
+                    const payload = JSON.parse(atob(token.split('.')[1]));
+                    const exp = new Date(payload.exp * 1000);
+                    const now = new Date();
+                    const isExpired = now > exp;
+                    
+                    tokenDetailsDiv.innerHTML = `
+                        <div class="info-box">
+                            <div class="info-label">Token (first 50 chars):</div>
+                            <div class="info-value">${token.substring(0, 50)}...</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Subject (User):</div>
+                            <div class="info-value">${payload.sub || 'Not found'}</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Role/Authorities:</div>
+                            <div class="info-value">${JSON.stringify(payload.role || payload.authorities || 'Not found')}</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Expires:</div>
+                            <div class="info-value" style="color: ${isExpired ? 'red' : 'green'}">
+                                ${exp.toLocaleString()} ${isExpired ? '(⚠️ EXPIRED!)' : '(✅ Valid)'}
+                            </div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Issued At:</div>
+                            <div class="info-value">${new Date(payload.iat * 1000).toLocaleString()}</div>
+                        </div>
+                    `;
+
+                    if (isExpired) {
+                        authStatusDiv.innerHTML += `
+                            <div class="status error" style="margin-top: 10px;">
+                                ⚠️ Token is EXPIRED - Please login again!
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    tokenDetailsDiv.innerHTML = `
+                        <div class="info-box">
+                            <div class="info-label">Error:</div>
+                            <div class="info-value" style="color: red;">
+                                Failed to decode token: ${e.message}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+
+            // Display user info
+            const userInfoDiv = document.getElementById('userInfo');
+            if (!userStr) {
+                userInfoDiv.innerHTML = `
+                    <div class="info-box">
+                        <div class="info-label">User Status:</div>
+                        <div class="info-value">No user in localStorage</div>
+                    </div>
+                `;
+            } else {
+                try {
+                    const user = JSON.parse(userStr);
+                    userInfoDiv.innerHTML = `
+                        <div class="info-box">
+                            <div class="info-label">User ID:</div>
+                            <div class="info-value">${user.id || 'Not found'}</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Username:</div>
+                            <div class="info-value">${user.username || 'Not found'}</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Email:</div>
+                            <div class="info-value">${user.email || 'Not found'}</div>
+                        </div>
+                        <div class="info-box">
+                            <div class="info-label">Role:</div>
+                            <div class="info-value" style="color: ${user.role === 'ADMIN' ? 'green' : 'orange'}; font-weight: bold;">
+                                ${user.role || 'Not found'} ${user.role === 'ADMIN' ? '✅' : '⚠️ (Need ADMIN role!)'}
+                            </div>
+                        </div>
+                    `;
+
+                    if (user.role !== 'ADMIN') {
+                        authStatusDiv.innerHTML += `
+                            <div class="status warning" style="margin-top: 10px;">
+                                ⚠️ You are logged in as ${user.role}, but ADMIN role is required
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    userInfoDiv.innerHTML = `
+                        <div class="info-box">
+                            <div class="info-label">Error:</div>
+                            <div class="info-value" style="color: red;">
+                                Failed to parse user: ${e.message}
+                            </div>
+                        </div>
+                    `;
+                }
+            }
+        }
+
+        function testAPI() {
+            const token = localStorage.getItem('token');
+            const resultDiv = document.getElementById('apiTestResult');
+            
+            if (!token) {
+                resultDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Cannot test - No token found. Please login first.
+                    </div>
+                `;
+                return;
+            }
+
+            resultDiv.innerHTML = `
+                <div class="status warning">
+                    🔄 Testing API connection...
+                </div>
+            `;
+
+            fetch('http://localhost:8080/api/alerts', {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json().then(data => {
+                        resultDiv.innerHTML = `
+                            <div class="status success">
+                                ✅ API Test Successful!
+                                <div style="margin-top: 10px; font-weight: normal;">
+                                    Status: ${response.status}<br>
+                                    Alerts found: ${data.length || 0}
+                                </div>
+                            </div>
+                        `;
+                    });
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="status error">
+                            ❌ API Test Failed!
+                            <div style="margin-top: 10px; font-weight: normal;">
+                                Status: ${response.status} ${response.statusText}<br>
+                                ${response.status === 401 ? 'Token is invalid or expired - Please login again' : ''}
+                                ${response.status === 403 ? 'You don\'t have ADMIN permissions' : ''}
+                            </div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(error => {
+                resultDiv.innerHTML = `
+                    <div class="status error">
+                        ❌ Connection Error!
+                        <div style="margin-top: 10px; font-weight: normal;">
+                            ${error.message}<br>
+                            Make sure backend is running on port 8080
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function clearAuth() {
+            if (confirm('Are you sure you want to clear authentication? You will need to login again.')) {
+                localStorage.removeItem('token');
+                localStorage.removeItem('currentUser');
+                alert('Authentication cleared! Refreshing page...');
+                location.reload();
+            }
+        }
+
+        // Run on page load
+        window.onload = checkAuth;
+    </script>
+</body>
+</html>

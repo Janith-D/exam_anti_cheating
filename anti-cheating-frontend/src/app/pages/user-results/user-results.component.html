@@ -1,1 +1,173 @@
-<p>user-results works!</p>
+<div class="results-container">
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading your results...</p>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="!loading && error" class="error-state">
+    <div class="error-icon">❌</div>
+    <h2>Oops!</h2>
+    <p>{{ error }}</p>
+    <div class="error-actions">
+      <button class="btn-primary" (click)="goToDashboard()">
+        <i class="fas fa-home"></i> Back to Dashboard
+      </button>
+      <button class="btn-secondary" (click)="showAllResults ? loadAllResults() : loadTestResult()" *ngIf="testId || showAllResults">
+        <i class="fas fa-sync"></i> Retry
+      </button>
+    </div>
+  </div>
+
+  <!-- All Results Display -->
+  <div *ngIf="!loading && !error && showAllResults && allResults.length > 0" class="all-results-content">
+    <div class="results-header">
+      <h1>📊 My Test Results</h1>
+      <p class="subtitle">Your complete test history</p>
+    </div>
+
+    <div class="results-list">
+      <div *ngFor="let result of allResults" class="result-item">
+        <div class="result-item-header">
+          <div class="result-title">
+            <h3>{{ result.test?.title || 'Test' }}</h3>
+            <span class="result-date" *ngIf="result.completedAt">
+              {{ result.completedAt | date:'MMM d, y, h:mm a' }}
+            </span>
+          </div>
+          <span class="score-badge-large" [ngClass]="getScoreClass()">
+            {{ result.scorePercentage }}%
+          </span>
+        </div>
+
+        <div class="result-item-body">
+          <div class="stats-row">
+            <div class="stat">
+              <span class="stat-icon">✅</span>
+              <span class="stat-label">Correct</span>
+              <span class="stat-value">{{ result.correctAnswers }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">📝</span>
+              <span class="stat-label">Total</span>
+              <span class="stat-value">{{ result.totalQuestions }}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-icon">❌</span>
+              <span class="stat-label">Wrong</span>
+              <span class="stat-value">{{ result.totalQuestions - result.correctAnswers }}</span>
+            </div>
+          </div>
+
+          <div class="progress-mini">
+            <div class="progress-fill-mini" 
+                 [style.width.%]="result.scorePercentage"
+                 [ngClass]="getScoreClassForResult(result)">
+            </div>
+          </div>
+        </div>
+
+        <div class="result-item-footer">
+          <button class="btn-outline-sm" (click)="viewSingleResult(result.test?.id!)">
+            📄 View Details
+          </button>
+          <button class="btn-primary-sm" (click)="retakeTest()">
+            🔄 Retake
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons-bottom">
+      <button class="btn-secondary" (click)="goToDashboard()">
+        <i class="fas fa-home"></i> Back to Dashboard
+      </button>
+    </div>
+  </div>
+
+  <!-- Single Result Display -->
+  <div *ngIf="!loading && !error && !showAllResults && testResult" class="results-content">
+    <!-- Header -->
+    <div class="results-header">
+      <div class="success-icon">✅</div>
+      <h1>Test Completed!</h1>
+      <p class="test-title">{{ testResult.test?.title || 'Test' }}</p>
+    </div>
+
+    <!-- Score Card -->
+    <div class="score-card" [ngClass]="getScoreClass()">
+      <div class="score-circle">
+        <div class="score-value">{{ testResult.scorePercentage }}%</div>
+        <div class="score-label">Your Score</div>
+      </div>
+      <div class="score-message">{{ getScoreMessage() }}</div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="details-grid">
+      <div class="detail-card">
+        <div class="detail-icon">✓</div>
+        <div class="detail-label">Correct Answers</div>
+        <div class="detail-value">{{ testResult.correctAnswers }}</div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-icon">📝</div>
+        <div class="detail-label">Total Questions</div>
+        <div class="detail-value">{{ testResult.totalQuestions }}</div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-icon">❌</div>
+        <div class="detail-label">Incorrect</div>
+        <div class="detail-value">{{ testResult.totalQuestions - testResult.correctAnswers }}</div>
+      </div>
+
+      <div class="detail-card">
+        <div class="detail-icon">📊</div>
+        <div class="detail-label">Percentage</div>
+        <div class="detail-value">{{ testResult.scorePercentage.toFixed(1) }}%</div>
+      </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-section">
+      <div class="progress-label">
+        <span>Performance</span>
+        <span>{{ testResult.correctAnswers }}/{{ testResult.totalQuestions }}</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" [style.width.%]="testResult.scorePercentage"></div>
+      </div>
+    </div>
+
+    <!-- Completion Time -->
+    <div class="completion-info" *ngIf="testResult.completedAt">
+      <i class="fas fa-clock"></i>
+      <span>Completed on {{ testResult.completedAt | date:'medium' }}</span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn-secondary" (click)="goToDashboard()">
+        <i class="fas fa-home"></i> Back to Dashboard
+      </button>
+      
+      <button class="btn-primary" (click)="retakeTest()">
+        <i class="fas fa-redo"></i> Retake Test
+      </button>
+    </div>
+
+    <!-- Additional Info -->
+    <div class="info-card">
+      <h3>What's Next?</h3>
+      <ul>
+        <li>Review your performance on the dashboard</li>
+        <li>Practice more to improve your score</li>
+        <li>Retake the test to achieve a better result</li>
+        <li>Check out other available exams</li>
+      </ul>
+    </div>
+  </div>
+</div>

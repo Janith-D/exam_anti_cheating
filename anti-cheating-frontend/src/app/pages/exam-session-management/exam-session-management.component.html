@@ -29,6 +29,22 @@
     <p>Processing...</p>
   </div>
 
+  <!-- Info Box - Publish Workflow -->
+  <div class="info-box" *ngIf="currentView === 'list' && !loading">
+    <div class="info-header">
+      <i class="bi bi-info-circle-fill"></i>
+      <h4>💡 Important: Making Exams Visible to Students</h4>
+    </div>
+    <p>
+      When you create an exam session, the associated exam may still be in <strong>DRAFT</strong> status.
+      <br>
+      <strong>Students can only see and enroll in PUBLISHED exams!</strong>
+    </p>
+    <p class="info-action">
+      👉 Click the <span class="badge-highlight">📤 Publish Exam</span> button below to make the exam visible to students.
+    </p>
+  </div>
+
   <!-- SESSION LIST VIEW -->
   <div class="sessions-list" *ngIf="currentView === 'list' && !loading">
     <!-- Active Sessions -->
@@ -71,6 +87,19 @@
             <button class="btn-view" (click)="viewSessionDetails(session)">
               View Details
             </button>
+            <button 
+              class="btn-publish" 
+              *ngIf="canPublishExam(session)"
+              (click)="publishExamFromSession(session)"
+              title="Publish exam to make it visible to students">
+              <i class="bi bi-send-fill"></i> Publish Exam
+            </button>
+            <span 
+              class="badge-published" 
+              *ngIf="isExamPublished(session)"
+              title="Exam is already published">
+              ✅ Exam Published
+            </span>
             <button class="btn-end" (click)="endSession(session.id)">
               End Session
             </button>
@@ -130,24 +159,34 @@
               View Details
             </button>
             <button 
+              class="btn-publish" 
+              *ngIf="canPublishExam(session)"
+              (click)="publishExamFromSession(session)"
+              title="Publish exam to make it visible to students">
+              <i class="bi bi-send-fill"></i> Publish Exam
+            </button>
+            <span 
+              class="badge-published" 
+              *ngIf="isExamPublished(session)"
+              title="Exam is already published and visible to students">
+              ✅ Exam Published
+            </span>
+            <button 
               class="btn-start" 
               *ngIf="getSessionStatus(session) === 'Scheduled'"
-              (click)="startSession(session.id)"
-            >
+              (click)="startSession(session.id)">
               Start Now
             </button>
             <button 
               class="btn-end" 
               *ngIf="getSessionStatus(session) === 'Active'"
-              (click)="endSession(session.id)"
-            >
+              (click)="endSession(session.id)">
               End Session
             </button>
             <button 
               class="btn-delete" 
               (click)="deleteSession(session.id)"
-              [disabled]="!session.id"
-            >
+              [disabled]="!session.id">
               Delete
             </button>
           </div>
@@ -160,21 +199,21 @@
   <div class="create-session-view" *ngIf="currentView === 'create' && !loading">
     <div class="form-section">
       <h2>Create New Exam Session</h2>
-      <p class="info-text">Schedule a new exam session by selecting a test and setting the time window.</p>
+      <p class="info-text">Schedule a new exam session by selecting an exam and setting the time window.</p>
       
       <div class="form-group">
-        <label for="test">Select Test *</label>
+        <label for="exam">Select Exam *</label>
         <select 
-          id="test" 
-          [(ngModel)]="selectedTestId"
+          id="exam" 
+          [(ngModel)]="selectedExamId"
           class="form-control"
         >
-          <option [ngValue]="null">-- Select a test --</option>
-          <option *ngFor="let test of availableTests" [ngValue]="test.id">
-            {{ test.title }} ({{ test.duration }} min, {{ test.numberOfQuestions || 0 }} questions)
+          <option [ngValue]="null">-- Select an exam --</option>
+          <option *ngFor="let exam of availableExams" [ngValue]="exam.id">
+            {{ exam.title }} - {{ exam.status }} (Created: {{ exam.createdAt | date:'short' }})
           </option>
         </select>
-        <small class="form-hint">Choose the test that students will take during this session</small>
+        <small class="form-hint">Choose the exam for this session</small>
       </div>
 
       <div class="form-row">
@@ -201,13 +240,21 @@
         </div>
       </div>
 
-      <div class="info-box" *ngIf="selectedTestId">
-        <h4>📝 Selected Test Information</h4>
+      <div class="info-box" *ngIf="selectedExamId">
+        <h4>📝 Selected Exam Information</h4>
         <div class="test-details">
-          <p><strong>Test:</strong> {{ getSelectedTest()?.title }}</p>
-          <p><strong>Duration:</strong> {{ getSelectedTest()?.duration }} minutes</p>
-          <p><strong>Questions:</strong> {{ getSelectedTest()?.numberOfQuestions || 0 }}</p>
-          <p><strong>Description:</strong> {{ getSelectedTest()?.description }}</p>
+          <p><strong>Exam:</strong> {{ getSelectedExam()?.title }}</p>
+          <p><strong>Status:</strong> 
+            <span [class]="'badge-' + getSelectedExam()?.status?.toLowerCase()">
+              {{ getSelectedExam()?.status }}
+            </span>
+          </p>
+          <p><strong>Description:</strong> {{ getSelectedExam()?.description }}</p>
+          <p><strong>Start Date:</strong> {{ getSelectedExam()?.startDate | date:'medium' }}</p>
+          <p><strong>End Date:</strong> {{ getSelectedExam()?.endDate | date:'medium' }}</p>
+          <p *ngIf="getSelectedExam()?.status === 'DRAFT'" class="warning-text">
+            ⚠️ This exam is in DRAFT status. Don't forget to publish it so students can see it!
+          </p>
         </div>
       </div>
     </div>

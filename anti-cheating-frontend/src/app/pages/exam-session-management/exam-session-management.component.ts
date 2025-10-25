@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ExamSessionService } from '../../Services/exam-session.service';
 import { TestService } from '../../Services/test.service.service';
+import { ExamService } from '../../Services/exam.service';
 import { ExamSession } from '../../models/exam-session.model';
 import { Test } from '../../models/test.model';
+import { Exam, ExamStatus } from '../../models/exam.model';
 
 @Component({
   selector: 'app-exam-session-management',
@@ -23,17 +25,18 @@ export class ExamSessionManagementComponent implements OnInit {
   activeExamSessions: ExamSession[] = [];
   selectedSession: ExamSession | null = null;
   
-  // Available tests
-  availableTests: Test[] = [];
+  // Available exams (changed from tests to exams)
+  availableExams: Exam[] = [];
+  availableTests: Test[] = []; // Keep for compatibility
   
   // Session form
   sessionForm: ExamSession = {
-    test: undefined,
     startTime: '',
     endTime: ''
   };
   
-  selectedTestId: number | null = null;
+  selectedExamId: number | null = null; // Changed from selectedTestId
+  selectedTestId: number | null = null; // Keep for compatibility
   
   // Loading and error states
   loading = false;
@@ -42,16 +45,20 @@ export class ExamSessionManagementComponent implements OnInit {
   
   // Validation
   formErrors: string[] = [];
+  
+  // Enum for template access
+  ExamStatus = ExamStatus;
 
   constructor(
     private examSessionService: ExamSessionService,
     private testService: TestService,
+    private examService: ExamService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadExamSessions();
-    this.loadAvailableTests();
+    this.loadAvailableExams(); // Load exams instead of tests
   }
 
   loadExamSessions(): void {
@@ -81,6 +88,19 @@ export class ExamSessionManagementComponent implements OnInit {
     });
   }
 
+  // NEW: Load available exams
+  loadAvailableExams(): void {
+    this.examService.getAllExams().subscribe({
+      next: (exams) => {
+        this.availableExams = exams || [];
+        console.log('📚 Loaded exams for session creation:', this.availableExams);
+      },
+      error: (error) => {
+        console.error('Error loading exams:', error);
+      }
+    });
+  }
+
   // View navigation
   showCreateSession(): void {
     this.currentView = 'create';
@@ -104,10 +124,10 @@ export class ExamSessionManagementComponent implements OnInit {
     const endTime = new Date(startTime.getTime() + 3600000); // 1 hour from start
     
     this.sessionForm = {
-      test: undefined,
       startTime: this.formatDateTimeLocal(startTime),
       endTime: this.formatDateTimeLocal(endTime)
     };
+    this.selectedExamId = null;
     this.selectedTestId = null;
     this.formErrors = [];
     this.error = '';
@@ -127,8 +147,8 @@ export class ExamSessionManagementComponent implements OnInit {
   validateSessionForm(): boolean {
     this.formErrors = [];
     
-    if (!this.selectedTestId) {
-      this.formErrors.push('Please select a test');
+    if (!this.selectedExamId) {
+      this.formErrors.push('Please select an exam');
     }
     
     if (!this.sessionForm.startTime) {
@@ -165,11 +185,14 @@ export class ExamSessionManagementComponent implements OnInit {
     this.loading = true;
     this.error = '';
     
-    const sessionData: ExamSession = {
-      test: { id: this.selectedTestId! } as Test,
+    const sessionData: any = {
+      examId: this.selectedExamId!, // Send examId to backend
       startTime: this.sessionForm.startTime,
-      endTime: this.sessionForm.endTime
+      endTime: this.sessionForm.endTime,
+      createdBy: 'admin' // TODO: Get from auth service
     };
+    
+    console.log('Creating session with data:', sessionData);
     
     this.examSessionService.createExamSession(sessionData).subscribe({
       next: (session) => {
@@ -289,7 +312,8 @@ export class ExamSessionManagementComponent implements OnInit {
   }
 
   getTestName(session: ExamSession): string {
-    return session.test?.title || 'Unknown Test';
+    // Try to get name from exam first, then test, then examName field
+    return session.exam?.title || session.test?.title || session.examName || 'Unknown Test';
   }
 
   getDuration(session: ExamSession): string {
@@ -314,6 +338,65 @@ export class ExamSessionManagementComponent implements OnInit {
       return null;
     }
     return this.availableTests.find(t => t.id === this.selectedTestId);
+  }
+
+  // NEW: Get selected exam
+  getSelectedExam(): Exam | undefined {
+    if (!this.selectedExamId) {
+      return undefined;
+    }
+    return this.availableExams.find(e => e.id === this.selectedExamId);
+  }
+
+  // Get exam from session
+  getExamFromSession(session: ExamSession): any {
+    // First try direct exam relationship, then fall back to test.exam
+    return session.exam || session.test?.exam;
+  }
+
+  // Check if exam can be published (is DRAFT)
+  canPublishExam(session: ExamSession): boolean {
+    const exam = this.getExamFromSession(session);
+    return exam && exam.status === ExamStatus.DRAFT;
+  }
+
+  // Check if exam is published
+  isExamPublished(session: ExamSession): boolean {
+    const exam = this.getExamFromSession(session);
+    return exam && (exam.status === ExamStatus.PUBLISHED || exam.status === ExamStatus.ONGOING);
+  }
+
+  // Publish exam from session
+  publishExamFromSession(session: ExamSession): void {
+    const exam = this.getExamFromSession(session);
+    
+    if (!exam || !exam.id) {
+      this.error = 'No exam associated with this session';
+      setTimeout(() => this.error = '', 3000);
+      return;
+    }
+
+    if (!confirm(`Publish exam "${exam.title}"?\n\nThis will make the exam visible to students for enrollment.`)) {
+      return;
+    }
+
+    this.loading = true;
+    this.examService.publishExam(exam.id).subscribe({
+      next: () => {
+        this.success = `✅ SUCCESS! Exam "${exam.title}" is now PUBLISHED and visible to students!`;
+        this.loadExamSessions();
+        setTimeout(() => {
+          this.success = '';
+          this.loading = false;
+        }, 5000);
+      },
+      error: (error) => {
+        console.error('Error publishing exam:', error);
+        this.error = 'Failed to publish exam. Please try again.';
+        this.loading = false;
+        setTimeout(() => this.error = '', 3000);
+      }
+    });
   }
 
   // Navigation

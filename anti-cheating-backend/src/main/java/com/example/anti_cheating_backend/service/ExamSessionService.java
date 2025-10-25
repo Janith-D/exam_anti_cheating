@@ -6,8 +6,10 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.example.anti_cheating_backend.entity.Exam;
 import com.example.anti_cheating_backend.entity.Enums;
 import com.example.anti_cheating_backend.entity.ExamSession;
+import com.example.anti_cheating_backend.repo.ExamRepo;
 import com.example.anti_cheating_backend.repo.ExamSessionRepo;
 
 @Service
@@ -15,6 +17,9 @@ public class ExamSessionService {
 
     @Autowired
     private ExamSessionRepo examSessionRepo;
+    
+    @Autowired
+    private ExamRepo examRepo;
 
     // Get all sessions
     public List<ExamSession> getAllSessions() {
@@ -27,8 +32,8 @@ public class ExamSessionService {
                 .orElseThrow(() -> new RuntimeException("Session not found"));
     }
 
-    // Create session
-    public ExamSession createSession(String examName, LocalDateTime startTime,LocalDateTime endTime, String createdBy){
+    // Create session - updated to accept examId
+    public ExamSession createSession(String examName, LocalDateTime startTime, LocalDateTime endTime, String createdBy){
         ExamSession session = new ExamSession();
         session.setExamName(examName);
         session.setStartTime(startTime);
@@ -37,6 +42,22 @@ public class ExamSessionService {
         session.setDurationMinutes((int)java.time.Duration.between(startTime,endTime).toMinutes());
         return examSessionRepo.save(session);
     }
+    
+    // Create session with exam relationship
+    public ExamSession createSessionWithExam(Long examId, LocalDateTime startTime, LocalDateTime endTime, String createdBy){
+        Exam exam = examRepo.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found"));
+        
+        ExamSession session = new ExamSession();
+        session.setExamName(exam.getTitle());
+        session.setExam(exam);
+        session.setStartTime(startTime);
+        session.setEndTime(endTime);
+        session.setCreatedBy(createdBy);
+        session.setDurationMinutes((int)java.time.Duration.between(startTime,endTime).toMinutes());
+        return examSessionRepo.save(session);
+    }
+    
     public List<ExamSession> getActiveSessions(){
         return examSessionRepo.findByStatus(Enums.SessionStatus.ACTIVE);
     }

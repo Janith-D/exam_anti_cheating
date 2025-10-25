@@ -122,9 +122,12 @@ export class AdminExamManagementComponent implements OnInit {
       // Create new exam
       this.examService.createExam(this.examForm).subscribe({
         next: (exam) => {
-          this.successMessage = 'Exam created successfully!';
+          this.successMessage = '✅ Exam created successfully! IMPORTANT: Click the 📤 Publish button to make it visible to students.';
           this.loadExams();
-          setTimeout(() => this.closeExamModal(), 1500);
+          setTimeout(() => {
+            this.closeExamModal();
+            // Keep message visible longer so admin sees it
+          }, 2000);
         },
         error: (error) => {
           console.error('Error creating exam:', error);
@@ -173,11 +176,15 @@ export class AdminExamManagementComponent implements OnInit {
   }
 
   publishExam(exam: Exam): void {
+    if (!confirm(`Publish "${exam.title}"?\n\nThis will make the exam visible to students for enrollment.`)) {
+      return;
+    }
+    
     this.examService.publishExam(exam.id!).subscribe({
       next: () => {
-        this.successMessage = 'Exam published successfully!';
+        this.successMessage = `✅ SUCCESS! Exam "${exam.title}" is now PUBLISHED and visible to students. They can now enroll!`;
         this.loadExams();
-        setTimeout(() => this.successMessage = '', 3000);
+        setTimeout(() => this.successMessage = '', 6000);
       },
       error: (error) => {
         console.error('Error publishing exam:', error);

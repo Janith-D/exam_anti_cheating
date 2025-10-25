@@ -50,12 +50,24 @@ public class ExamSessionController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> createSession(@RequestBody Map<String, Object> payload) {
         try {
-            String examName = (String) payload.get("examName");
-            LocalDateTime startTime = LocalDateTime.parse((String) payload.get("startTime"));
-            LocalDateTime endTime = LocalDateTime.parse((String) payload.get("endTime"));
-            String createdBy = (String) payload.get("createdBy");
-            ExamSession session = examSessionService.createSession(examName, startTime, endTime, createdBy);
-            return ResponseEntity.ok(Map.of("message", "Session created", "sessionId", session.getId()));
+            // Check if examId is provided (new approach with exam relationship)
+            if (payload.containsKey("examId")) {
+                Long examId = ((Number) payload.get("examId")).longValue();
+                LocalDateTime startTime = LocalDateTime.parse((String) payload.get("startTime"));
+                LocalDateTime endTime = LocalDateTime.parse((String) payload.get("endTime"));
+                String createdBy = (String) payload.get("createdBy");
+                ExamSession session = examSessionService.createSessionWithExam(examId, startTime, endTime, createdBy);
+                return ResponseEntity.ok(Map.of("message", "Session created", "sessionId", session.getId()));
+            } 
+            // Fallback to old approach for backward compatibility
+            else {
+                String examName = (String) payload.get("examName");
+                LocalDateTime startTime = LocalDateTime.parse((String) payload.get("startTime"));
+                LocalDateTime endTime = LocalDateTime.parse((String) payload.get("endTime"));
+                String createdBy = (String) payload.get("createdBy");
+                ExamSession session = examSessionService.createSession(examName, startTime, endTime, createdBy);
+                return ResponseEntity.ok(Map.of("message", "Session created", "sessionId", session.getId()));
+            }
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

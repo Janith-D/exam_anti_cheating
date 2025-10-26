@@ -90,13 +90,25 @@ export class ExamSessionManagementComponent implements OnInit {
 
   // NEW: Load available exams
   loadAvailableExams(): void {
+    this.loading = true;
     this.examService.getAllExams().subscribe({
       next: (exams) => {
         this.availableExams = exams || [];
+        this.loading = false;
         console.log('📚 Loaded exams for session creation:', this.availableExams);
+        
+        if (this.availableExams.length === 0) {
+          console.warn('⚠️ No exams found! Please create an exam first in Exam Management.');
+          this.error = 'No exams available. Please create an exam first in Exam Management page.';
+        } else {
+          console.log(`✅ Found ${this.availableExams.length} exam(s):`, 
+            this.availableExams.map(e => `${e.title} (${e.status})`).join(', '));
+        }
       },
       error: (error) => {
-        console.error('Error loading exams:', error);
+        console.error('❌ Error loading exams:', error);
+        this.error = 'Failed to load exams. Please check your connection and try again.';
+        this.loading = false;
       }
     });
   }
@@ -116,6 +128,10 @@ export class ExamSessionManagementComponent implements OnInit {
   viewSessionDetails(session: ExamSession): void {
     this.selectedSession = session;
     this.currentView = 'details';
+  }
+
+  goToExamManagement(): void {
+    this.router.navigate(['/admin/exams']);
   }
 
   resetForm(): void {
@@ -194,12 +210,38 @@ export class ExamSessionManagementComponent implements OnInit {
     
     console.log('Creating session with data:', sessionData);
     
+    // First create the session
     this.examSessionService.createExamSession(sessionData).subscribe({
       next: (session) => {
-        this.success = 'Exam session created successfully!';
-        setTimeout(() => {
-          this.showSessionList();
-        }, 2000);
+        console.log('✅ Session created successfully:', session);
+        
+        // Now automatically publish the exam
+        const selectedExam = this.getSelectedExam();
+        if (selectedExam && selectedExam.id && selectedExam.status === ExamStatus.DRAFT) {
+          console.log('📤 Auto-publishing exam:', selectedExam.title);
+          this.examService.publishExam(selectedExam.id).subscribe({
+            next: () => {
+              console.log('✅ Exam published successfully');
+              this.success = '✅ Exam session created and exam published! Students can now see and enroll.';
+              setTimeout(() => {
+                this.showSessionList();
+              }, 2000);
+            },
+            error: (error) => {
+              console.error('Error publishing exam:', error);
+              this.success = 'Exam session created but failed to publish exam automatically.';
+              setTimeout(() => {
+                this.showSessionList();
+              }, 2000);
+            }
+          });
+        } else {
+          // Exam is already published or doesn't need publishing
+          this.success = 'Exam session created successfully! Students can now see the exam.';
+          setTimeout(() => {
+            this.showSessionList();
+          }, 2000);
+        }
       },
       error: (error) => {
         console.error('Error creating exam session:', error);

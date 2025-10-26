@@ -28,8 +28,11 @@ export class TestService {
   }
 
   // Delete test (Admin only)
-  deleteTest(testId: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${testId}`);
+  deleteTest(testId: number, force: boolean = false): Observable<any> {
+    const url = force 
+      ? `${this.apiUrl}/${testId}?force=true` 
+      : `${this.apiUrl}/${testId}`;
+    return this.http.delete<any>(url);
   }
 
   // Submit test answers

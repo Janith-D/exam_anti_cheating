@@ -9,6 +9,12 @@
       <button class="btn btn-success" (click)="openCreateModal()">
         <i class="bi bi-plus-circle"></i> Create New Exam
       </button>
+      <button class="btn btn-info" routerLink="/exam-session-management">
+        <i class="bi bi-calendar-event"></i> Exam Sessions
+      </button>
+      <button class="btn btn-warning" routerLink="/test-management">
+        <i class="bi bi-card-list"></i> Manage Tests
+      </button>
       <button class="btn btn-outline-light" routerLink="/admin/dashboard">
         <i class="bi bi-speedometer2"></i> Dashboard
       </button>
@@ -32,9 +38,17 @@
   <!-- Info Box - Exam Workflow -->
   <div class="alert alert-info mx-4 mt-3" style="border-left: 4px solid #0dcaf0;">
     <h5 class="alert-heading">
-      <i class="bi bi-info-circle-fill"></i> How Exam Visibility Works
+      <i class="bi bi-info-circle-fill"></i> How to Create Complete Exams
     </h5>
     <p class="mb-2">
+      <strong>🎯 Three Creation Options:</strong><br>
+      <strong>1️⃣ Simple Mode</strong> → Create exam only, add tests later via "Manage Tests"<br>
+      <strong>2️⃣ Detailed Mode</strong> → Create exam with all tests and questions in one go<br>
+      <strong>3️⃣ Exam Sessions</strong> → Click "Exam Sessions" to schedule and manage exam sessions
+    </p>
+    <hr>
+    <p class="mb-2">
+      <strong>📊 Exam Status Workflow:</strong><br>
       <strong>📝 DRAFT</strong> → Exam created but <strong class="text-danger">NOT visible to students</strong><br>
       <strong>📤 PUBLISHED</strong> → <strong class="text-success">Students CAN see</strong> and enroll in the exam<br>
       <strong>▶️ ONGOING</strong> → Exam is currently active/live<br>
@@ -174,15 +188,51 @@
 
 <!-- Create/Edit Exam Modal -->
 <div class="modal" [class.show]="showExamModal" [style.display]="showExamModal ? 'block' : 'none'">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
+  <div class="modal-dialog modal-dialog-centered" [class.modal-xl]="createMode === 'detailed'" [class.modal-lg]="createMode === 'simple'">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">
           <i class="bi bi-journal-plus"></i> {{ editingExam ? 'Edit' : 'Create' }} Exam
+          <span *ngIf="!editingExam && createMode === 'detailed'" class="badge bg-info ms-2">
+            Detailed Mode
+          </span>
         </h5>
         <button type="button" class="btn-close" (click)="closeExamModal()"></button>
       </div>
       <div class="modal-body">
+        
+        <!-- Mode Selector (only for new exams) -->
+        <div *ngIf="!editingExam" class="alert alert-light border mb-4">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <strong>Creation Mode:</strong>
+              <p class="mb-0 small text-muted">
+                <span *ngIf="createMode === 'simple'">Create exam only (add tests later)</span>
+                <span *ngIf="createMode === 'detailed'">Create exam with tests and questions now</span>
+              </p>
+            </div>
+            <div class="btn-group" role="group">
+              <button 
+                type="button" 
+                class="btn btn-sm"
+                [class.btn-primary]="createMode === 'simple'"
+                [class.btn-outline-secondary]="createMode === 'detailed'"
+                (click)="switchToSimpleMode()">
+                <i class="bi bi-lightning"></i> Simple
+              </button>
+              <button 
+                type="button" 
+                class="btn btn-sm"
+                [class.btn-primary]="createMode === 'detailed'"
+                [class.btn-outline-secondary]="createMode === 'simple'"
+                (click)="switchToDetailedMode()">
+                <i class="bi bi-list-check"></i> Detailed
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Exam Basic Information -->
         <form>
           <div class="mb-3">
             <label class="form-label">Title <span class="text-danger">*</span></label>
@@ -245,13 +295,239 @@
             </div>
           </div>
         </form>
+
+        <!-- Detailed Mode: Tests and Questions -->
+        <div *ngIf="createMode === 'detailed' && !editingExam" class="mt-4">
+          <hr>
+          <h6 class="mb-3">
+            <i class="bi bi-clipboard-check"></i> Add Tests to This Exam
+            <span class="badge bg-secondary ms-2">{{ tests.length }} test(s)</span>
+          </h6>
+
+          <!-- Added Tests List -->
+          <div *ngIf="tests.length > 0" class="mb-4">
+            <div class="alert alert-success">
+              <strong>✅ Tests Added:</strong>
+              <ul class="mb-0 mt-2">
+                <li *ngFor="let test of tests; let i = index">
+                  <strong>{{ test.title }}</strong> - {{ test.questions.length }} question(s)
+                  <button class="btn btn-sm btn-outline-primary ms-2" (click)="editTest(i)">
+                    <i class="bi bi-pencil"></i> Edit
+                  </button>
+                  <button class="btn btn-sm btn-outline-danger ms-1" (click)="removeTest(i)">
+                    <i class="bi bi-trash"></i> Remove
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <!-- Current Test Form -->
+          <div class="card">
+            <div class="card-header">
+              <h6 class="mb-0">Current Test</h6>
+            </div>
+            <div class="card-body">
+              <div class="row mb-3">
+                <div class="col-md-8">
+                  <label class="form-label">Test Title <span class="text-danger">*</span></label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    [(ngModel)]="currentTest.title"
+                    placeholder="e.g., Chapter 1 - Introduction">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Duration (minutes)</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="currentTest.duration"
+                    min="1">
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Test Description</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  [(ngModel)]="currentTest.description"
+                  placeholder="Brief description">
+              </div>
+
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label class="form-label">Test Order</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="currentTest.testOrder"
+                    min="1">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Passing Score</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="currentTest.passingScore"
+                    min="0"
+                    max="100">
+                </div>
+                <div class="col-md-4">
+                  <label class="form-label">Total Marks</label>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    [(ngModel)]="currentTest.totalMarks"
+                    min="1">
+                </div>
+              </div>
+
+              <!-- Questions for Current Test -->
+              <hr>
+              <h6 class="mb-3">
+                Questions in This Test
+                <span class="badge bg-info ms-2">{{ currentTest.questions.length }}</span>
+              </h6>
+
+              <!-- Added Questions -->
+              <div *ngIf="currentTest.questions.length > 0" class="mb-3">
+                <div class="list-group">
+                  <div *ngFor="let q of currentTest.questions; let i = index" class="list-group-item">
+                    <div class="d-flex justify-content-between align-items-start">
+                      <div class="flex-grow-1">
+                        <strong>Q{{i + 1}}:</strong> {{ q.text }}
+                        <div class="small text-muted mt-1">
+                          Options: {{ q.options.join(', ') }} | Correct: {{ q.options[q.correctOption] }}
+                          <span *ngIf="q.topic" class="badge bg-secondary ms-2">{{ q.topic }}</span>
+                        </div>
+                      </div>
+                      <div class="btn-group btn-group-sm ms-2">
+                        <button class="btn btn-outline-primary" (click)="editQuestionInTest(i)">
+                          <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-outline-danger" (click)="removeQuestionFromTest(i)">
+                          <i class="bi bi-trash"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add Question Form -->
+              <div class="card bg-light">
+                <div class="card-body">
+                  <h6 class="mb-3">Add Question</h6>
+                  
+                  <div class="mb-3">
+                    <label class="form-label">Question Text <span class="text-danger">*</span></label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      [(ngModel)]="currentQuestion.text"
+                      placeholder="Enter your question">
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Option 1 <span class="text-danger">*</span></label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="currentQuestion.options[0]"
+                        placeholder="First option">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Option 2 <span class="text-danger">*</span></label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="currentQuestion.options[1]"
+                        placeholder="Second option">
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Option 3 <span class="text-danger">*</span></label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="currentQuestion.options[2]"
+                        placeholder="Third option">
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Option 4 <span class="text-danger">*</span></label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="currentQuestion.options[3]"
+                        placeholder="Fourth option">
+                    </div>
+                  </div>
+
+                  <div class="row mb-3">
+                    <div class="col-md-6">
+                      <label class="form-label">Correct Option <span class="text-danger">*</span></label>
+                      <select class="form-select" [(ngModel)]="currentQuestion.correctOption">
+                        <option [value]="0">Option 1</option>
+                        <option [value]="1">Option 2</option>
+                        <option [value]="2">Option 3</option>
+                        <option [value]="3">Option 4</option>
+                      </select>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label">Topic/Category</label>
+                      <input 
+                        type="text" 
+                        class="form-control" 
+                        [(ngModel)]="currentQuestion.topic"
+                        placeholder="e.g., Arrays, Loops, OOP">
+                    </div>
+                  </div>
+
+                  <button 
+                    type="button" 
+                    class="btn btn-success btn-sm w-100" 
+                    (click)="addQuestionToCurrentTest()">
+                    <i class="bi bi-plus-circle"></i> Add Question to Test
+                  </button>
+                </div>
+              </div>
+
+              <!-- Add Test Button -->
+              <button 
+                type="button" 
+                class="btn btn-primary w-100 mt-3" 
+                (click)="addTest()">
+                <i class="bi bi-check-circle"></i> Add This Test to Exam
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
       <div class="modal-footer">
+        <div class="text-start flex-grow-1">
+          <div *ngIf="errorMessage" class="text-danger small">
+            <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+          </div>
+          <div *ngIf="successMessage" class="text-success small">
+            <i class="bi bi-check-circle"></i> {{ successMessage }}
+          </div>
+        </div>
         <button type="button" class="btn btn-secondary" (click)="closeExamModal()">
           Cancel
         </button>
         <button type="button" class="btn btn-primary" (click)="saveExam()" [disabled]="loading">
-          <i class="bi bi-save"></i> {{ editingExam ? 'Update' : 'Create' }} Exam
+          <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
+          <i *ngIf="!loading" class="bi bi-save"></i> 
+          {{ editingExam ? 'Update' : 'Create' }} Exam
+          <span *ngIf="createMode === 'detailed' && tests.length > 0" class="badge bg-light text-dark ms-2">
+            with {{ tests.length }} test(s)
+          </span>
         </button>
       </div>
     </div>

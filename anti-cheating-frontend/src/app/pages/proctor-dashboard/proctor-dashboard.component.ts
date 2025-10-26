@@ -188,6 +188,10 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
   }
 
   // Navigation methods
+  navigateToExamManagement(): void {
+    this.router.navigate(['/admin/exams']);
+  }
+
   navigateToTestManagement(): void {
     this.router.navigate(['/admin/test-management']);
   }

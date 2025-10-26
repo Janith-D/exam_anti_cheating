@@ -29,22 +29,6 @@
     <p>Processing...</p>
   </div>
 
-  <!-- Info Box - Publish Workflow -->
-  <div class="info-box" *ngIf="currentView === 'list' && !loading">
-    <div class="info-header">
-      <i class="bi bi-info-circle-fill"></i>
-      <h4>💡 Important: Making Exams Visible to Students</h4>
-    </div>
-    <p>
-      When you create an exam session, the associated exam may still be in <strong>DRAFT</strong> status.
-      <br>
-      <strong>Students can only see and enroll in PUBLISHED exams!</strong>
-    </p>
-    <p class="info-action">
-      👉 Click the <span class="badge-highlight">📤 Publish Exam</span> button below to make the exam visible to students.
-    </p>
-  </div>
-
   <!-- SESSION LIST VIEW -->
   <div class="sessions-list" *ngIf="currentView === 'list' && !loading">
     <!-- Active Sessions -->
@@ -201,60 +185,80 @@
       <h2>Create New Exam Session</h2>
       <p class="info-text">Schedule a new exam session by selecting an exam and setting the time window.</p>
       
-      <div class="form-group">
-        <label for="exam">Select Exam *</label>
-        <select 
-          id="exam" 
-          [(ngModel)]="selectedExamId"
-          class="form-control"
-        >
-          <option [ngValue]="null">-- Select an exam --</option>
-          <option *ngFor="let exam of availableExams" [ngValue]="exam.id">
-            {{ exam.title }} - {{ exam.status }} (Created: {{ exam.createdAt | date:'short' }})
-          </option>
-        </select>
-        <small class="form-hint">Choose the exam for this session</small>
+      <!-- No Exams Warning -->
+      <div class="alert alert-warning" *ngIf="availableExams.length === 0">
+        <h4>⚠️ No Exams Available</h4>
+        <p>You need to create an exam before you can schedule a session.</p>
+        <p><strong>Steps to create an exam:</strong></p>
+        <ol>
+          <li>Go to <strong>Exam Management</strong> page</li>
+          <li>Click <strong>"Create New Exam"</strong></li>
+          <li>Choose <strong>Simple Mode</strong> or <strong>Detailed Mode</strong></li>
+          <li>Fill in exam details and save</li>
+          <li>Return here to create a session</li>
+        </ol>
+        <button class="btn btn-primary mt-3" (click)="goToExamManagement()">
+          <i class="bi bi-plus-circle"></i> Go to Exam Management
+        </button>
       </div>
 
-      <div class="form-row">
+      <!-- Exam Selection Form (only show if exams exist) -->
+      <div *ngIf="availableExams.length > 0">
         <div class="form-group">
-          <label for="startTime">Start Time *</label>
-          <input 
-            type="datetime-local" 
-            id="startTime" 
-            [(ngModel)]="sessionForm.startTime"
+          <label for="exam">Select Exam *</label>
+          <select 
+            id="exam" 
+            [(ngModel)]="selectedExamId"
             class="form-control"
-          />
-          <small class="form-hint">When the exam will become available</small>
+          >
+            <option [ngValue]="null">-- Select an exam --</option>
+            <option *ngFor="let exam of availableExams" [ngValue]="exam.id">
+              {{ exam.title }} - {{ exam.status }}
+              <span *ngIf="exam.createdAt">(Created: {{ exam.createdAt | date:'short' }})</span>
+            </option>
+          </select>
         </div>
 
-        <div class="form-group">
-          <label for="endTime">End Time *</label>
-          <input 
-            type="datetime-local" 
-            id="endTime" 
-            [(ngModel)]="sessionForm.endTime"
-            class="form-control"
-          />
-          <small class="form-hint">When the exam will automatically close</small>
-        </div>
-      </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="startTime">Start Time *</label>
+            <input 
+              type="datetime-local" 
+              id="startTime" 
+              [(ngModel)]="sessionForm.startTime"
+              class="form-control"
+            />
+            <small class="form-hint">When the exam will become available</small>
+          </div>
 
-      <div class="info-box" *ngIf="selectedExamId">
-        <h4>📝 Selected Exam Information</h4>
-        <div class="test-details">
-          <p><strong>Exam:</strong> {{ getSelectedExam()?.title }}</p>
-          <p><strong>Status:</strong> 
-            <span [class]="'badge-' + getSelectedExam()?.status?.toLowerCase()">
-              {{ getSelectedExam()?.status }}
-            </span>
-          </p>
-          <p><strong>Description:</strong> {{ getSelectedExam()?.description }}</p>
-          <p><strong>Start Date:</strong> {{ getSelectedExam()?.startDate | date:'medium' }}</p>
-          <p><strong>End Date:</strong> {{ getSelectedExam()?.endDate | date:'medium' }}</p>
-          <p *ngIf="getSelectedExam()?.status === 'DRAFT'" class="warning-text">
-            ⚠️ This exam is in DRAFT status. Don't forget to publish it so students can see it!
-          </p>
+          <div class="form-group">
+            <label for="endTime">End Time *</label>
+            <input 
+              type="datetime-local" 
+              id="endTime" 
+              [(ngModel)]="sessionForm.endTime"
+              class="form-control"
+            />
+            <small class="form-hint">When the exam will automatically close</small>
+          </div>
+        </div>
+
+        <div class="info-box" *ngIf="selectedExamId">
+          <h4>📝 Selected Exam Information</h4>
+          <div class="test-details">
+            <p><strong>Exam:</strong> {{ getSelectedExam()?.title }}</p>
+            <p><strong>Status:</strong> 
+              <span [class]="'badge-' + getSelectedExam()?.status?.toLowerCase()">
+                {{ getSelectedExam()?.status }}
+              </span>
+            </p>
+            <p><strong>Description:</strong> {{ getSelectedExam()?.description }}</p>
+            <p><strong>Start Date:</strong> {{ getSelectedExam()?.startDate | date:'medium' }}</p>
+            <p><strong>End Date:</strong> {{ getSelectedExam()?.endDate | date:'medium' }}</p>
+            <p *ngIf="getSelectedExam()?.status === 'DRAFT'" class="warning-text">
+              ⚠️ This exam is in DRAFT status. Don't forget to publish it so students can see it!
+            </p>
+          </div>
         </div>
       </div>
     </div>
@@ -262,7 +266,7 @@
     <!-- Form Actions -->
     <div class="form-actions">
       <button class="btn-cancel" (click)="showSessionList()">Cancel</button>
-      <button class="btn-save" (click)="createSession()">
+      <button class="btn-save" (click)="createSession()" [disabled]="availableExams.length === 0">
         🚀 Create Exam Session
       </button>
     </div>

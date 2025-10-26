@@ -62,13 +62,21 @@ public class TestController {
 
     @DeleteMapping("/{testId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Void> deleteTest(@PathVariable Long testId) {
+    public ResponseEntity<?> deleteTest(
+            @PathVariable Long testId,
+            @org.springframework.web.bind.annotation.RequestParam(required = false, defaultValue = "false") boolean force) {
         try {
-            testService.deleteTest(testId);
-            return ResponseEntity.ok().build();
+            testService.deleteTest(testId, force);
+            if (force) {
+                return ResponseEntity.ok(Map.of(
+                    "message", "Test and all associated student results deleted successfully",
+                    "warning", "Student data has been permanently removed"
+                ));
+            }
+            return ResponseEntity.ok(Map.of("message", "Test deleted successfully"));
         } catch (RuntimeException e) {
             LOGGER.severe("Error deleting test " + testId + ": " + e.getMessage());
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 

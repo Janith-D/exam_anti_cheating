@@ -317,15 +317,69 @@ export class TestManagementComponent implements OnInit {
       return;
     }
     
-    this.testService.deleteTest(testId).subscribe({
-      next: () => {
+    // First try normal delete
+    this.testService.deleteTest(testId, false).subscribe({
+      next: (response) => {
         this.success = 'Test deleted successfully';
         this.loadTests();
         setTimeout(() => this.success = '', 3000);
       },
       error: (error: any) => {
         console.error('Error deleting test:', error);
-        this.error = 'Failed to delete test';
+        
+        // Extract error message from backend
+        let errorMessage = 'Failed to delete test';
+        if (error.error && error.error.error) {
+          errorMessage = error.error.error;
+          
+          // Check if error is about student results
+          if (errorMessage.includes('student(s) have already taken this test')) {
+            // Ask for force delete confirmation
+            const forceDelete = confirm(
+              '⚠️ WARNING: ' + errorMessage + '\n\n' +
+              '🗑️ Do you want to FORCE DELETE this test?\n\n' +
+              '❌ This will permanently delete:\n' +
+              '   • The test\n' +
+              '   • All student results\n' +
+              '   • All questions\n\n' +
+              '⚠️ THIS CANNOT BE UNDONE!\n\n' +
+              'Click OK to force delete, or Cancel to keep the test.'
+            );
+            
+            if (forceDelete) {
+              this.forceDeleteTest(testId);
+              return;
+            }
+          }
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        this.error = errorMessage;
+        setTimeout(() => this.error = '', 5000);
+      }
+    });
+  }
+
+  // Force delete test (with student results)
+  forceDeleteTest(testId: number): void {
+    this.testService.deleteTest(testId, true).subscribe({
+      next: (response) => {
+        this.success = '✅ Test and all student results deleted successfully';
+        if (response.warning) {
+          console.warn(response.warning);
+        }
+        this.loadTests();
+        setTimeout(() => this.success = '', 5000);
+      },
+      error: (error: any) => {
+        console.error('Error force deleting test:', error);
+        let errorMessage = 'Failed to force delete test';
+        if (error.error && error.error.error) {
+          errorMessage = error.error.error;
+        }
+        this.error = errorMessage;
+        setTimeout(() => this.error = '', 5000);
       }
     });
   }

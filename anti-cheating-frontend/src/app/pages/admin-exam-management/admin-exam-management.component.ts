@@ -181,15 +181,28 @@ export class AdminExamManagementComponent implements OnInit {
       this.errorMessage = 'Test title is required';
       return;
     }
+    if (!this.currentTest.duration || this.currentTest.duration <= 0) {
+      this.errorMessage = 'Test duration must be greater than 0';
+      return;
+    }
     if (this.currentTest.questions.length === 0) {
       this.errorMessage = 'Test must have at least one question';
       return;
     }
     
-    this.tests.push({ ...this.currentTest });
+    // Ensure numeric values are valid
+    const testToAdd: TestForm = {
+      ...this.currentTest,
+      duration: Number(this.currentTest.duration),
+      passingScore: Number(this.currentTest.passingScore) || 60,
+      totalMarks: Number(this.currentTest.totalMarks) || 100,
+      testOrder: Number(this.currentTest.testOrder) || this.tests.length + 1
+    };
+    
+    this.tests.push(testToAdd);
     this.currentTest = this.getEmptyTest();
     this.currentTest.testOrder = this.tests.length + 1;
-    this.successMessage = `Test added! Total: ${this.tests.length} test(s)`;
+    this.successMessage = `✅ Test added! Total: ${this.tests.length} test(s)`;
     setTimeout(() => this.successMessage = '', 2000);
   }
 
@@ -306,16 +319,26 @@ export class AdminExamManagementComponent implements OnInit {
         const testForm = this.tests[i];
         this.successMessage = `Creating test ${i + 1} of ${this.tests.length}...`;
         
-        // Create test
+        // Validate test data before sending
+        if (!testForm.title || testForm.title.trim() === '') {
+          throw new Error(`Test ${i + 1}: Title is required`);
+        }
+        if (!testForm.duration || testForm.duration <= 0) {
+          throw new Error(`Test ${i + 1}: Duration must be greater than 0`);
+        }
+        
+        // Create test with validated data
         const testData: any = {
-          title: testForm.title,
-          description: testForm.description,
-          duration: testForm.duration,
+          title: testForm.title.trim(),
+          description: testForm.description?.trim() || '',
+          duration: Number(testForm.duration), // Ensure it's a number
           exam: { id: examId } as Exam,
-          testOrder: testForm.testOrder,
-          passingScore: testForm.passingScore,
-          totalMarks: testForm.totalMarks
+          testOrder: Number(testForm.testOrder) || 1,
+          passingScore: Number(testForm.passingScore) || 60,
+          totalMarks: Number(testForm.totalMarks) || 100
         };
+        
+        console.log(`📤 Sending test ${i + 1} data:`, testData);
         
         const createdTest = await this.testService.createTest(testData).toPromise();
         console.log(`✅ Test ${i + 1} created:`, createdTest);
@@ -335,9 +358,20 @@ export class AdminExamManagementComponent implements OnInit {
         this.closeExamModal();
       }, 3000);
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('❌ Error creating tests:', error);
-      this.errorMessage = 'Exam created but some tests/questions failed';
+      
+      // Extract detailed error message
+      let errorMsg = 'Exam created but some tests/questions failed. ';
+      if (error?.error?.message) {
+        errorMsg += error.error.message;
+      } else if (error?.message) {
+        errorMsg += error.message;
+      } else if (error?.status === 400) {
+        errorMsg += 'Invalid test data. Please check test title and duration.';
+      }
+      
+      this.errorMessage = errorMsg;
       this.loading = false;
     }
   }

@@ -155,9 +155,11 @@ def enroll():
 
         log_api_request('enroll', student_id, True)
         return jsonify({
+            'success': True,
             'status': 'success',
             'studentId': student_id,
-            'embedding': encoding_base64
+            'embedding': encoding_base64,
+            'quality': result.get('quality', 1.0)
         }), 200
 
     except ValueError as e:

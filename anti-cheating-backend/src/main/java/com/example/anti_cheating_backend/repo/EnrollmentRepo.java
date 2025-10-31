@@ -1,21 +1,31 @@
 package com.example.anti_cheating_backend.repo;
 
-import com.example.anti_cheating_backend.entity.Enrollment;
-import com.example.anti_cheating_backend.entity.Enums;
-import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.example.anti_cheating_backend.entity.Enrollment;
+import com.example.anti_cheating_backend.entity.Enums;
 
 public interface EnrollmentRepo extends JpaRepository<Enrollment,Long> {
     // Legacy method for backward compatibility
     Enrollment findByStudentId(Long studentId);
     
-    // Exam-based enrollment queries
+    // Exam-based enrollment queries with JOIN FETCH to avoid lazy loading issues
+    // LEFT JOIN to handle legacy enrollments without exams
+    @Query("SELECT e FROM Enrollment e LEFT JOIN FETCH e.student LEFT JOIN FETCH e.exam WHERE e.student.id = :studentId")
+    List<Enrollment> findAllByStudentId(@Param("studentId") Long studentId);
+    
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.exam WHERE e.exam.id = :examId")
+    List<Enrollment> findByExamId(@Param("examId") Long examId);
+    
+    @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.exam WHERE e.exam.id = :examId AND e.status = :status")
+    List<Enrollment> findByExamIdAndStatus(@Param("examId") Long examId, @Param("status") Enums.EnrollmentStatus status);
+    
     Optional<Enrollment> findByStudentIdAndExamId(Long studentId, Long examId);
-    List<Enrollment> findAllByStudentId(Long studentId);
-    List<Enrollment> findByExamId(Long examId);
-    List<Enrollment> findByExamIdAndStatus(Long examId, Enums.EnrollmentStatus status);
     boolean existsByStudentIdAndExamId(Long studentId, Long examId);
     long countByExamIdAndStatus(Long examId, Enums.EnrollmentStatus status);
 }

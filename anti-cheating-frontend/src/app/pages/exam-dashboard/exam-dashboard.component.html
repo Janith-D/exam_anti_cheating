@@ -167,63 +167,64 @@
 
 <!-- Enrollment Modal -->
 <div class="modal" [class.show]="showEnrollmentModal" [style.display]="showEnrollmentModal ? 'block' : 'none'">
-  <div class="modal-dialog modal-dialog-centered modal-lg">
-    <div class="modal-content">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content enrollment-modal">
       <div class="modal-header">
         <h5 class="modal-title">
-          <i class="bi bi-camera"></i> Enroll in {{ selectedExam?.title }}
+          <i class="bi bi-person-check"></i> Face Verification
         </h5>
         <button type="button" class="btn-close" (click)="closeEnrollmentModal()"></button>
       </div>
-      <div class="modal-body">
-        <div *ngIf="errorMessage" class="alert alert-danger">
+      <div class="modal-body text-center">
+        <p class="enrollment-subtitle mb-3">Enrolling in: <strong>{{ selectedExam?.title }}</strong></p>
+        
+        <div *ngIf="errorMessage" class="alert alert-danger alert-sm">
           <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
         </div>
-        <div *ngIf="successMessage" class="alert alert-success">
+        <div *ngIf="successMessage" class="alert alert-success alert-sm">
           <i class="bi bi-check-circle"></i> {{ successMessage }}
         </div>
 
-        <div class="enrollment-instructions mb-3">
-          <h6><i class="bi bi-info-circle"></i> Face Verification Required</h6>
-          <p class="text-muted">
-            Please capture a clear photo of your face for identity verification. 
-            Make sure your face is well-lit and clearly visible.
-          </p>
-        </div>
-
-        <div class="camera-container">
-          <div *ngIf="!capturedImage" class="video-container">
-            <video id="enrollmentVideo" autoplay playsinline class="camera-feed"></video>
-            <button class="btn btn-primary capture-btn" (click)="capturePhoto()">
-              <i class="bi bi-camera"></i> Capture Photo
+        <div class="face-verification-card">
+          <div *ngIf="!capturedImage" class="camera-section">
+            <div class="camera-frame">
+              <video id="enrollmentVideo" autoplay playsinline class="camera-preview"></video>
+              <div class="camera-overlay">
+                <div class="face-guide-circle"></div>
+              </div>
+            </div>
+            <p class="camera-hint">
+              <i class="bi bi-info-circle"></i> Position your face in the circle
+            </p>
+            <button class="btn btn-primary btn-capture" (click)="capturePhoto()">
+              <i class="bi bi-camera-fill"></i> Capture Photo
             </button>
           </div>
 
-          <div *ngIf="capturedImage" class="preview-container">
-            <img [src]="capturedImage" alt="Captured photo" class="captured-image">
-            <button class="btn btn-warning retake-btn" (click)="retakePhoto()">
-              <i class="bi bi-arrow-clockwise"></i> Retake Photo
+          <div *ngIf="capturedImage" class="preview-section">
+            <div class="preview-frame">
+              <img [src]="capturedImage" alt="Captured photo" class="preview-image">
+            </div>
+            <p class="preview-hint">
+              <i class="bi bi-check-circle-fill text-success"></i> Photo captured successfully
+            </p>
+            <button class="btn btn-warning btn-retake mb-2" (click)="retakePhoto()">
+              <i class="bi bi-arrow-clockwise"></i> Retake
+            </button>
+            <button 
+              class="btn btn-success btn-confirm" 
+              (click)="enrollInExam()"
+              [disabled]="enrolling">
+              <span *ngIf="!enrolling">
+                <i class="bi bi-check-circle"></i> Confirm & Enroll
+              </span>
+              <span *ngIf="enrolling">
+                <span class="spinner-border spinner-border-sm me-2"></span>
+                Verifying...
+              </span>
             </button>
           </div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="closeEnrollmentModal()" [disabled]="enrolling">
-          Cancel
-        </button>
-        <button 
-          type="button" 
-          class="btn btn-success" 
-          (click)="enrollInExam()"
-          [disabled]="!capturedImage || enrolling">
-          <span *ngIf="!enrolling">
-            <i class="bi bi-check-circle"></i> Confirm Enrollment
-          </span>
-          <span *ngIf="enrolling">
-            <span class="spinner-border spinner-border-sm me-2"></span>
-            Processing...
-          </span>
-        </button>
       </div>
     </div>
   </div>

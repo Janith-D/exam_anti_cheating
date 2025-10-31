@@ -21,7 +21,7 @@ export class ExamDashboardComponent implements OnInit {
   loading = false;
   errorMessage = '';
   successMessage = '';
-  currentUser: any = null;
+  currentUser: any = null; // Using any to handle both id and userId properties
   
   // Enrollment modal
   showEnrollmentModal = false;
@@ -45,10 +45,36 @@ export class ExamDashboardComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUserValue;
+    console.log('📱 Current user from auth service:', this.currentUser);
+    
+    // Fallback: Try to get user from localStorage if not in auth service
     if (!this.currentUser) {
+      const storedUser = localStorage.getItem('currentUser');
+      if (storedUser) {
+        this.currentUser = JSON.parse(storedUser);
+        console.log('📦 User loaded from localStorage:', this.currentUser);
+      }
+    }
+    
+    if (!this.currentUser) {
+      console.error('❌ No user found, redirecting to login');
       this.router.navigate(['/login']);
       return;
     }
+    
+    // Ensure user has an ID
+    const studentId = this.currentUser?.id || this.currentUser?.userId;
+    if (!studentId) {
+      console.error('⚠️ User object missing ID:', this.currentUser);
+      this.errorMessage = 'Authentication error. Please login again.';
+      setTimeout(() => {
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      }, 2000);
+      return;
+    }
+    
+    console.log('✅ User authenticated with ID:', studentId);
     this.loadExams();
     this.loadEnrollments();
   }
@@ -92,9 +118,13 @@ export class ExamDashboardComponent implements OnInit {
   }
 
   loadEnrollments(): void {
-    if (!this.currentUser?.userId) return;
+    const studentId = this.currentUser?.id || this.currentUser?.userId;
+    if (!studentId) {
+      console.error('❌ No student ID available for loading enrollments');
+      return;
+    }
     
-    this.enrollmentService.getStudentEnrollments(this.currentUser.userId).subscribe({
+    this.enrollmentService.getStudentEnrollments(studentId).subscribe({
       next: (enrollments) => {
         this.enrolledExams = enrollments;
       },
@@ -119,14 +149,17 @@ export class ExamDashboardComponent implements OnInit {
   }
 
   openEnrollmentModal(exam: Exam): void {
+    console.log('🎯 Opening enrollment modal for:', exam.title);
     this.selectedExam = exam;
     this.showEnrollmentModal = true;
     this.errorMessage = '';
     this.successMessage = '';
     this.capturedImage = null;
     
-    // Start camera
-    setTimeout(() => this.startCamera(), 100);
+    // Start camera after modal is rendered
+    setTimeout(() => {
+      this.startCamera();
+    }, 300);
   }
 
   closeEnrollmentModal(): void {
@@ -138,18 +171,42 @@ export class ExamDashboardComponent implements OnInit {
 
   async startCamera(): Promise<void> {
     try {
+      console.log('🎥 Starting camera...');
       const video = document.getElementById('enrollmentVideo') as HTMLVideoElement;
-      if (!video) return;
+      if (!video) {
+        console.error('❌ Video element not found');
+        this.errorMessage = 'Camera initialization failed. Please try again.';
+        return;
+      }
 
       this.stream = await navigator.mediaDevices.getUserMedia({
-        video: { width: 640, height: 480 }
+        video: { 
+          width: { ideal: 640 },
+          height: { ideal: 480 },
+          facingMode: 'user'
+        }
       });
       
       video.srcObject = this.stream;
       this.videoElement = video;
-    } catch (error) {
-      console.error('Error accessing camera:', error);
-      this.errorMessage = 'Failed to access camera. Please grant camera permissions.';
+      
+      // Wait for video to be ready
+      await new Promise<void>((resolve) => {
+        video.onloadedmetadata = () => {
+          console.log('✅ Camera ready');
+          resolve();
+        };
+      });
+      
+    } catch (error: any) {
+      console.error('❌ Error accessing camera:', error);
+      if (error.name === 'NotAllowedError') {
+        this.errorMessage = 'Camera access denied. Please grant camera permissions and try again.';
+      } else if (error.name === 'NotFoundError') {
+        this.errorMessage = 'No camera found. Please connect a camera and try again.';
+      } else {
+        this.errorMessage = 'Failed to access camera. Please check your camera settings.';
+      }
     }
   }
 
@@ -164,63 +221,145 @@ export class ExamDashboardComponent implements OnInit {
   }
 
   capturePhoto(): void {
-    if (!this.videoElement) return;
-
-    const canvas = document.createElement('canvas');
-    canvas.width = this.videoElement.videoWidth;
-    canvas.height = this.videoElement.videoHeight;
+    console.log('📸 Capturing photo...');
     
-    const context = canvas.getContext('2d');
-    if (context) {
-      context.drawImage(this.videoElement, 0, 0);
-      this.capturedImage = canvas.toDataURL('image/jpeg');
+    if (!this.videoElement) {
+      console.error('❌ Video element not available');
+      this.errorMessage = 'Camera not ready. Please wait and try again.';
+      return;
+    }
+
+    if (this.videoElement.readyState !== this.videoElement.HAVE_ENOUGH_DATA) {
+      console.error('❌ Video not ready:', this.videoElement.readyState);
+      this.errorMessage = 'Camera is still loading. Please wait a moment and try again.';
+      return;
+    }
+
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = this.videoElement.videoWidth;
+      canvas.height = this.videoElement.videoHeight;
+      
+      console.log('📐 Canvas size:', canvas.width, 'x', canvas.height);
+      
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Invalid video dimensions');
+      }
+      
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(this.videoElement, 0, 0);
+        this.capturedImage = canvas.toDataURL('image/jpeg', 0.95);
+        console.log('✅ Photo captured successfully');
+        console.log('📊 Image size:', Math.round(this.capturedImage.length / 1024), 'KB');
+      } else {
+        throw new Error('Failed to get canvas context');
+      }
+    } catch (error) {
+      console.error('❌ Error capturing photo:', error);
+      this.errorMessage = 'Failed to capture photo. Please try again.';
     }
   }
 
   retakePhoto(): void {
+    console.log('🔄 Retaking photo...');
     this.capturedImage = null;
+    this.errorMessage = '';
+    this.successMessage = '';
   }
 
   async enrollInExam(): Promise<void> {
-    if (!this.selectedExam || !this.capturedImage || !this.currentUser?.userId) {
+    console.log('🚀 enrollInExam() called');
+    console.log('📋 selectedExam:', this.selectedExam);
+    console.log('📸 capturedImage exists:', !!this.capturedImage);
+    console.log('📸 capturedImage length:', this.capturedImage?.length);
+    console.log('👤 currentUser:', this.currentUser);
+    
+    if (!this.selectedExam) {
+      console.error('❌ No exam selected');
+      this.errorMessage = 'No exam selected';
+      return;
+    }
+    
+    if (!this.capturedImage) {
+      console.error('❌ No captured image');
       this.errorMessage = 'Please capture your photo first';
       return;
     }
+    
+    // Support both id and userId properties
+    const studentId = this.currentUser?.id || this.currentUser?.userId;
+    if (!studentId) {
+      console.error('❌ No user ID available');
+      console.error('Current user object:', this.currentUser);
+      this.errorMessage = 'User not authenticated. Please login again.';
+      return;
+    }
 
+    console.log('✅ All validation passed, proceeding with enrollment...');
+    console.log('📝 Using student ID:', studentId);
     this.enrolling = true;
     this.errorMessage = '';
     this.successMessage = '';
 
     try {
+      console.log('🔄 Starting enrollment process...');
+      console.log('📝 Exam ID:', this.selectedExam.id);
+      console.log('👤 Student ID:', studentId);
+      
       // Convert base64 to File
       const response = await fetch(this.capturedImage);
       const blob = await response.blob();
       const file = new File([blob], 'face.jpg', { type: 'image/jpeg' });
+      console.log('📸 Image file created:', file.size, 'bytes');
 
       this.enrollmentService.enrollInExam(
         this.selectedExam.id!,
-        this.currentUser.userId,
+        studentId,
         file
       ).subscribe({
         next: (response) => {
-          this.successMessage = `Successfully enrolled in ${this.selectedExam!.title}!`;
+          console.log('✅ Enrollment successful:', response);
+          this.successMessage = `Successfully enrolled in ${this.selectedExam!.title}! Redirecting to exam...`;
           this.enrolling = false;
           
-          // Reload enrollments
+          // Store the exam for navigation
+          const enrolledExam = this.selectedExam!;
+          
+          // Close modal and navigate to exam details
           setTimeout(() => {
-            this.loadEnrollments();
             this.closeEnrollmentModal();
-          }, 2000);
+            this.loadEnrollments();
+            // Navigate to exam details page
+            console.log('🎯 Navigating to exam details:', enrolledExam.id);
+            this.router.navigate(['/exam-details', enrolledExam.id]);
+          }, 1500);
         },
         error: (error) => {
-          console.error('Enrollment error:', error);
-          this.errorMessage = error.error?.error || 'Failed to enroll. Please try again.';
+          console.error('❌ Enrollment error:', error);
+          console.error('Error status:', error.status);
+          console.error('Error body:', error.error);
+          
+          let errorMsg = 'Failed to enroll. ';
+          if (error.error?.error) {
+            errorMsg += error.error.error;
+          } else if (error.status === 400) {
+            errorMsg += 'Face verification failed. Please ensure your face is clearly visible and try again.';
+          } else if (error.status === 503) {
+            errorMsg += 'Face verification service is unavailable. Please try again later.';
+          } else if (error.status === 0) {
+            errorMsg += 'Cannot connect to server. Please check your connection.';
+          } else {
+            errorMsg += 'Please try again.';
+          }
+          
+          this.errorMessage = errorMsg;
           this.enrolling = false;
         }
       });
     } catch (error) {
       console.error('Error processing image:', error);
-      this.errorMessage = 'Failed to process image';
+      this.errorMessage = 'Failed to process image. Please try again.';
       this.enrolling = false;
     }
   }

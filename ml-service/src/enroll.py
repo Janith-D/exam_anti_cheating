@@ -123,7 +123,11 @@ class FaceEnrollmentSystem:
             self.save_enrollment_metadata(studentId, image_path, embedding_quality)
             logging.info(f"User {studentId} enrolled successfully (quality {embedding_quality:.3f})")
 
-            return {"success": True, "embedding": embedding}
+            return {
+                "success": True, 
+                "embedding": embedding,
+                "quality": embedding_quality
+            }
 
         except KeyboardInterrupt:
             logging.info("Enrollment cancelled by user")

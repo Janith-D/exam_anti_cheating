@@ -146,7 +146,9 @@ public class AuthService implements UserDetailsService {
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
+        response.put("userId", student.getId()); // ✅ Added missing userId
         response.put("userName", userName);
+        response.put("email", student.getEmail()); // ✅ Added email
         response.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
         response.put("verified", true);
         response.put("activationAllowed", true);

@@ -1,19 +1,29 @@
 package com.example.anti_cheating_backend.controller;
 
-import com.example.anti_cheating_backend.entity.Enrollment;
-import com.example.anti_cheating_backend.entity.Enums;
-import com.example.anti_cheating_backend.service.EnrollmentService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.anti_cheating_backend.dto.EnrollmentDTO;
+import com.example.anti_cheating_backend.entity.Enrollment;
+import com.example.anti_cheating_backend.entity.Enums;
+import com.example.anti_cheating_backend.service.EnrollmentService;
 
 @RestController
 @RequestMapping("/api/enrollment")
@@ -87,8 +97,18 @@ public class EnrollmentController {
     public ResponseEntity<?> getStudentEnrollments(@PathVariable Long studentId) {
         try {
             List<Enrollment> enrollments = enrollmentService.getStudentEnrollments(studentId);
-            return ResponseEntity.ok(enrollments);
-        } catch (RuntimeException e) {
+            
+            // Filter out enrollments without exams (legacy data)
+            List<EnrollmentDTO> enrollmentDTOs = enrollments.stream()
+                .filter(e -> e.getExam() != null && e.getStudent() != null)
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+                
+            return ResponseEntity.ok(enrollmentDTOs);
+        } catch (Exception e) {
+            // Log the full error for debugging
+            System.err.println("Error in getStudentEnrollments: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
@@ -98,7 +118,10 @@ public class EnrollmentController {
     public ResponseEntity<?> getExamEnrollments(@PathVariable Long examId) {
         try {
             List<Enrollment> enrollments = enrollmentService.getExamEnrollments(examId);
-            return ResponseEntity.ok(enrollments);
+            List<EnrollmentDTO> enrollmentDTOs = enrollments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(enrollmentDTOs);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -112,7 +135,10 @@ public class EnrollmentController {
         try {
             Enums.EnrollmentStatus enrollmentStatus = Enums.EnrollmentStatus.valueOf(status.toUpperCase());
             List<Enrollment> enrollments = enrollmentService.getExamEnrollmentsByStatus(examId, enrollmentStatus);
-            return ResponseEntity.ok(enrollments);
+            List<EnrollmentDTO> enrollmentDTOs = enrollments.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+            return ResponseEntity.ok(enrollmentDTOs);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid status: " + status));
         } catch (RuntimeException e) {
@@ -153,5 +179,37 @@ public class EnrollmentController {
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
+    }
+
+    // Helper method to convert Enrollment entity to DTO
+    private EnrollmentDTO convertToDTO(Enrollment enrollment) {
+        if (enrollment == null) {
+            throw new IllegalArgumentException("Enrollment cannot be null");
+        }
+        
+        EnrollmentDTO dto = new EnrollmentDTO();
+        dto.setId(enrollment.getId());
+        
+        // Handle Student
+        if (enrollment.getStudent() != null) {
+            dto.setStudentId(enrollment.getStudent().getId());
+            dto.setStudentName(enrollment.getStudent().getUserName());
+        }
+        
+        // Handle Exam
+        if (enrollment.getExam() != null) {
+            dto.setExamId(enrollment.getExam().getId());
+            dto.setExamTitle(enrollment.getExam().getTitle());
+            dto.setExamDescription(enrollment.getExam().getDescription());
+            dto.setExamStartDate(enrollment.getExam().getStartDate());
+            dto.setExamEndDate(enrollment.getExam().getEndDate());
+        }
+        
+        dto.setStatus(enrollment.getStatus());
+        dto.setIsVerified(enrollment.getIsVerified());
+        dto.setVerificationScore(enrollment.getVerificationScore());
+        dto.setEnrollmentDate(enrollment.getEnrollmentDate());
+        dto.setLastVerification(enrollment.getLastVerification());
+        return dto;
     }
 }

@@ -67,16 +67,21 @@ export class ExamDetailsComponent implements OnInit {
   }
 
   loadExamTests(): void {
-    // Load all tests and filter by exam (you'll need to add this to TestService)
-    this.testService.getAllTests().subscribe({
+    if (!this.exam?.id) {
+      this.tests = [];
+      this.loading = false;
+      return;
+    }
+
+    // Load tests that belong to this specific exam
+    this.testService.getTestsByExam(this.exam.id).subscribe({
       next: (tests: Test[]) => {
-        // Filter tests that belong to this exam
-        // Note: You may need to update Test model to include examId
-        this.tests = tests; // Temporary - should filter by examId
+        this.tests = tests;
+        console.log(`Loaded ${tests.length} test(s) for exam ${this.exam?.id}:`, tests);
         this.loading = false;
       },
       error: (error: any) => {
-        console.error('Error loading tests:', error);
+        console.error('Error loading tests for exam:', error);
         this.tests = [];
         this.loading = false;
       }
@@ -105,12 +110,14 @@ export class ExamDetailsComponent implements OnInit {
   }
 
   canAccessTest(): boolean {
-    return this.enrollmentStatus === EnrollmentStatus.APPROVED;
+    // Allow access if enrollment is VERIFIED or APPROVED
+    return this.enrollmentStatus === EnrollmentStatus.VERIFIED || 
+           this.enrollmentStatus === EnrollmentStatus.APPROVED;
   }
 
   startTest(test: Test): void {
     if (!this.canAccessTest()) {
-      alert('You must be enrolled and approved to take this test');
+      alert('You must be enrolled and verified to take this test');
       return;
     }
     this.router.navigate(['/test-page', test.id]);

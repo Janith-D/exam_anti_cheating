@@ -30,7 +30,21 @@ public class ExamSessionController {
     @GetMapping
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<ExamSession>> getAllSessions() {
-        return ResponseEntity.ok(examSessionService.getAllSessions());
+        List<ExamSession> sessions = examSessionService.getAllSessions();
+        
+        // Validate exam relationships to prevent serialization errors
+        sessions.forEach(session -> {
+            try {
+                if (session.getExam() != null) {
+                    session.getExam().getId(); // Trigger lazy load
+                }
+            } catch (Exception e) {
+                System.err.println("Warning: Session " + session.getId() + " has invalid exam reference");
+                session.setExam(null); // Clear invalid reference
+            }
+        });
+        
+        return ResponseEntity.ok(sessions);
     }
 
     // Get exam session by ID
@@ -39,6 +53,18 @@ public class ExamSessionController {
     public ResponseEntity<?> getSessionById(@PathVariable Long sessionId) {
         try {
             ExamSession session = examSessionService.getSessionById(sessionId);
+            
+            // Handle potential lazy loading issues with exam relationship
+            try {
+                if (session.getExam() != null) {
+                    // Trigger lazy load to validate exam exists
+                    session.getExam().getId();
+                }
+            } catch (Exception e) {
+                System.err.println("Warning: Session " + sessionId + " has invalid exam reference: " + e.getMessage());
+                // Continue - session is still valid without exam
+            }
+            
             return ResponseEntity.ok(session);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -76,7 +102,21 @@ public class ExamSessionController {
     @GetMapping("/active")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
     public ResponseEntity<List<ExamSession>> getActiveSessions() {
-        return ResponseEntity.ok(examSessionService.getActiveSessions());
+        List<ExamSession> sessions = examSessionService.getActiveSessions();
+        
+        // Validate exam relationships to prevent serialization errors
+        sessions.forEach(session -> {
+            try {
+                if (session.getExam() != null) {
+                    session.getExam().getId(); // Trigger lazy load
+                }
+            } catch (Exception e) {
+                System.err.println("Warning: Active session " + session.getId() + " has invalid exam reference");
+                session.setExam(null); // Clear invalid reference
+            }
+        });
+        
+        return ResponseEntity.ok(sessions);
     }
 
     // Update exam session

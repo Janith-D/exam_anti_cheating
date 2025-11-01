@@ -72,8 +72,24 @@
           <a href="#" class="forgot-password">Forgot password?</a>
         </div>
 
-        <!-- Face Verification Section -->
+        <!-- Admin Login Checkbox -->
         <div class="form-group">
+          <label class="checkbox-label">
+            <input 
+              type="checkbox" 
+              [(ngModel)]="adminLogin" 
+              [ngModelOptions]="{standalone: true}"
+              class="checkbox-input"
+            />
+            <span class="checkbox-text">🔑 Admin Login (Skip face verification)</span>
+          </label>
+          <p class="help-text" *ngIf="adminLogin">
+            ⚠️ Face verification is disabled. This option is for administrators only.
+          </p>
+        </div>
+
+        <!-- Face Verification Section -->
+        <div class="form-group" *ngIf="!adminLogin">
           <label class="form-label">📸 Face Verification (Required)</label>
           <p class="help-text">Please capture your face to verify your identity</p>
           <div class="face-capture-section">
@@ -108,9 +124,11 @@
         <button
           type="submit"
           class="btn btn-primary btn-block btn-lg"
-          [disabled]="loginForm.invalid || !capturedImage || loading"
+          [disabled]="loginForm.invalid || (!adminLogin && !capturedImage) || loading"
         >
-          <span *ngIf="!loading">{{ capturedImage ? '✅ Sign in with Face Verification' : '📸 Capture Face First' }}</span>
+          <span *ngIf="!loading">
+            {{ adminLogin ? '🔑 Sign in as Admin' : (capturedImage ? '✅ Sign in with Face Verification' : '📸 Capture Face First') }}
+          </span>
           <span *ngIf="loading" class="spinner spinner-sm"></span>
         </button>
       </form>

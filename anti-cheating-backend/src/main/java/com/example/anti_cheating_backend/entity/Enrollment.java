@@ -40,7 +40,7 @@ public class Enrollment {
     private Student student;
     
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "exam_id", nullable = false)
+    @JoinColumn(name = "exam_id", nullable = true)
     @JsonIgnoreProperties({"tests", "enrollments", "hibernateLazyInitializer", "handler"})
     private Exam exam;
     

@@ -17,6 +17,11 @@ export class TestService {
     return this.http.get<Test[]>(this.apiUrl);
   }
 
+  // Get tests by exam ID
+  getTestsByExam(examId: number): Observable<Test[]> {
+    return this.http.get<Test[]>(`http://localhost:8080/api/exams/${examId}/tests`);
+  }
+
   // Get test by ID
   getTestById(id: number): Observable<Test> {
     return this.http.get<Test>(`${this.apiUrl}/${id}`);

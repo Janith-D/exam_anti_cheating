@@ -128,29 +128,84 @@ public class AuthService implements UserDetailsService {
         final String jwt = jwtUtil.generateToken(userDetails);
 
         Student student = studentRepo.findByUserName(userName);
-        Enrollment enrollment = enrollmentRepo.findByStudentId(student.getId());
-        if (enrollment == null) {
-            throw new RuntimeException("No enrollment found for user");
-        }
+        
+        // Check if user is ADMIN - admins don't need face verification
+        boolean isAdmin = student.getRole() == Enums.UserRole.ADMIN;
+        LOGGER.info("User role: " + student.getRole() + ", isAdmin: " + isAdmin);
+        
+        boolean verified = true; // Default to verified for admins
+        
+        // Only require face verification for STUDENTS
+        if (!isAdmin) {
+            LOGGER.info("User is STUDENT, checking face enrollment...");
+            
+            // Get ALL enrollments for the student (including exam enrollments and face enrollment)
+            java.util.List<Enrollment> enrollments = enrollmentRepo.findAllByStudentId(student.getId());
+            
+            LOGGER.info("Found " + enrollments.size() + " enrollments for student " + student.getId());
+            
+            // Find the face enrollment (the one without an exam, or the oldest one)
+            Enrollment faceEnrollment = null;
+            for (Enrollment e : enrollments) {
+                try {
+                    // Check if exam is null or has invalid ID
+                    if (e.getExam() == null) {
+                        LOGGER.info("Found enrollment " + e.getId() + " with null exam (face-only enrollment)");
+                        if (e.getFaceEmbedding() != null && !e.getFaceEmbedding().isEmpty()) {
+                            faceEnrollment = e;
+                            break;
+                        }
+                    }
+                } catch (Exception ex) {
+                    // Exam reference might be invalid (e.g., exam_id = 0), skip this enrollment
+                    LOGGER.warning("Skipping enrollment " + e.getId() + " due to invalid exam reference: " + ex.getMessage());
+                    if (e.getFaceEmbedding() != null && !e.getFaceEmbedding().isEmpty()) {
+                        faceEnrollment = e;
+                        break;
+                    }
+                }
+            }
+            
+            // If no face-only enrollment found, use the first one with face embedding
+            if (faceEnrollment == null && !enrollments.isEmpty()) {
+                for (Enrollment e : enrollments) {
+                    try {
+                        if (e.getFaceEmbedding() != null && !e.getFaceEmbedding().isEmpty()) {
+                            LOGGER.info("Using enrollment " + e.getId() + " with face embedding");
+                            faceEnrollment = e;
+                            break;
+                        }
+                    } catch (Exception ex) {
+                        LOGGER.warning("Error accessing enrollment " + e.getId() + ": " + ex.getMessage());
+                    }
+                }
+            }
+            
+            if (faceEnrollment == null || faceEnrollment.getFaceEmbedding() == null) {
+                throw new RuntimeException("No face enrollment found for student. Please register with face verification first.");
+            }
 
-        boolean verified;
-        if (mlServiceEnabled) {
-            verified = verifyFace(student.getId(), imageBase64, enrollment.getFaceEmbedding());
+            // Verify face for students only
+            if (mlServiceEnabled) {
+                verified = verifyFace(student.getId(), imageBase64, faceEnrollment.getFaceEmbedding());
+            } else {
+                LOGGER.info("ML service disabled, skipping face verification");
+                verified = true;
+            }
+            if (!verified) {
+                throw new RuntimeException("Face verification failed during login");
+            }
         } else {
-            LOGGER.info("ML service disabled, skipping face verification");
-            verified = true;
-        }
-        if (!verified) {
-            throw new RuntimeException("Face verification failed during login");
+            LOGGER.info("User is ADMIN, skipping face verification");
         }
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
-        response.put("userId", student.getId()); // ✅ Added missing userId
+        response.put("userId", student.getId());
         response.put("userName", userName);
-        response.put("email", student.getEmail()); // ✅ Added email
+        response.put("email", student.getEmail());
         response.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
-        response.put("verified", true);
+        response.put("verified", verified);
         response.put("activationAllowed", true);
 
         return response;

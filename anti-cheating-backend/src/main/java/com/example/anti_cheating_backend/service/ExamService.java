@@ -167,8 +167,9 @@ public class ExamService {
             examSessions.forEach(dto::addSession);
             
             // Check if student is enrolled
+            // Filter out face-only enrollments (exam is null) before checking enrollment
             enrollments.stream()
-                .filter(e -> e.getExam().getId().equals(exam.getId()))
+                .filter(e -> e.getExam() != null && e.getExam().getId().equals(exam.getId()))
                 .findFirst()
                 .ifPresentOrElse(
                     enrollment -> {

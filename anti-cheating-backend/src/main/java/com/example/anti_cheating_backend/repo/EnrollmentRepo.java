@@ -14,9 +14,9 @@ public interface EnrollmentRepo extends JpaRepository<Enrollment,Long> {
     // Legacy method for backward compatibility
     Enrollment findByStudentId(Long studentId);
     
-    // Exam-based enrollment queries with JOIN FETCH to avoid lazy loading issues
-    // LEFT JOIN to handle legacy enrollments without exams
-    @Query("SELECT e FROM Enrollment e LEFT JOIN FETCH e.student LEFT JOIN FETCH e.exam WHERE e.student.id = :studentId")
+    // Get enrollments for a student - simple query without JOIN FETCH to avoid issues with NULL/invalid exam_id
+    // This allows the controller to handle lazy loading safely with try-catch
+    @Query("SELECT e FROM Enrollment e WHERE e.student.id = :studentId")
     List<Enrollment> findAllByStudentId(@Param("studentId") Long studentId);
     
     @Query("SELECT e FROM Enrollment e JOIN FETCH e.student JOIN FETCH e.exam WHERE e.exam.id = :examId")

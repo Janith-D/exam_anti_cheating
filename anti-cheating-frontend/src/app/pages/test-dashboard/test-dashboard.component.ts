@@ -123,8 +123,8 @@ export class TestDashboardComponent implements OnInit {
 
   startExam(examId: number, sessionId: number): void {
     console.log('Starting exam:', examId, 'Session:', sessionId);
-    // TODO: Navigate to exam taking interface
-    this.router.navigate(['/exam', examId, 'session', sessionId]);
+    // Navigate to exam details page where student can see and start tests
+    this.router.navigate(['/exam-details', examId]);
   }
 
   enrollInExam(examId: number): void {
@@ -144,7 +144,8 @@ export class TestDashboardComponent implements OnInit {
 
   canStartExam(exam: any): boolean {
     if (!exam.isEnrolled) return false;
-    if (exam.enrollmentStatus !== 'APPROVED') return false;
+    // Accept both VERIFIED and APPROVED enrollment statuses
+    if (exam.enrollmentStatus !== 'APPROVED' && exam.enrollmentStatus !== 'VERIFIED') return false;
     if (!exam.activeSessions || exam.activeSessions.length === 0) return false;
     
     return exam.activeSessions.some((s: any) => s.status === 'ACTIVE');

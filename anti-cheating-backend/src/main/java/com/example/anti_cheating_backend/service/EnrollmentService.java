@@ -1,12 +1,11 @@
 package com.example.anti_cheating_backend.service;
 
-import com.example.anti_cheating_backend.entity.Enrollment;
-import com.example.anti_cheating_backend.entity.Enums;
-import com.example.anti_cheating_backend.entity.Exam;
-import com.example.anti_cheating_backend.entity.Student;
-import com.example.anti_cheating_backend.repo.EnrollmentRepo;
-import com.example.anti_cheating_backend.repo.ExamRepo;
-import com.example.anti_cheating_backend.repo.StudentRepo;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +13,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.example.anti_cheating_backend.entity.Enrollment;
+import com.example.anti_cheating_backend.entity.Enums;
+import com.example.anti_cheating_backend.entity.Exam;
+import com.example.anti_cheating_backend.entity.Student;
+import com.example.anti_cheating_backend.repo.EnrollmentRepo;
+import com.example.anti_cheating_backend.repo.ExamRepo;
+import com.example.anti_cheating_backend.repo.StudentRepo;
 
 @Service
 public class EnrollmentService {
@@ -113,9 +115,16 @@ public class EnrollmentService {
             throw new RuntimeException("Exam is not available for enrollment. Current status: " + exam.getStatus());
         }
 
-        // Check if already enrolled
-        if (enrollmentRepo.existsByStudentIdAndExamId(studentId, examId)) {
-            throw new RuntimeException("Student is already enrolled in this exam");
+        // Check if already enrolled with APPROVED status
+        Optional<Enrollment> existingEnrollment = enrollmentRepo.findByStudentIdAndExamId(studentId, examId);
+        if (existingEnrollment.isPresent()) {
+            Enrollment enrollment = existingEnrollment.get();
+            // If already approved, don't allow re-enrollment
+            if (enrollment.getStatus() == Enums.EnrollmentStatus.APPROVED) {
+                throw new RuntimeException("Student is already enrolled in this exam");
+            }
+            // If pending/rejected, allow re-verification by updating existing enrollment
+            LOGGER.info("Updating existing enrollment " + enrollment.getId() + " for student " + studentId + " in exam " + examId);
         }
 
         // Check if exam is full
@@ -128,7 +137,7 @@ public class EnrollmentService {
 
         if (!mlServiceEnabled) {
             LOGGER.info("ML service disabled, using mock enrollment for exam: " + examId);
-            return createMockExamEnrollment(student, exam);
+            return createMockExamEnrollment(student, exam, existingEnrollment);
         }
 
         // Call ML service for face verification
@@ -161,7 +170,8 @@ public class EnrollmentService {
             throw new RuntimeException(errorMsg);
         }
 
-        Enrollment enrollment = new Enrollment();
+        // Reuse existing enrollment if present, otherwise create new
+        Enrollment enrollment = existingEnrollment.orElse(new Enrollment());
         enrollment.setStudent(student);
         enrollment.setExam(exam);
         enrollment.setFaceEmbedding(result.get("embedding") != null ? 
@@ -175,8 +185,9 @@ public class EnrollmentService {
         return enrollmentRepo.save(enrollment);
     }
 
-    private Enrollment createMockExamEnrollment(Student student, Exam exam) {
-        Enrollment enrollment = new Enrollment();
+    private Enrollment createMockExamEnrollment(Student student, Exam exam, Optional<Enrollment> existingEnrollment) {
+        // Reuse existing enrollment if present, otherwise create new
+        Enrollment enrollment = existingEnrollment.orElse(new Enrollment());
         enrollment.setStudent(student);
         enrollment.setExam(exam);
         enrollment.setFaceEmbedding("mock_embedding_data_exam_" + exam.getId());

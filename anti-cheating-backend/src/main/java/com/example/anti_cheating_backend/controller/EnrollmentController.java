@@ -1,3 +1,4 @@
+
 package com.example.anti_cheating_backend.controller;
 
 import java.util.Base64;
@@ -76,14 +77,14 @@ public class EnrollmentController {
         try {
             String imageBase64 = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getBytes());
             Enrollment enrollment = enrollmentService.enrollInExam(studentId, examId, imageBase64);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Enrolled in exam successfully");
             response.put("enrollmentId", enrollment.getId());
             response.put("examId", examId);
             response.put("status", enrollment.getStatus());
             response.put("verificationScore", enrollment.getVerificationScore());
-            
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();
@@ -98,15 +99,34 @@ public class EnrollmentController {
         try {
             List<Enrollment> enrollments = enrollmentService.getStudentEnrollments(studentId);
             
-            // Filter out enrollments without exams (legacy data)
+            System.out.println("Found " + enrollments.size() + " enrollments for student " + studentId);
+
+            // Safely filter and convert enrollments
             List<EnrollmentDTO> enrollmentDTOs = enrollments.stream()
-                .filter(e -> e.getExam() != null && e.getStudent() != null)
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-                
+                    .filter(e -> {
+                        try {
+                            // Only include enrollments that have an exam
+                            return e.getExam() != null && e.getStudent() != null;
+                        } catch (Exception ex) {
+                            // Skip enrollments with invalid exam references
+                            System.err.println("Skipping enrollment " + e.getId() + " due to error: " + ex.getMessage());
+                            return false;
+                        }
+                    })
+                    .map(e -> {
+                        try {
+                            return convertToDTO(e);
+                        } catch (Exception ex) {
+                            System.err.println("Error converting enrollment " + e.getId() + ": " + ex.getMessage());
+                            return null;
+                        }
+                    })
+                    .filter(dto -> dto != null)
+                    .collect(Collectors.toList());
+            
+            System.out.println("Returning " + enrollmentDTOs.size() + " valid enrollments");
             return ResponseEntity.ok(enrollmentDTOs);
         } catch (Exception e) {
-            // Log the full error for debugging
             System.err.println("Error in getStudentEnrollments: " + e.getMessage());
             e.printStackTrace();
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -119,8 +139,8 @@ public class EnrollmentController {
         try {
             List<Enrollment> enrollments = enrollmentService.getExamEnrollments(examId);
             List<EnrollmentDTO> enrollmentDTOs = enrollments.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(enrollmentDTOs);
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
@@ -136,8 +156,8 @@ public class EnrollmentController {
             Enums.EnrollmentStatus enrollmentStatus = Enums.EnrollmentStatus.valueOf(status.toUpperCase());
             List<Enrollment> enrollments = enrollmentService.getExamEnrollmentsByStatus(examId, enrollmentStatus);
             List<EnrollmentDTO> enrollmentDTOs = enrollments.stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
             return ResponseEntity.ok(enrollmentDTOs);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid status: " + status));
@@ -154,12 +174,12 @@ public class EnrollmentController {
         try {
             Enums.EnrollmentStatus enrollmentStatus = Enums.EnrollmentStatus.valueOf(status.toUpperCase());
             Enrollment enrollment = enrollmentService.updateEnrollmentStatus(enrollmentId, enrollmentStatus);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Enrollment status updated successfully");
             response.put("enrollmentId", enrollment.getId());
             response.put("status", enrollment.getStatus());
-            
+
             return ResponseEntity.ok(response);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", "Invalid status: " + status));
@@ -186,25 +206,33 @@ public class EnrollmentController {
         if (enrollment == null) {
             throw new IllegalArgumentException("Enrollment cannot be null");
         }
-        
+
         EnrollmentDTO dto = new EnrollmentDTO();
         dto.setId(enrollment.getId());
-        
-        // Handle Student
-        if (enrollment.getStudent() != null) {
-            dto.setStudentId(enrollment.getStudent().getId());
-            dto.setStudentName(enrollment.getStudent().getUserName());
+
+        // Handle Student with try-catch
+        try {
+            if (enrollment.getStudent() != null) {
+                dto.setStudentId(enrollment.getStudent().getId());
+                dto.setStudentName(enrollment.getStudent().getUserName());
+            }
+        } catch (Exception e) {
+            System.err.println("Error accessing student for enrollment " + enrollment.getId() + ": " + e.getMessage());
         }
-        
-        // Handle Exam
-        if (enrollment.getExam() != null) {
-            dto.setExamId(enrollment.getExam().getId());
-            dto.setExamTitle(enrollment.getExam().getTitle());
-            dto.setExamDescription(enrollment.getExam().getDescription());
-            dto.setExamStartDate(enrollment.getExam().getStartDate());
-            dto.setExamEndDate(enrollment.getExam().getEndDate());
+
+        // Handle Exam with try-catch
+        try {
+            if (enrollment.getExam() != null) {
+                dto.setExamId(enrollment.getExam().getId());
+                dto.setExamTitle(enrollment.getExam().getTitle());
+                dto.setExamDescription(enrollment.getExam().getDescription());
+                dto.setExamStartDate(enrollment.getExam().getStartDate());
+                dto.setExamEndDate(enrollment.getExam().getEndDate());
+            }
+        } catch (Exception e) {
+            System.err.println("Error accessing exam for enrollment " + enrollment.getId() + ": " + e.getMessage());
         }
-        
+
         dto.setStatus(enrollment.getStatus());
         dto.setIsVerified(enrollment.getIsVerified());
         dto.setVerificationScore(enrollment.getVerificationScore());

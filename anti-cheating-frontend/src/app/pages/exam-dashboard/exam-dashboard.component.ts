@@ -126,7 +126,9 @@ export class ExamDashboardComponent implements OnInit {
     
     this.enrollmentService.getStudentEnrollments(studentId).subscribe({
       next: (enrollments) => {
-        this.enrolledExams = enrollments;
+        // Filter out enrollments without valid exam data (face-only enrollments)
+        this.enrolledExams = enrollments.filter(e => e.exam != null);
+        console.log('✅ Loaded enrollments with valid exams:', this.enrolledExams.length);
       },
       error: (error) => {
         console.error('Error loading enrollments:', error);
@@ -364,7 +366,11 @@ export class ExamDashboardComponent implements OnInit {
     }
   }
 
-  viewExamDetails(exam: Exam): void {
+  viewExamDetails(exam: Exam | undefined | null): void {
+    if (!exam || !exam.id) {
+      console.error('Cannot view exam details: exam is null or missing ID');
+      return;
+    }
     this.router.navigate(['/exam-details', exam.id]);
   }
 

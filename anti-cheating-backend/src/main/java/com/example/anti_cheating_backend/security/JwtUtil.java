@@ -1,20 +1,22 @@
 package com.example.anti_cheating_backend.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.security.Keys;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
-
-import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
+
+import javax.crypto.SecretKey;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
 
 @Component
 public class JwtUtil {
@@ -29,16 +31,33 @@ public class JwtUtil {
 
     private SecretKey getSigningKey() {
         try {
+            // Decode the Base64 secret from properties
             byte[] keyBytes = Base64.getDecoder().decode(secret);
+            
+            // Ensure the key is at least 512 bits (64 bytes) for HS512
             if (keyBytes.length < 64) {
-                LOGGER.warning("JWT secret key is too short for HS512 (< 512 bits). Generating a new secure key.");
-                return Keys.secretKeyFor(SignatureAlgorithm.HS512);
+                // Pad the key to 64 bytes if it's too short
+                byte[] paddedKey = new byte[64];
+                System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 64));
+                LOGGER.warning("JWT secret key was too short, padded to 512 bits");
+                return Keys.hmacShaKeyFor(paddedKey);
             }
+            
+            LOGGER.info("Using configured JWT secret key (stable across restarts)");
             return Keys.hmacShaKeyFor(keyBytes);
         } catch (IllegalArgumentException e) {
-            LOGGER.severe("Invalid Base64 secret key: " + e.getMessage());
-            LOGGER.info("Generating a new secure key for HS512.");
-            return Keys.secretKeyFor(SignatureAlgorithm.HS512);
+            // If Base64 decoding fails, use the secret as-is (UTF-8 bytes)
+            LOGGER.warning("Secret is not valid Base64, using as UTF-8 string: " + e.getMessage());
+            byte[] keyBytes = secret.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            
+            // Pad if necessary
+            if (keyBytes.length < 64) {
+                byte[] paddedKey = new byte[64];
+                System.arraycopy(keyBytes, 0, paddedKey, 0, Math.min(keyBytes.length, 64));
+                return Keys.hmacShaKeyFor(paddedKey);
+            }
+            
+            return Keys.hmacShaKeyFor(keyBytes);
         }
     }
 

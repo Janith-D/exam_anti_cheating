@@ -35,9 +35,9 @@ public class ExamSession {
     @Column(name = "exam_name")
     private String examName;
     
-    // Many sessions belong to one exam
+    // Many sessions belong to one exam (optional - can be null for test sessions)
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "exam_id")
+    @JoinColumn(name = "exam_id", nullable = true)
     private Exam exam;
     
     @Column(name = "start_time")

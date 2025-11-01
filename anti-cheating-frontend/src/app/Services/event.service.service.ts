@@ -15,7 +15,7 @@ export class EventService {
    * Log an event to the backend
    */
   logEvent(event: any): Observable<Event> {
-    return this.http.post<Event>(this.apiUrl, event);
+    return this.http.post<Event>(`${this.apiUrl}/log`, event);
   }
 
   /**

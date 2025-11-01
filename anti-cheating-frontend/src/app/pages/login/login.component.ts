@@ -1,6 +1,6 @@
 import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../Services/auth.service.service';
 import { CameraService } from '../../Services/camera.service';
@@ -8,7 +8,7 @@ import { CameraService } from '../../Services/camera.service';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule, RouterModule],
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
@@ -22,6 +22,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   successMessage = '';
   showCamera = false;
   capturedImage: string | null = null;
+  adminLogin = false; // Flag for admin login without face verification
 
   constructor(
     private fb: FormBuilder,
@@ -47,8 +48,13 @@ export class LoginComponent implements OnInit, OnDestroy {
     // Check if session expired
     this.route.queryParams.subscribe(params => {
       if (params['sessionExpired'] === 'true') {
-        this.errorMessage = '⏱️ Your session has expired. Please login again.';
-        console.log('🔒 Session expired - showing message to user');
+        const reason = params['reason'];
+        if (reason === 'backend_restart') {
+          this.errorMessage = '🔄 Server was restarted. Please login again to continue.';
+        } else {
+          this.errorMessage = '⏱️ Your session has expired. Please login again.';
+        }
+        console.log('🔒 Session expired - showing message to user. Reason:', reason);
       }
     });
   }
@@ -212,9 +218,9 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Check if face verification is done
-    if (!this.capturedImage) {
-      this.errorMessage = 'Please capture your face for verification before signing in.';
+    // Check if face verification is done (skip for admin login)
+    if (!this.adminLogin && !this.capturedImage) {
+      this.errorMessage = 'Please capture your face for verification before signing in, or enable "Admin Login".';
       return;
     }
 
@@ -227,16 +233,23 @@ export class LoginComponent implements OnInit, OnDestroy {
       const password = this.loginForm.get('password')?.value;
       
       console.log('Logging in with username:', username);
+      console.log('Admin login mode:', this.adminLogin);
       console.log('Face image captured:', this.capturedImage ? 'Yes' : 'No');
-      
-      // Convert base64 image to Blob
-      const imageBlob = this.base64ToBlob(this.capturedImage);
       
       // Create FormData for multipart/form-data request
       const formData = new FormData();
       formData.append('userName', username);
-      formData.append('password', password); // Use actual password from form
-      formData.append('image', imageBlob, 'face.jpg');
+      formData.append('password', password);
+      
+      // Add image only if not admin login or if image is captured
+      if (this.capturedImage) {
+        const imageBlob = this.base64ToBlob(this.capturedImage);
+        formData.append('image', imageBlob, 'face.jpg');
+      } else if (this.adminLogin) {
+        // For admin login without face, send a dummy 1x1 transparent PNG
+        const dummyBlob = this.createDummyImage();
+        formData.append('image', dummyBlob, 'dummy.png');
+      }
       
       // Send FormData directly to backend
       this.authService.loginWithFace(formData).subscribe({
@@ -273,6 +286,17 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     return new Blob([uInt8Array], { type: contentType });
+  }
+
+  private createDummyImage(): Blob {
+    // Create a 1x1 transparent PNG (smallest valid image)
+    const base64 = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==';
+    const binary = atob(base64);
+    const array = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) {
+      array[i] = binary.charCodeAt(i);
+    }
+    return new Blob([array], { type: 'image/png' });
   }
 
   private redirectToDashboard(): void {

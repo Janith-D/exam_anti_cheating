@@ -110,6 +110,12 @@ public class EventService {
             ResponseEntity<Map> response = restTemplate.postForEntity(mlService + "/verify",payload, Map.class);
             Map<String,Object> result = response.getBody();
 
+            // Null-safe access to result map
+            if (result == null || result.get("match") == null || result.get("liveness") == null) {
+                createAlert(event, "ML service returned invalid response", Enums.AlertSeverity.CRITICAL);
+                return;
+            }
+
             boolean match = Boolean.parseBoolean(result.get("match").toString());
             boolean liveness = Boolean.parseBoolean(result.get("liveness").toString());
 

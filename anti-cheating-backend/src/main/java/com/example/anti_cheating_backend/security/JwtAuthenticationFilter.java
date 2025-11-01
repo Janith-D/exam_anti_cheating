@@ -45,8 +45,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             try {
                 username = jwtUtil.extractUsername(jwt);
                 LOGGER.info("JWT Filter - Extracted username: " + username);
+            } catch (io.jsonwebtoken.ExpiredJwtException e) {
+                LOGGER.warning("JWT Filter - Token has expired: " + e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Token expired\",\"message\":\"Your session has expired. Please login again.\"}");
+                return;
             } catch (Exception e) {
                 LOGGER.severe("JWT Filter - Failed to extract username: " + e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Invalid token\",\"message\":\"Authentication failed. Please login again.\"}");
+                return;
             }
         } else {
             LOGGER.warning("JWT Filter - Authorization header missing or doesn't start with 'Bearer '");
@@ -67,9 +77,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     LOGGER.info("JWT Filter - Authentication successful for user: " + username + " with roles: " + userDetails.getAuthorities());
                 } else {
                     LOGGER.warning("JWT Filter - Token validation failed for user: " + username);
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.setContentType("application/json");
+                    response.getWriter().write("{\"error\":\"Token validation failed\",\"message\":\"Your session is invalid. Please login again.\"}");
+                    return;
                 }
             } catch (Exception e) {
                 LOGGER.severe("JWT Filter - Error during authentication: " + e.getMessage());
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"error\":\"Authentication error\",\"message\":\"Authentication failed: " + e.getMessage() + "\"}");
+                return;
             }
         }
         filterChain.doFilter(request, response);

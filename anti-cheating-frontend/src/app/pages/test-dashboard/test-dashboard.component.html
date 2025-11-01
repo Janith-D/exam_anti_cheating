@@ -116,13 +116,23 @@
               </div>
             </div>
 
+            <!-- Direct navigation to exam questions -->
+            <div class="exam-actions" *ngIf="exam.enrollmentStatus === 'APPROVED' || exam.enrollmentStatus === 'VERIFIED'">
+              <button 
+                class="btn btn-primary btn-block"
+                (click)="startExam(exam.examId, 0)"
+              >
+                📝 View Exam & Answer Questions
+              </button>
+            </div>
+
             <!-- No Active Sessions -->
             <div *ngIf="!exam.activeSessions || exam.activeSessions.length === 0" class="no-sessions">
               <p>⏰ No active sessions at the moment</p>
             </div>
 
-            <!-- Enrollment Not Approved -->
-            <div *ngIf="exam.enrollmentStatus !== 'APPROVED'" class="enrollment-notice">
+            <!-- Enrollment Not Approved/Verified -->
+            <div *ngIf="exam.enrollmentStatus !== 'APPROVED' && exam.enrollmentStatus !== 'VERIFIED'" class="enrollment-notice">
               <p>⚠️ Your enrollment is {{ exam.enrollmentStatus }}. 
                 <span *ngIf="exam.enrollmentStatus === 'PENDING'">
                   Please wait for approval.

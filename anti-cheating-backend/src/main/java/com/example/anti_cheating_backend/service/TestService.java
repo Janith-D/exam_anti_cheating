@@ -91,4 +91,8 @@ public class TestService {
         return testRepo.findAll();
     }
 
+    public List<Test> getTestsByExam(Long examId) {
+        return testRepo.findByExamId(examId);
+    }
+
 }

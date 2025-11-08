@@ -1,0 +1,276 @@
+<div class="student-management-container">
+  <!-- Header -->
+  <div class="header">
+    <button class="back-btn" (click)="goToDashboard()">
+      <span>←</span> Back to Dashboard
+    </button>
+    <h1>👥 Student Management</h1>
+  </div>
+
+  <!-- Success/Error Messages -->
+  <div class="message success" *ngIf="successMessage">
+    ✓ {{ successMessage }}
+  </div>
+  <div class="message error" *ngIf="errorMessage">
+    ✗ {{ errorMessage }}
+  </div>
+
+  <!-- Loading Spinner -->
+  <div class="loading" *ngIf="loading">
+    <div class="spinner"></div>
+    <p>Loading students...</p>
+  </div>
+
+  <!-- STUDENT LIST VIEW -->
+  <div class="students-list" *ngIf="currentView === 'list' && !loading">
+    <!-- Search and Filter Section -->
+    <div class="filter-section">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchTerm" 
+          (ngModelChange)="onSearchChange()"
+          placeholder="🔍 Search by name, username, or email..."
+          class="search-input">
+      </div>
+      
+      <div class="filter-controls">
+        <select [(ngModel)]="filterStatus" (change)="onFilterChange()" class="filter-select">
+          <option value="all">All Students</option>
+          <option value="active">Active Only</option>
+          <option value="inactive">Inactive Only</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Students Table -->
+    <div class="table-container" *ngIf="filteredStudents.length > 0">
+      <table class="students-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Created</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let student of filteredStudents" class="student-row">
+            <td><strong>#{{ student.id }}</strong></td>
+            <td>
+              <div class="username-cell">
+                <span class="username">{{ student.username }}</span>
+                <span class="student-id" *ngIf="student.studentId">
+                  ID: {{ student.studentId }}
+                </span>
+              </div>
+            </td>
+            <td>
+              <span *ngIf="student.firstName || student.lastName">
+                {{ student.firstName }} {{ student.lastName }}
+              </span>
+              <span *ngIf="!student.firstName && !student.lastName" class="text-muted">
+                Not provided
+              </span>
+            </td>
+            <td>{{ student.email }}</td>
+            <td>
+              <span class="badge" [ngClass]="student.isActive ? 'badge-active' : 'badge-inactive'">
+                {{ student.isActive ? '✓ Active' : '✗ Inactive' }}
+              </span>
+            </td>
+            <td>{{ formatDateShort(student.createdAt) }}</td>
+            <td>
+              <button class="btn-view" (click)="viewStudentProfile(student)">
+                📊 View Profile
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="filteredStudents.length === 0 && !loading">
+      <div class="empty-icon">🔍</div>
+      <h3>No Students Found</h3>
+      <p>{{ searchTerm ? 'Try adjusting your search terms' : 'No students are registered yet' }}</p>
+    </div>
+  </div>
+
+  <!-- STUDENT PROFILE VIEW -->
+  <div class="student-profile" *ngIf="currentView === 'profile' && selectedStudent">
+    <!-- Profile Header -->
+    <div class="profile-header">
+      <button class="back-btn-small" (click)="backToList()">
+        ← Back to List
+      </button>
+      <div class="profile-info">
+        <div class="profile-avatar">
+          {{ selectedStudent.username.charAt(0).toUpperCase() }}
+        </div>
+        <div class="profile-details">
+          <h2>{{ selectedStudent.firstName }} {{ selectedStudent.lastName || selectedStudent.username }}</h2>
+          <p class="profile-email">📧 {{ selectedStudent.email }}</p>
+          <p class="profile-username">👤 {{ '@' }}{{ selectedStudent.username }}</p>
+          <span class="badge" [ngClass]="selectedStudent.isActive ? 'badge-active' : 'badge-inactive'">
+            {{ selectedStudent.isActive ? '✓ Active' : '✗ Inactive' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading Stats -->
+    <div class="loading-stats" *ngIf="loadingStats">
+      <div class="spinner-small"></div>
+      <p>Loading statistics...</p>
+    </div>
+
+    <!-- Statistics Dashboard -->
+    <div class="stats-dashboard" *ngIf="studentStats && !loadingStats">
+      <h3>📊 Student Statistics</h3>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon">📝</div>
+          <div class="stat-content">
+            <h4>Total Exams</h4>
+            <p class="stat-value">{{ studentStats.totalExams }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">✅</div>
+          <div class="stat-content">
+            <h4>Completed</h4>
+            <p class="stat-value">{{ studentStats.completedExams }}</p>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon">🎯</div>
+          <div class="stat-content">
+            <h4>Active Exams</h4>
+            <p class="stat-value">{{ studentStats.activeExams }}</p>
+          </div>
+        </div>
+        <div class="stat-card clickable" (click)="filterAlertsBySeverity('all')" 
+             [class.active]="alertSeverityFilter === 'all'" title="Click to view all alerts">
+          <div class="stat-icon">🚨</div>
+          <div class="stat-content">
+            <h4>Total Alerts</h4>
+            <p class="stat-value">{{ studentStats.totalAlerts }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Alert Breakdown -->
+      <div class="alert-breakdown">
+        <h4>Alert Severity Breakdown <span class="filter-hint">(Click to filter alerts)</span></h4>
+        <div class="alert-stats">
+          <div class="alert-stat critical clickable" (click)="filterAlertsBySeverity('CRITICAL')"
+               [class.active]="alertSeverityFilter === 'CRITICAL'" title="Click to view critical alerts only">
+            <span class="alert-label">🔴 Critical</span>
+            <span class="alert-count">{{ studentStats.criticalAlerts }}</span>
+          </div>
+          <div class="alert-stat high clickable" (click)="filterAlertsBySeverity('HIGH')"
+               [class.active]="alertSeverityFilter === 'HIGH'" title="Click to view high alerts only">
+            <span class="alert-label">🟠 High</span>
+            <span class="alert-count">{{ studentStats.highAlerts }}</span>
+          </div>
+          <div class="alert-stat medium clickable" (click)="filterAlertsBySeverity('MEDIUM')"
+               [class.active]="alertSeverityFilter === 'MEDIUM'" title="Click to view medium alerts only">
+            <span class="alert-label">🟡 Medium</span>
+            <span class="alert-count">{{ studentStats.mediumAlerts }}</span>
+          </div>
+          <div class="alert-stat low clickable" (click)="filterAlertsBySeverity('LOW')"
+               [class.active]="alertSeverityFilter === 'LOW'" title="Click to view low alerts only">
+            <span class="alert-label">🟢 Low</span>
+            <span class="alert-count">{{ studentStats.lowAlerts }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Block Status -->
+      <div class="block-status" *ngIf="studentStats.currentlyBlocked">
+        <h4>⛔ Block Status</h4>
+        <div class="block-warning">
+          <p><strong>This student is currently blocked from one or more exams.</strong></p>
+        </div>
+      </div>
+
+      <!-- Block History -->
+      <div class="block-history" *ngIf="studentStats.blockHistory && studentStats.blockHistory.length > 0">
+        <h4>📜 Block History</h4>
+        <div class="history-list">
+          <div class="history-item" *ngFor="let block of studentStats.blockHistory">
+            <div class="history-header">
+              <span class="history-title">{{ block.examTitle || 'Exam #' + block.examId }}</span>
+              <span class="history-status" [ngClass]="block.unblockedAt ? 'status-unblocked' : 'status-blocked'">
+                {{ block.unblockedAt ? '✓ Unblocked' : '⛔ Blocked' }}
+              </span>
+            </div>
+            <div class="history-details">
+              <p><strong>Blocked:</strong> {{ formatDate(block.blockedAt) }} by {{ block.blockedBy }}</p>
+              <p><strong>Reason:</strong> {{ block.blockReason }}</p>
+              <p *ngIf="block.unblockedAt">
+                <strong>Unblocked:</strong> {{ formatDate(block.unblockedAt) }} by {{ block.unblockedBy }}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert History -->
+    <div class="alert-history">
+      <div class="alert-history-header">
+        <h3>🚨 Alert History</h3>
+        <div class="filter-display" *ngIf="alertSeverityFilter !== 'all'">
+          <span class="filter-badge">Showing: {{ alertSeverityFilter }} alerts</span>
+          <button class="clear-filter-btn" (click)="filterAlertsBySeverity('all')">✕ Clear Filter</button>
+        </div>
+      </div>
+      
+      <div class="alerts-timeline" *ngIf="filteredAlerts.length > 0">
+        <div class="timeline-item" *ngFor="let alert of filteredAlerts">
+          <div class="timeline-marker" [ngClass]="getSeverityClass(alert.severity)">
+            {{ getAlertIcon(alert.type) }}
+          </div>
+          <div class="timeline-content">
+            <div class="alert-card">
+              <div class="alert-header">
+                <span class="alert-severity" [ngClass]="getSeverityClass(alert.severity)">
+                  {{ alert.severity }}
+                </span>
+                <span class="alert-status-badge" [ngClass]="getStatusClass(alert.status)">
+                  {{ alert.status }}
+                </span>
+                <span class="alert-time">{{ formatDate(alert.timestamp) }}</span>
+              </div>
+              <div class="alert-body">
+                <p class="alert-type"><strong>Type:</strong> {{ alert.type }}</p>
+                <p class="alert-message">{{ alert.message }}</p>
+                <p class="alert-exam" *ngIf="alert.examSession?.exam">
+                  <strong>Exam:</strong> {{ alert.examSession?.exam?.title }}
+                </p>
+              </div>
+              <div class="alert-footer" *ngIf="alert.status === 'RESOLVED'">
+                <p>✓ Resolved {{ formatDate(alert.resolvedAt!) }} by {{ alert.resolvedBy }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="empty-state-small" *ngIf="filteredAlerts.length === 0 && studentAlerts.length > 0">
+        <p>🔍 No {{ alertSeverityFilter }} alerts found</p>
+        <button class="btn-view" (click)="filterAlertsBySeverity('all')">Show All Alerts</button>
+      </div>
+
+      <div class="empty-state-small" *ngIf="studentAlerts.length === 0">
+        <p>✓ No alerts found for this student</p>
+      </div>
+    </div>
+  </div>
+</div>

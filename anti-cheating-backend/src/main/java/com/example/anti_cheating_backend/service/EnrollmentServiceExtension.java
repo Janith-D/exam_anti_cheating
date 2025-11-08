@@ -34,6 +34,9 @@ public class EnrollmentServiceExtension {
         enrollment.setBlockedAt(LocalDateTime.now());
         enrollment.setBlockedBy(adminUsername);
         enrollment.setBlockReason(reason != null ? reason : "Repeated cheating violations");
+        // Clear any previous unblock data when re-blocking
+        enrollment.setUnblockedAt(null);
+        enrollment.setUnblockedBy(null);
         
         LOGGER.info("Blocking student " + studentId + " from exam " + examId + " by admin: " + adminUsername);
         return enrollmentRepo.save(enrollment);
@@ -48,9 +51,9 @@ public class EnrollmentServiceExtension {
         
         Enrollment enrollment = enrollmentOpt.get();
         enrollment.setIsBlocked(false);
-        enrollment.setBlockedAt(null);
-        enrollment.setBlockedBy(null);
-        enrollment.setBlockReason(null);
+        enrollment.setUnblockedAt(LocalDateTime.now());
+        enrollment.setUnblockedBy(adminUsername);
+        // Keep block history (blockedAt, blockedBy, blockReason) for audit trail
         
         LOGGER.info("Unblocking student " + studentId + " from exam " + examId + " by admin: " + adminUsername);
         return enrollmentRepo.save(enrollment);

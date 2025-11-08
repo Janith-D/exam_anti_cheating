@@ -85,7 +85,12 @@ export const routes: Routes = [
   },
   {
     path: 'admin/students',
-    loadComponent: () => import('./pages/alert-dashboard/alert-dashboard.component').then(m => m.AlertDashboardComponent),
+    loadComponent: () => import('./pages/student-management/student-management.component').then(m => m.StudentManagementComponent),
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'admin/students/:id',
+    loadComponent: () => import('./pages/student-management/student-management.component').then(m => m.StudentManagementComponent),
     canActivate: [adminGuard]
   },
   {

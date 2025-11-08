@@ -53,7 +53,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private router: Router,
+    public router: Router,
     private testService: TestService,
     private questionService: QuestionService,
     private eventService: EventService,

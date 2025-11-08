@@ -77,6 +77,12 @@ public class Enrollment {
     
     @Column(name = "block_reason")
     private String blockReason;
+    
+    @Column(name = "unblocked_at")
+    private LocalDateTime unblockedAt;
+    
+    @Column(name = "unblocked_by")
+    private String unblockedBy;
 
     @PrePersist
     protected void onCreate() {

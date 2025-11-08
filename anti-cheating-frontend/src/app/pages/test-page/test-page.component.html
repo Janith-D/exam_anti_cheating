@@ -12,6 +12,25 @@
 
   <!-- Test Content -->
   <div *ngIf="!loading && !errorMessage && test" class="test-content">
+    <!-- BLOCKED MESSAGE -->
+    <div *ngIf="isBlocked" class="blocked-overlay">
+      <div class="blocked-message">
+        <div class="blocked-icon">⛔</div>
+        <h2>Exam Access Blocked</h2>
+        <p class="blocked-reason">{{ blockReason }}</p>
+        <p class="blocked-info">
+          <strong>Blocked on:</strong> {{ blockedAt | date:'medium' }}<br>
+          <strong>Blocked by:</strong> {{ blockedBy }}
+        </p>
+        <p class="contact-info">
+          Please contact your instructor or exam administrator to resolve this issue.
+        </p>
+        <button class="btn-back" (click)="router.navigate(['/exam-dashboard'])">
+          ← Back to Dashboard
+        </button>
+      </div>
+    </div>
+
     <!-- Header with Timer -->
     <div class="test-header">
       <div class="test-info">

@@ -89,9 +89,14 @@
     </div>
 
     <div *ngIf="!enrollmentStatus" 
-         class="alert alert-info">
-      <i class="bi bi-info-circle"></i> 
-      You are not enrolled in this exam. Please enroll from the exam dashboard to access the tests.
+         class="alert alert-info d-flex justify-content-between align-items-center">
+      <div>
+        <i class="bi bi-info-circle"></i> 
+        You are not enrolled in this exam. Please enroll to access the tests.
+      </div>
+      <button class="btn btn-success" (click)="openEnrollmentModal()">
+        <i class="bi bi-person-plus"></i> Enroll Now
+      </button>
     </div>
 
     <!-- Tests Section -->
@@ -137,3 +142,69 @@
     </div>
   </div>
 </div>
+
+<!-- Enrollment Modal -->
+<div class="modal fade" [class.show]="showEnrollmentModal" [style.display]="showEnrollmentModal ? 'block' : 'none'" 
+     tabindex="-1" role="dialog" *ngIf="showEnrollmentModal">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="bi bi-person-check"></i> Enroll in Exam
+        </h5>
+        <button type="button" class="btn-close" (click)="closeEnrollmentModal()" [disabled]="enrolling"></button>
+      </div>
+      <div class="modal-body">
+        <div *ngIf="successMessage" class="alert alert-success">
+          <i class="bi bi-check-circle"></i> {{ successMessage }}
+        </div>
+        <div *ngIf="errorMessage" class="alert alert-danger">
+          <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+        </div>
+
+        <div *ngIf="exam" class="mb-3">
+          <h6>{{ exam.title }}</h6>
+          <p class="text-muted">{{ exam.description }}</p>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label">
+            <i class="bi bi-camera"></i> Upload Your Face Image
+          </label>
+          <input 
+            type="file" 
+            class="form-control" 
+            accept="image/*"
+            (change)="onFileSelected($event)"
+            [disabled]="enrolling">
+          <small class="form-text text-muted">
+            Please upload a clear photo of your face for verification
+          </small>
+        </div>
+
+        <div *ngIf="selectedImage" class="alert alert-info">
+          <i class="bi bi-image"></i> Image selected: {{ selectedImage.name }}
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeEnrollmentModal()" [disabled]="enrolling">
+          Cancel
+        </button>
+        <button 
+          type="button" 
+          class="btn btn-success" 
+          (click)="enrollInExam()"
+          [disabled]="!selectedImage || enrolling">
+          <span *ngIf="!enrolling">
+            <i class="bi bi-check-circle"></i> Enroll
+          </span>
+          <span *ngIf="enrolling">
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Enrolling...
+          </span>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade" [class.show]="showEnrollmentModal" *ngIf="showEnrollmentModal"></div>

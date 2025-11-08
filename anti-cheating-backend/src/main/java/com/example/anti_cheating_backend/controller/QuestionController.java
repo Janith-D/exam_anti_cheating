@@ -31,10 +31,18 @@ public class QuestionController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Question> createQuestion(@RequestBody Question question) {
         try {
+            LOGGER.info("=== CREATE QUESTION REQUEST ===");
+            LOGGER.info("Question text: " + question.getText());
+            LOGGER.info("Test ID: " + (question.getTest() != null ? question.getTest().getId() : "null"));
+            LOGGER.info("Options count: " + (question.getOptions() != null ? question.getOptions().size() : 0));
+            LOGGER.info("Correct option: " + question.getCorrectOption());
+            
             Question savedQuestion = questionService.createQuestion(question);
+            LOGGER.info("Question created successfully with ID: " + savedQuestion.getId());
             return ResponseEntity.ok(savedQuestion);
-        } catch ( RuntimeException e) {
+        } catch (RuntimeException e) {
             LOGGER.severe("Error creating question: " + e.getMessage());
+            e.printStackTrace();
             return ResponseEntity.badRequest().body(null);
         }
     }

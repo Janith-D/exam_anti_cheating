@@ -1,21 +1,22 @@
 package com.example.anti_cheating_backend.service;
 
-import com.example.anti_cheating_backend.dto.AvailableExamDTO;
-import com.example.anti_cheating_backend.entity.Exam;
-import com.example.anti_cheating_backend.entity.Enrollment;
-import com.example.anti_cheating_backend.entity.Enums;
-import com.example.anti_cheating_backend.entity.ExamSession;
-import com.example.anti_cheating_backend.repo.EnrollmentRepo;
-import com.example.anti_cheating_backend.repo.ExamRepo;
-import com.example.anti_cheating_backend.repo.ExamSessionRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.example.anti_cheating_backend.dto.AvailableExamDTO;
+import com.example.anti_cheating_backend.entity.Enrollment;
+import com.example.anti_cheating_backend.entity.Enums;
+import com.example.anti_cheating_backend.entity.Exam;
+import com.example.anti_cheating_backend.entity.ExamSession;
+import com.example.anti_cheating_backend.repo.EnrollmentRepo;
+import com.example.anti_cheating_backend.repo.ExamRepo;
+import com.example.anti_cheating_backend.repo.ExamSessionRepo;
 
 @Service
 public class ExamService {
@@ -93,8 +94,29 @@ public class ExamService {
 
     // Delete exam
     public void deleteExam(Long examId) {
-        Exam exam = getExamById(examId);
-        examRepo.delete(exam);
+        try {
+            Exam exam = getExamById(examId);
+            
+            // Log deletion attempt
+            System.out.println("Attempting to delete exam ID: " + examId + " - Title: " + exam.getTitle());
+            
+            // Check for related data
+            if (exam.getTests() != null) {
+                System.out.println("  - Tests to cascade delete: " + exam.getTests().size());
+            }
+            if (exam.getEnrollments() != null) {
+                System.out.println("  - Enrollments to cascade delete: " + exam.getEnrollments().size());
+            }
+            
+            // Delete the exam (cascade will handle tests and enrollments)
+            examRepo.delete(exam);
+            
+            System.out.println("✅ Exam " + examId + " deleted successfully");
+        } catch (Exception e) {
+            System.err.println("❌ Error deleting exam " + examId + ": " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Failed to delete exam: " + e.getMessage());
+        }
     }
 
     // Publish exam (make it available for students)

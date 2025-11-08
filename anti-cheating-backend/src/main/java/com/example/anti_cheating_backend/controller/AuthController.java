@@ -1,14 +1,20 @@
 package com.example.anti_cheating_backend.controller;
 
-import com.example.anti_cheating_backend.service.AuthService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.anti_cheating_backend.service.AuthService;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -72,6 +78,22 @@ public class AuthController {
             payload.put("image", imageBase64);
 
             Map<String, Object> response = authService.login(payload);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
+    // Simple login without face verification (for first-time login or when face not enrolled)
+    @PostMapping(value = "/simple-login", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map<String, Object>> simpleLogin(@RequestBody Map<String, String> credentials) {
+        try {
+            String userName = credentials.get("userName");
+            String password = credentials.get("password");
+
+            Map<String, Object> response = authService.simpleLogin(userName, password);
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             Map<String, Object> errorResponse = new HashMap<>();

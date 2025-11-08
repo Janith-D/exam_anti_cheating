@@ -117,4 +117,39 @@ export class EnrollmentService {
         return status;
     }
   }
+
+  // Block student from exam (Admin only)
+  blockStudent(studentId: number, examId: number, reason?: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+
+    const params = reason ? `?reason=${encodeURIComponent(reason)}` : '';
+    return this.http.post(
+      `${this.apiUrl}/block/${studentId}/exam/${examId}${params}`,
+      {},
+      { headers }
+    ).pipe(catchError(this.handleError));
+  }
+
+  // Unblock student from exam (Admin only)
+  unblockStudent(studentId: number, examId: number): Observable<any> {
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+
+    return this.http.post(
+      `${this.apiUrl}/unblock/${studentId}/exam/${examId}`,
+      {},
+      { headers }
+    ).pipe(catchError(this.handleError));
+  }
+
+  // Check if student is blocked in exam
+  checkBlockStatus(studentId: number, examId: number): Observable<any> {
+    return this.http.get(
+      `${this.apiUrl}/check-block/${studentId}/exam/${examId}`,
+      { headers: this.getHeaders() }
+    ).pipe(catchError(this.handleError));
+  }
 }

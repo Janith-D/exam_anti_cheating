@@ -66,11 +66,26 @@ public class Enrollment {
     @Column(name = "status")
     private Enums.EnrollmentStatus status = Enums.EnrollmentStatus.PENDING;
 
+    @Column(name = "is_blocked")
+    private Boolean isBlocked = false;
+    
+    @Column(name = "blocked_at")
+    private LocalDateTime blockedAt;
+    
+    @Column(name = "blocked_by")
+    private String blockedBy;
+    
+    @Column(name = "block_reason")
+    private String blockReason;
+
     @PrePersist
     protected void onCreate() {
         enrollmentDate = LocalDateTime.now();
         if (status == null) {
             status = Enums.EnrollmentStatus.PENDING;
+        }
+        if (isBlocked == null) {
+            isBlocked = false;
         }
     }
 }

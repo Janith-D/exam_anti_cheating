@@ -30,6 +30,10 @@ export interface Enrollment {
   isVerified?: boolean;
   verificationScore?: number;
   status: EnrollmentStatus;
+  isBlocked?: boolean;
+  blockedAt?: string;
+  blockedBy?: string;
+  blockReason?: string;
 }
 
 export enum EnrollmentStatus {

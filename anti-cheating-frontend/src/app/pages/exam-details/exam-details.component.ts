@@ -21,7 +21,11 @@ export class ExamDetailsComponent implements OnInit {
   enrollmentStatus: EnrollmentStatus | null = null;
   loading = false;
   errorMessage = '';
+  successMessage = '';
   currentUser: any = null;
+  enrolling = false;
+  showEnrollmentModal = false;
+  selectedImage: File | null = null;
 
   ExamStatus = ExamStatus;
   EnrollmentStatus = EnrollmentStatus;
@@ -89,22 +93,36 @@ export class ExamDetailsComponent implements OnInit {
   }
 
   checkEnrollmentStatus(examId: number): void {
-    if (!this.currentUser?.userId) return;
+    if (!this.currentUser?.id) {
+      console.log('❌ No current user ID found');
+      return;
+    }
 
-    this.enrollmentService.checkEnrollment(this.currentUser.userId, examId).subscribe({
-      next: (response) => {
-        if (response.isEnrolled) {
-          // Get detailed enrollment info
-          this.enrollmentService.getStudentEnrollments(this.currentUser.userId).subscribe({
-            next: (enrollments) => {
-              const enrollment = enrollments.find(e => e.exam?.id === examId);
-              this.enrollmentStatus = enrollment?.status || null;
-            }
-          });
+    console.log('🔍 Checking enrollment for student:', this.currentUser.id, 'exam:', examId);
+    
+    // Get all enrollments for the student
+    this.enrollmentService.getStudentEnrollments(this.currentUser.id).subscribe({
+      next: (enrollments) => {
+        console.log('📋 All enrollments:', enrollments);
+        
+        // Find enrollment for this specific exam
+        const enrollment = enrollments.find((e: any) => {
+          // Handle both direct exam ID and nested exam object
+          const enrollmentExamId = e.exam?.id || e.examId;
+          return enrollmentExamId === examId;
+        });
+        
+        if (enrollment) {
+          this.enrollmentStatus = enrollment.status;
+          console.log('✅ Found enrollment with status:', this.enrollmentStatus);
+        } else {
+          this.enrollmentStatus = null;
+          console.log('⚠️ Student is not enrolled in this exam');
         }
       },
       error: (error) => {
-        console.error('Error checking enrollment:', error);
+        console.error('❌ Error checking enrollment:', error);
+        this.enrollmentStatus = null;
       }
     });
   }
@@ -141,5 +159,64 @@ export class ExamDetailsComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/exam-dashboard']);
+  }
+
+  // Enrollment functionality
+  openEnrollmentModal(): void {
+    this.showEnrollmentModal = true;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  closeEnrollmentModal(): void {
+    this.showEnrollmentModal = false;
+    this.selectedImage = null;
+    this.errorMessage = '';
+    this.successMessage = '';
+  }
+
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith('image/')) {
+      this.selectedImage = file;
+      this.errorMessage = '';
+    } else {
+      this.errorMessage = 'Please select a valid image file';
+      this.selectedImage = null;
+    }
+  }
+
+  enrollInExam(): void {
+    if (!this.selectedImage) {
+      this.errorMessage = 'Please select your face image';
+      return;
+    }
+
+    if (!this.exam) {
+      this.errorMessage = 'Exam information not available';
+      return;
+    }
+
+    this.enrolling = true;
+    this.errorMessage = '';
+
+    this.enrollmentService.enrollInExam(this.exam.id!, this.currentUser.id, this.selectedImage).subscribe({
+      next: (response) => {
+        console.log('✅ Enrollment successful:', response);
+        this.successMessage = 'Successfully enrolled! Verifying...';
+        
+        // Wait a moment then refresh enrollment status
+        setTimeout(() => {
+          this.checkEnrollmentStatus(this.exam!.id!);
+          this.closeEnrollmentModal();
+          this.enrolling = false;
+        }, 1500);
+      },
+      error: (error) => {
+        console.error('❌ Enrollment failed:', error);
+        this.errorMessage = error.error?.error || 'Failed to enroll in exam. Please try again.';
+        this.enrolling = false;
+      }
+    });
   }
 }

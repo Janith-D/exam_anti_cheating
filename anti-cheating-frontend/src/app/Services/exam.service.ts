@@ -4,6 +4,13 @@ import { Observable, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { Exam, ExamStatus } from '../models/exam.model';
 
+// Response interface for exam creation
+export interface ExamCreationResponse {
+  exam: Exam;
+  examId: number;
+  message: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -50,8 +57,8 @@ export class ExamService {
   }
 
   // Create exam (Admin only)
-  createExam(exam: Exam): Observable<Exam> {
-    return this.http.post<Exam>(this.apiUrl, exam, { headers: this.getHeaders() })
+  createExam(exam: Exam): Observable<ExamCreationResponse> {
+    return this.http.post<ExamCreationResponse>(this.apiUrl, exam, { headers: this.getHeaders() })
       .pipe(catchError(this.handleError));
   }
 

@@ -115,13 +115,17 @@ public class EnrollmentService {
             throw new RuntimeException("Exam is not available for enrollment. Current status: " + exam.getStatus());
         }
 
-        // Check if already enrolled with APPROVED status
+        // Check if already enrolled with APPROVED or VERIFIED status
         Optional<Enrollment> existingEnrollment = enrollmentRepo.findByStudentIdAndExamId(studentId, examId);
         if (existingEnrollment.isPresent()) {
             Enrollment enrollment = existingEnrollment.get();
-            // If already approved, don't allow re-enrollment
-            if (enrollment.getStatus() == Enums.EnrollmentStatus.APPROVED) {
-                throw new RuntimeException("Student is already enrolled in this exam");
+            // If already approved or verified, return the existing enrollment
+            if (enrollment.getStatus() == Enums.EnrollmentStatus.APPROVED || 
+                enrollment.getStatus() == Enums.EnrollmentStatus.VERIFIED) {
+                LOGGER.info("Student " + studentId + " is already enrolled in exam " + examId + " with status: " + enrollment.getStatus());
+                // Update verification timestamp and return existing enrollment
+                enrollment.setLastVerification(LocalDateTime.now());
+                return enrollmentRepo.save(enrollment);
             }
             // If pending/rejected, allow re-verification by updating existing enrollment
             LOGGER.info("Updating existing enrollment " + enrollment.getId() + " for student " + studentId + " in exam " + examId);

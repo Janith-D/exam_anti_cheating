@@ -24,4 +24,8 @@ public class EnrollmentDTO {
     private Double verificationScore;
     private LocalDateTime enrollmentDate;
     private LocalDateTime lastVerification;
+    private Boolean isBlocked;
+    private LocalDateTime blockedAt;
+    private String blockedBy;
+    private String blockReason;
 }

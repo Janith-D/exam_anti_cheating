@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.anti_cheating_backend.entity.Exam;
 import com.example.anti_cheating_backend.entity.Test;
 import com.example.anti_cheating_backend.entity.TestResult;
+import com.example.anti_cheating_backend.repo.ExamRepo;
 import com.example.anti_cheating_backend.repo.QuestionRepo;
 import com.example.anti_cheating_backend.repo.TestRepo;
 import com.example.anti_cheating_backend.repo.TestResultRepo;
@@ -28,6 +30,9 @@ public class TestService {
     
     @Autowired
     private TestResultRepo testResultRepo;
+    
+    @Autowired
+    private ExamRepo examRepo;
 
     public Test createTest(Test test,String createdBy){
         if (test.getTitle() == null || test.getTitle().isEmpty()){
@@ -38,10 +43,27 @@ public class TestService {
             LOGGER.severe("Test duration must be positive");
             throw new IllegalArgumentException("Test duration must be positive");
         }
+        
+        // CRITICAL FIX: Validate and load the exam from database
+        if (test.getExam() == null || test.getExam().getId() == null) {
+            LOGGER.severe("Test must be associated with a valid exam");
+            throw new IllegalArgumentException("Test must be associated with a valid exam");
+        }
+        
+        // Load the exam from database to ensure it exists
+        Exam exam = examRepo.findById(test.getExam().getId())
+                .orElseThrow(() -> {
+                    LOGGER.severe("Exam not found with ID: " + test.getExam().getId());
+                    return new RuntimeException("Exam not found with ID: " + test.getExam().getId());
+                });
+        
+        // Set the exam relationship explicitly
+        test.setExam(exam);
         test.setCreatedBy(createdBy);
         test.setCreatedAt(LocalDateTime.now());
+        
         Test savedTest = testRepo.save(test);
-        LOGGER.info("Created test : "+ savedTest.getId() + " By "+ createdBy);
+        LOGGER.info("Created test: " + savedTest.getId() + " for exam: " + exam.getId() + " by " + createdBy);
         return savedTest;
     }
 
@@ -60,15 +82,13 @@ public class TestService {
         Test test = testRepo.findById(testId)
                 .orElseThrow(()-> new RuntimeException("Test not found : "+ testId));
         
-        // Check if test is associated with an exam (cannot be bypassed)
-        if (test.getExam() != null) {
-            throw new RuntimeException("Cannot delete test. This test is associated with exam: " + test.getExam().getTitle() + ". Please delete the exam first to remove all its tests.");
-        }
+        LOGGER.info("Attempting to delete test: " + testId + " (force: " + forceDelete + ")");
         
         // Check if there are test results (students have taken this test)
         List<TestResult> testResults = testResultRepo.findByTestId(testId);
         if (!testResults.isEmpty() && !forceDelete) {
-            throw new RuntimeException("Cannot delete test. " + testResults.size() + " student(s) have already taken this test. Deleting it would lose their results.");
+            LOGGER.warning("Cannot delete test " + testId + " - " + testResults.size() + " student(s) have taken it");
+            throw new RuntimeException("Cannot delete test. " + testResults.size() + " student(s) have already taken this test. Use force delete to remove it anyway (this will delete student results).");
         }
         
         // If force delete, remove all test results first
@@ -79,12 +99,18 @@ public class TestService {
         }
         
         // Delete all questions associated with this test
+        int deletedQuestions = questionRepo.findByTestId(testId).size();
         questionRepo.deleteByTestId(testId);
-        LOGGER.info("Deleted questions for test: " + testId);
+        LOGGER.info("Deleted " + deletedQuestions + " question(s) for test: " + testId);
         
-        // Now delete the test
+        // Log exam association if exists
+        if (test.getExam() != null) {
+            LOGGER.info("Removing test " + testId + " from exam: " + test.getExam().getId() + " (" + test.getExam().getTitle() + ")");
+        }
+        
+        // Delete the test (exam association will be handled by cascade)
         testRepo.delete(test);
-        LOGGER.info("Deleted test : "+ testId);
+        LOGGER.info("Successfully deleted test: " + testId);
     }
     
     public List<Test> getAvailableTests(){

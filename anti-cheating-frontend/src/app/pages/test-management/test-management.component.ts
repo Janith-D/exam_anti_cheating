@@ -71,13 +71,22 @@ export class TestManagementComponent implements OnInit {
   loadTests(): void {
     this.loading = true;
     this.error = '';
+    console.log('🔄 Loading tests from database...');
+    
     this.testService.getAllTests().subscribe({
       next: (tests) => {
         this.tests = tests || [];
         this.loading = false;
+        
+        console.log(`✅ Loaded ${this.tests.length} test(s)`);
+        if (this.tests.length > 0) {
+          console.log('📋 Test IDs:', this.tests.map(t => t.id).join(', '));
+        } else {
+          console.log('⚠️  No tests found in database');
+        }
       },
       error: (error) => {
-        console.error('Error loading tests:', error);
+        console.error('❌ Error loading tests:', error);
         this.error = 'Failed to load tests';
         this.loading = false;
       }
@@ -313,24 +322,61 @@ export class TestManagementComponent implements OnInit {
       return;
     }
     
-    if (!confirm('Are you sure you want to delete this test? This action cannot be undone.')) {
+    // Check if test exists in current list
+    const testExists = this.tests.find(t => t.id === testId);
+    if (!testExists) {
+      console.warn(`⚠️  Test ID ${testId} not found in current list`);
+      this.error = `Test ID ${testId} not found. The page may be showing outdated data.`;
+      
+      // Offer to refresh
+      if (confirm('This test may have already been deleted or does not exist. Would you like to refresh the page to see current tests?')) {
+        this.loadTests();
+      }
+      setTimeout(() => this.error = '', 5000);
+      return;
+    }
+    
+    console.log(`🗑️  Attempting to delete test ID ${testId}: "${testExists.title}"`);
+    
+    if (!confirm(`Are you sure you want to delete test "${testExists.title}"? This action cannot be undone.`)) {
       return;
     }
     
     // First try normal delete
     this.testService.deleteTest(testId, false).subscribe({
       next: (response) => {
+        console.log('✅ Test deleted successfully');
         this.success = 'Test deleted successfully';
         this.loadTests();
         setTimeout(() => this.success = '', 3000);
       },
       error: (error: any) => {
-        console.error('Error deleting test:', error);
+        console.error('❌ Error deleting test:', error);
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          errorBody: error.error
+        });
         
         // Extract error message from backend
         let errorMessage = 'Failed to delete test';
         if (error.error && error.error.error) {
           errorMessage = error.error.error;
+          
+          // Check for specific error types
+          if (errorMessage.includes('Test not found')) {
+            console.warn('⚠️  Test no longer exists in database');
+            this.error = `Test ID ${testId} does not exist. It may have been deleted already.`;
+            
+            // Auto-refresh to show current state
+            setTimeout(() => {
+              console.log('🔄 Auto-refreshing test list...');
+              this.loadTests();
+            }, 2000);
+            
+            setTimeout(() => this.error = '', 5000);
+            return;
+          }
           
           // Check if error is about student results
           if (errorMessage.includes('student(s) have already taken this test')) {

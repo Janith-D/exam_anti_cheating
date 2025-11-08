@@ -225,6 +225,18 @@
             >
               📊 Student Report
             </button>
+            
+            <!-- Block button: Shows if student exists and severity is CRITICAL/HIGH -->
+            <!-- Note: If examSession.exam.id is not available, admin can manually enter exam ID -->
+            <button 
+              *ngIf="alert.student?.id && (alert.severity === 'CRITICAL' || alert.severity === 'HIGH')"
+              class="btn btn-sm btn-danger"
+              (click)="showBlockDialog(alert)"
+              title="Block student from exam due to repeated cheating"
+            >
+              🚫 Block Student
+            </button>
+            
             <button 
               *ngIf="!alert.resolved && alert.status !== 'RESOLVED'"
               class="btn btn-sm btn-success"

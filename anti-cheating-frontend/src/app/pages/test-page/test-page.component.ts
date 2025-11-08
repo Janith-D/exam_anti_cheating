@@ -9,6 +9,7 @@ import { EventService } from '../../Services/event.service.service';
 import { ExamSessionService } from '../../Services/exam-session.service';
 import { AuthService } from '../../Services/auth.service.service';
 import { StudentActivityService } from '../../Services/student-activity.service';
+import { EnrollmentService } from '../../Services/enrollment.service';
 import { Test } from '../../models/test.model';
 import { Question } from '../../models/question.model';
 
@@ -17,7 +18,7 @@ import { Question } from '../../models/question.model';
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './test-page.component.html',
-  styleUrl: './test-page.component.css'
+  styleUrls: ['./test-page.component.css', './blocked-overlay.css']
 })
 export class TestPageComponent implements OnInit, OnDestroy {
   test: Test | null = null;
@@ -43,6 +44,13 @@ export class TestPageComponent implements OnInit, OnDestroy {
   tabSwitchCount = 0;
   suspiciousActivityDetected = false;
 
+  // Blocking
+  isBlocked = false;
+  blockReason = '';
+  blockedAt: string | null = null;
+  blockedBy: string | null = null;
+  blockCheckInterval: any = null;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -51,7 +59,8 @@ export class TestPageComponent implements OnInit, OnDestroy {
     private eventService: EventService,
     private examSessionService: ExamSessionService,
     private authService: AuthService,
-    private studentActivityService: StudentActivityService
+    private studentActivityService: StudentActivityService,
+    private enrollmentService: EnrollmentService
   ) {}
 
   ngOnInit(): void {
@@ -61,6 +70,14 @@ export class TestPageComponent implements OnInit, OnDestroy {
     this.route.params.subscribe(params => {
       this.testId = +params['id'];
       this.loadTestAndQuestions();
+      
+      // Check if student is blocked before starting test
+      this.checkBlockStatus();
+      
+      // Set up periodic block status checking (every 30 seconds)
+      this.blockCheckInterval = setInterval(() => {
+        this.checkBlockStatus();
+      }, 30000);
     });
     
     // Monitor visibility changes (tab switches)
@@ -76,6 +93,11 @@ export class TestPageComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
+    }
+    
+    // Clear block check interval
+    if (this.blockCheckInterval) {
+      clearInterval(this.blockCheckInterval);
     }
     
     // Disconnect WebSocket when component is destroyed
@@ -105,9 +127,18 @@ export class TestPageComponent implements OnInit, OnDestroy {
   }
 
   loadQuestions(): void {
+    console.log('🔍 Loading questions for test ID:', this.testId);
     this.questionService.getQuestionsByTest(this.testId).subscribe({
       next: (questions) => {
+        console.log(`✅ Loaded ${questions.length} question(s) for test ${this.testId}`);
+        console.log('   Questions:', questions);
         this.questions = questions;
+        
+        if (questions.length === 0) {
+          console.warn('⚠️ No questions found for this test!');
+          this.errorMessage = 'No questions available for this test. Please contact administrator.';
+        }
+        
         this.loading = false;
         
         // Get or create exam session for this test
@@ -194,6 +225,12 @@ export class TestPageComponent implements OnInit, OnDestroy {
   }
 
   selectAnswer(optionIndex: number): void {
+    // Check if student is blocked
+    if (this.isBlocked) {
+      window.alert('⛔ You are blocked from this exam and cannot answer questions.\n\nReason: ' + this.blockReason + '\n\nPlease contact your instructor.');
+      return;
+    }
+
     if (this.currentQuestion && this.currentQuestion.id) {
       this.answers[this.currentQuestion.id] = optionIndex;
       
@@ -247,12 +284,48 @@ export class TestPageComponent implements OnInit, OnDestroy {
     this.logEvent('QUESTION_NAVIGATED', `Jumped to question ${index + 1}`);
   }
 
+  // Check if student is blocked from this exam
+  checkBlockStatus(): void {
+    if (!this.test?.examId || !this.currentUser?.id) {
+      return; // Can't check without exam ID and student ID
+    }
+
+    this.enrollmentService.checkBlockStatus(this.currentUser.id, this.test.examId).subscribe({
+      next: (status) => {
+        const wasBlocked = this.isBlocked;
+        this.isBlocked = status.isBlocked || false;
+        this.blockReason = status.reason || '';
+        this.blockedAt = status.blockedAt || null;
+        this.blockedBy = status.blockedBy || null;
+
+        if (!wasBlocked && this.isBlocked) {
+          // Just got blocked
+          console.log('🚫 Student has been BLOCKED from this exam');
+          window.alert('⛔ You have been blocked from this exam by an administrator.\n\nReason: ' + this.blockReason);
+        } else if (wasBlocked && !this.isBlocked) {
+          // Just got unblocked
+          console.log('✅ Student has been UNBLOCKED');
+          window.alert('✅ You have been unblocked! You may now continue the exam.');
+        }
+      },
+      error: (error) => {
+        console.error('Error checking block status:', error);
+      }
+    });
+  }
+
   isAnswered(index: number): boolean {
     const question = this.questions[index];
     return question && question.id ? this.answers[question.id] !== undefined : false;
   }
 
   submitTest(): void {
+    // Check if student is blocked
+    if (this.isBlocked) {
+      window.alert('⛔ You are blocked from this exam and cannot submit.\n\nReason: ' + this.blockReason + '\n\nPlease contact your instructor.');
+      return;
+    }
+
     // Confirm submission
     const unanswered = this.questions.length - this.answeredCount;
     if (unanswered > 0) {

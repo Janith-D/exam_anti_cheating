@@ -2,10 +2,12 @@ package com.example.anti_cheating_backend.entity;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
 import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -25,15 +27,20 @@ public class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "test_id",nullable = false)
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "test_id", nullable = false)
+    @JsonIgnoreProperties({"questions", "exam"})
     private Test test;
+    
+    @Column(columnDefinition = "TEXT")
     private String text;
+    
     @ElementCollection
-    @CollectionTable(name = "question_option",joinColumns =
-    @JoinColumn(name = "question_id"))
+    @CollectionTable(name = "question_option", joinColumns = @JoinColumn(name = "question_id"))
     @Column(name = "option_text")
     private List<String> options;
+    
     private int correctOption;
     private String topic;
 }

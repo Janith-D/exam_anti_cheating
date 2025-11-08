@@ -298,12 +298,13 @@ export class AdminExamManagementComponent implements OnInit {
   createDetailedExam(): void {
     // Step 1: Create the exam
     this.examService.createExam(this.examForm).subscribe({
-      next: (createdExam) => {
-        console.log('✅ Exam created:', createdExam);
+      next: (response) => {
+        console.log('✅ Exam created:', response);
         this.successMessage = 'Exam created! Creating tests...';
         
         // Step 2: Create all tests with questions
-        this.createAllTests(createdExam.id!);
+        // Backend returns examId in the response object
+        this.createAllTests(response.examId);
       },
       error: (error) => {
         console.error('❌ Error creating exam:', error);
@@ -315,8 +316,19 @@ export class AdminExamManagementComponent implements OnInit {
 
   async createAllTests(examId: number): Promise<void> {
     try {
+      console.log('🔧 Starting test creation process...');
+      console.log('  Number of tests to create:', this.tests.length);
+      console.log('  Exam ID (parameter):', examId);
+      console.log('  Exam ID type:', typeof examId);
+      console.log('  Exam ID is null?', examId === null);
+      console.log('  Exam ID is undefined?', examId === undefined);
+      console.log('  Current user:', this.authService.currentUserValue);
+      console.log('  JWT token exists:', !!this.authService.getToken());
+      console.log('  JWT token preview:', this.authService.getToken()?.substring(0, 30) + '...');
+      
       for (let i = 0; i < this.tests.length; i++) {
         const testForm = this.tests[i];
+        console.log(`\n📝 Processing test ${i + 1}/${this.tests.length}:`, testForm.title);
         this.successMessage = `Creating test ${i + 1} of ${this.tests.length}...`;
         
         // Validate test data before sending
@@ -332,7 +344,7 @@ export class AdminExamManagementComponent implements OnInit {
           title: testForm.title.trim(),
           description: testForm.description?.trim() || '',
           duration: Number(testForm.duration), // Ensure it's a number
-          exam: { id: examId } as Exam,
+          examId: examId, // Send just the ID, not the full exam object
           testOrder: Number(testForm.testOrder) || 1,
           passingScore: Number(testForm.passingScore) || 60,
           totalMarks: Number(testForm.totalMarks) || 100
@@ -360,10 +372,26 @@ export class AdminExamManagementComponent implements OnInit {
       
     } catch (error: any) {
       console.error('❌ Error creating tests:', error);
+      console.error('  Error status:', error?.status);
+      console.error('  Error statusText:', error?.statusText);
+      console.error('  Error message:', error?.message);
+      console.error('  Error details:', error?.error);
+      console.error('  Full error object:', error);
+      
+      // Check if it's an authentication/authorization issue
+      if (error?.status === 401) {
+        console.error('🚨 401 UNAUTHORIZED ERROR!');
+        console.error('  This means the JWT token is invalid or missing admin role');
+        console.error('  Current user from localStorage:', localStorage.getItem('currentUser'));
+        console.error('  Current token from localStorage:', localStorage.getItem('token')?.substring(0, 30) + '...');
+      }
       
       // Extract detailed error message
       let errorMsg = 'Exam created but some tests/questions failed. ';
-      if (error?.error?.message) {
+      if (error?.status === 401) {
+        errorMsg = '🔐 Authentication Error: Your admin session may have expired or you don\'t have admin permissions. ';
+        errorMsg += 'Please logout and login again as admin. ';
+      } else if (error?.error?.message) {
         errorMsg += error.error.message;
       } else if (error?.message) {
         errorMsg += error.message;
@@ -377,19 +405,66 @@ export class AdminExamManagementComponent implements OnInit {
   }
 
   async createQuestionsForTest(testId: number, questions: QuestionForm[]): Promise<void> {
-    const questionPromises = questions.map(q => {
+    console.log(`📋 Creating ${questions.length} question(s) for test ${testId}...`);
+    console.log('   Questions data:', questions);
+    
+    if (!questions || questions.length === 0) {
+      console.warn('⚠️ No questions to create for test', testId);
+      return;
+    }
+    
+    // Create questions one by one to avoid overwhelming the server
+    // and to get better error reporting
+    const createdQuestions: any[] = [];
+    const failedQuestions: any[] = [];
+    
+    for (let i = 0; i < questions.length; i++) {
+      const q = questions[i];
       const questionCreate: QuestionCreate = {
         test: { id: testId },
         text: q.text,
         options: q.options,
         correctOption: q.correctOption,
-        topic: q.topic
+        topic: q.topic || 'General'
       };
-      return this.questionService.createQuestion(questionCreate).toPromise();
-    });
+      
+      console.log(`   📝 Creating question ${i + 1}/${questions.length}:`, questionCreate);
+      
+      try {
+        const result = await this.questionService.createQuestion(questionCreate).toPromise();
+        createdQuestions.push(result);
+        console.log(`   ✅ Question ${i + 1} created with ID: ${result?.id}`);
+      } catch (error: any) {
+        console.error(`   ❌ Question ${i + 1} FAILED:`, error);
+        console.error(`      Status: ${error?.status}`);
+        console.error(`      Message: ${error?.message}`);
+        console.error(`      Error details:`, error?.error);
+        
+        failedQuestions.push({
+          index: i + 1,
+          question: questionCreate,
+          error: error
+        });
+        
+        // Check if it's a 401 error
+        if (error?.status === 401) {
+          console.error('   🚨 401 ERROR: Authentication failed for question creation!');
+          console.error('      This means your JWT token is invalid or missing admin role');
+          throw new Error('Authentication failed: Please logout and login again as admin');
+        }
+      }
+    }
     
-    await Promise.all(questionPromises);
-    console.log(`✅ ${questions.length} question(s) created for test ${testId}`);
+    // Report results
+    if (createdQuestions.length > 0) {
+      console.log(`✅ Successfully created ${createdQuestions.length}/${questions.length} question(s) for test ${testId}`);
+    }
+    
+    if (failedQuestions.length > 0) {
+      console.error(`❌ Failed to create ${failedQuestions.length}/${questions.length} question(s)`);
+      console.error('   Failed questions:', failedQuestions);
+      throw new Error(`${failedQuestions.length} question(s) failed to save. Check console for details.`);
+    }
   }
 
   validateExam(): boolean {

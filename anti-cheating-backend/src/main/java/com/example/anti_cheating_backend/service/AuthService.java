@@ -211,6 +211,32 @@ public class AuthService implements UserDetailsService {
         return response;
     }
 
+    // Simple login without face verification
+    public Map<String, Object> simpleLogin(String userName, String password) {
+        LOGGER.info("Simple login (no face verification) for user: " + userName);
+
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(userName, password)
+        );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        final UserDetails userDetails = loadUserByUsername(userName);
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        Student student = studentRepo.findByUserName(userName);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", jwt);
+        response.put("userId", student.getId());
+        response.put("userName", userName);
+        response.put("email", student.getEmail());
+        response.put("role", userDetails.getAuthorities().iterator().next().getAuthority());
+        response.put("verified", false); // No face verification performed
+        response.put("activationAllowed", true);
+        response.put("message", "Login successful. Please enroll your face for enhanced security.");
+
+        return response;
+    }
+
     private Enrollment enrollFace(Long studentId, String imageBase64) {
         Map<String, Object> payload = Map.of("studentId", studentId, "image", imageBase64);
         LOGGER.info("Sending enrollment request to ML service: " + payload);

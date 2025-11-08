@@ -8,6 +8,7 @@ import { ExamSessionService } from '../../Services/exam-session.service';
 import { WebSocketService } from '../../Services/websocket.service.service';
 import { StudentActivityService, StudentActivity } from '../../Services/student-activity.service';
 import { AuthService } from '../../Services/auth.service.service';
+import { EnrollmentService } from '../../Services/enrollment.service';
 import { Alert, AlertSeverity } from '../../models/alert.model';
 import { Event } from '../../models/event.model';
 import { ExamSession } from '../../models/exam-session.model';
@@ -59,7 +60,8 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
     private webSocketService: WebSocketService,
     private studentActivityService: StudentActivityService,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private enrollmentService: EnrollmentService
   ) {}
 
   ngOnInit(): void {
@@ -138,6 +140,21 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
           const timeA = new Date(a.timestamp || a.createdAt || '').getTime();
           const timeB = new Date(b.timestamp || b.createdAt || '').getTime();
           return timeB - timeA;
+        });
+        
+        // Debug logging for block button visibility
+        console.log('📊 Alert data structure check:');
+        alerts.forEach((alert, index) => {
+          if (index < 3) { // Log first 3 alerts
+            console.log(`Alert ${index + 1}:`, {
+              severity: alert.severity,
+              studentId: alert.student?.id,
+              examSessionId: alert.examSession?.id,
+              examId: alert.examSession?.exam?.id,
+              hasAllRequiredFields: !!(alert.student?.id && alert.examSession?.exam?.id && 
+                (alert.severity === 'CRITICAL' || alert.severity === 'HIGH'))
+            });
+          }
         });
         
         this.stats.totalAlerts = alerts.length;
@@ -485,5 +502,74 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.router.navigate(['/admin/dashboard']);
+  }
+
+  // Show block dialog - handles cases where exam ID might not be in alert
+  showBlockDialog(alertData: Alert): void {
+    const studentId = alertData.student?.id;
+    const examId = alertData.examSession?.exam?.id;
+    
+    if (!studentId) {
+      window.alert('❌ Cannot block: Student ID not found in alert');
+      return;
+    }
+
+    // If exam ID is available, use it directly
+    if (examId) {
+      this.blockStudent(studentId, examId, alertData);
+    } else {
+      // Exam ID not found - ask admin to provide it
+      const examIdInput = prompt(
+        `Enter the Exam ID to block this student from:\n\n` +
+        `Student: ${alertData.student?.username || 'Unknown'}\n` +
+        `Alert: ${alertData.message}\n\n` +
+        `(You can find Exam IDs in the Exam Management page)`
+      );
+      
+      if (examIdInput) {
+        const examIdNumber = parseInt(examIdInput, 10);
+        if (!isNaN(examIdNumber) && examIdNumber > 0) {
+          this.blockStudent(studentId, examIdNumber, alertData);
+        } else {
+          window.alert('❌ Invalid Exam ID. Please enter a valid number.');
+        }
+      }
+    }
+  }
+
+  // Block student from exam due to repeated cheating
+  blockStudent(studentId: number, examId: number, alertData: Alert): void {
+    const reason = `Blocked due to ${alertData.severity} alert: ${alertData.message}`;
+    
+    if (confirm(`Are you sure you want to BLOCK this student from the exam?\n\nStudent: ${alertData.student?.username}\nExam ID: ${examId}\nReason: ${reason}\n\nThe student will not be able to answer questions until unblocked.`)) {
+      this.enrollmentService.blockStudent(studentId, examId, reason).subscribe({
+        next: (response) => {
+          console.log('✅ Student blocked:', response);
+          window.alert('✅ Student has been blocked from this exam. They cannot continue until unblocked.');
+          this.loadAlerts(); // Refresh alerts
+        },
+        error: (error) => {
+          console.error('❌ Error blocking student:', error);
+          window.alert('❌ Failed to block student: ' + (error.error?.error || error.message));
+        }
+      });
+    }
+  }
+
+  // Unblock student from exam
+  unblockStudent(studentId: number, examId: number, studentName: string): void {
+    if (confirm(`Are you sure you want to UNBLOCK ${studentName} from this exam?\n\nThey will be able to continue answering questions.`)) {
+      this.enrollmentService.unblockStudent(studentId, examId).subscribe({
+        next: (response) => {
+          console.log('✅ Student unblocked:', response);
+          window.alert('✅ Student has been unblocked and can now continue the exam.');
+          this.loadAlerts(); // Refresh alerts
+        },
+        error: (error) => {
+          console.error('❌ Error unblocking student:', error);
+          window.alert('❌ Failed to unblock student: ' + (error.error?.error || error.message));
+        }
+      });
+    }
   }
 }

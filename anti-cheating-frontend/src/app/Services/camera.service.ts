@@ -81,4 +81,61 @@ export class CameraService {
 
     return new Blob([uInt8Array], { type: contentType });
   }
+
+  // Capture multiple frames with instructions for liveness detection
+  async captureFramesWithLiveness(
+    videoElement: HTMLVideoElement,
+    numFrames: number = 5,
+    delayBetweenFrames: number = 1000
+  ): Promise<string[]> {
+    const frames: string[] = [];
+    const instructions = [
+      '👀 Look at camera',
+      '👁️ Blink your eyes', 
+      '↔️ Move head slightly left',
+      '↔️ Move head slightly right',
+      '👀 Look at camera again'
+    ];
+
+    for (let i = 0; i < numFrames; i++) {
+      const instruction = instructions[i] || 'Hold steady';
+      
+      // Show instruction (caller should display this)
+      console.log(`Frame ${i + 1}/${numFrames}: ${instruction}`);
+      
+      // Wait for specified delay
+      if (i > 0) {
+        await this.delay(delayBetweenFrames);
+      }
+      
+      // Capture frame
+      try {
+        const frame = this.captureImage(videoElement);
+        frames.push(frame);
+        console.log(`✅ Frame ${i + 1} captured`);
+      } catch (error) {
+        console.error(`❌ Failed to capture frame ${i + 1}:`, error);
+        throw error;
+      }
+    }
+
+    return frames;
+  }
+
+  // Get instruction for specific frame number
+  getLivenessInstruction(frameIndex: number): string {
+    const instructions = [
+      '👀 Look at camera',
+      '👁️ Blink your eyes',
+      '↔️ Move head slightly left', 
+      '↔️ Move head slightly right',
+      '👀 Look at camera again'
+    ];
+    return instructions[frameIndex] || 'Hold steady';
+  }
+
+  // Helper delay function
+  private delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
 }

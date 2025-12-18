@@ -416,3 +416,145 @@
     transform: translateX(0);
   }
 }
+
+/* ============================================
+   LIVENESS DETECTION STYLES
+   ============================================ */
+.liveness-toggle {
+  margin-bottom: 0.75rem;
+}
+
+.liveness-progress {
+  background: #f8f9fa;
+  border: 2px solid #e3e6ef;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.progress-text {
+  font-weight: 600;
+  color: var(--color-dark);
+  font-size: 0.875rem;
+}
+
+.instruction-text {
+  font-size: 1.125rem;
+  color: var(--color-primary);
+  font-weight: 700;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+.progress-bar-container {
+  width: 100%;
+  height: 8px;
+  background: #e3e6ef;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  transition: width 0.3s ease;
+  border-radius: 4px;
+}
+
+.liveness-score {
+  margin-bottom: 1rem;
+}
+
+.score-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: 600;
+}
+
+.score-badge.success {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.score-badge.warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.score-label {
+  font-size: 0.875rem;
+}
+
+.score-value {
+  font-size: 1.125rem;
+  font-weight: 700;
+}
+
+.instruction-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 10;
+}
+
+.instruction-box {
+  background: var(--color-white);
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  animation: scaleIn 0.3s ease-out;
+}
+
+.capture-badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: var(--color-success);
+  color: var(--color-white);
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}

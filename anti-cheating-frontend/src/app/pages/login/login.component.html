@@ -90,8 +90,44 @@
 
         <!-- Face Verification Section -->
         <div class="form-group" *ngIf="!adminLogin">
-          <label class="form-label">📸 Face Verification (Required)</label>
-          <p class="help-text">Please capture your face to verify your identity</p>
+          <label class="form-label">📸 Face Verification with Liveness Detection</label>
+          
+          <!-- Liveness Detection Toggle -->
+          <div class="liveness-toggle">
+            <label class="checkbox-label">
+              <input 
+                type="checkbox" 
+                [(ngModel)]="useLivenessDetection" 
+                [ngModelOptions]="{standalone: true}"
+                class="checkbox-input"
+              />
+              <span class="checkbox-text">🔍 Enable Liveness Detection (Recommended)</span>
+            </label>
+          </div>
+          
+          <p class="help-text">
+            {{ useLivenessDetection ? '🎥 Multi-frame capture with blink & movement detection' : '📷 Single photo capture (basic verification)' }}
+          </p>
+          
+          <!-- Frame Capture Progress -->
+          <div class="liveness-progress" *ngIf="capturingFrames">
+            <div class="progress-header">
+              <span class="progress-text">📸 Capturing Frame {{ currentFrameIndex }}/{{ totalFrames }}</span>
+              <span class="instruction-text">{{ currentInstruction }}</span>
+            </div>
+            <div class="progress-bar-container">
+              <div class="progress-bar" [style.width.%]="(currentFrameIndex / totalFrames) * 100"></div>
+            </div>
+          </div>
+          
+          <!-- Liveness Score Display -->
+          <div class="liveness-score" *ngIf="livenessScore !== null && capturedImage">
+            <div class="score-badge" [class.success]="livenessScore >= 60" [class.warning]="livenessScore < 60">
+              <span class="score-label">Liveness Score:</span>
+              <span class="score-value">{{ livenessScore }}/100</span>
+            </div>
+          </div>
+          
           <div class="face-capture-section">
             <video 
               #videoElement 
@@ -102,10 +138,21 @@
               autoplay
               muted
             ></video>
+            
+            <!-- Show current instruction overlay during capture -->
+            <div class="instruction-overlay" *ngIf="showCamera && capturingFrames">
+              <div class="instruction-box">
+                {{ currentInstruction }}
+              </div>
+            </div>
+            
             <canvas #canvasElement class="face-canvas hidden"></canvas>
             
             <div class="captured-image" *ngIf="capturedImage">
               <img [src]="capturedImage" alt="Captured face" />
+              <div class="capture-badge" *ngIf="useLivenessDetection">
+                ✅ {{ capturedFrames.length }} frames captured
+              </div>
               <button type="button" class="btn-retake" (click)="retakePhoto()">Retake</button>
             </div>
             
@@ -114,8 +161,9 @@
               class="btn btn-outline btn-block"
               (click)="toggleCamera()"
               *ngIf="!capturedImage"
+              [disabled]="capturingFrames"
             >
-              {{ showCamera ? '📷 Capture Face' : '📹 Start Camera' }}
+              {{ showCamera ? (useLivenessDetection ? '🎥 Start Liveness Capture' : '📷 Capture Face') : '📹 Start Camera' }}
             </button>
           </div>
         </div>

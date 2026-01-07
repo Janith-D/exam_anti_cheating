@@ -147,12 +147,12 @@
 
 /* Info Box */
 .info-box {
-  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-  border-left: 5px solid #3b82f6;
+  background: linear-gradient(135deg, #ECF4E8 0%, #bfdbfe 100%);
+  border-left: 5px solid #93BFC7;
   padding: 1.5rem;
   margin-bottom: 2rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 2px 8px rgba(147, 191, 199, 0.2);
 }
 
 .info-header {
@@ -164,7 +164,7 @@
 
 .info-header i {
   font-size: 1.5rem;
-  color: #3b82f6;
+  color: #93BFC7;
 }
 
 .info-header h4 {
@@ -714,4 +714,5 @@ select.form-control {
     width: 100%;
   }
 }
+
 

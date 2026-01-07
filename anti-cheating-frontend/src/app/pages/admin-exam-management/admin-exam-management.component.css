@@ -1,8 +1,8 @@
 /* Professional Color Palette */
 :root {
-  --color-primary: #3b82f6;
-  --color-primary-dark: #2563eb;
-  --color-primary-light: #dbeafe;
+  --color-primary: #93BFC7;
+  --color-primary-dark: #6BA5AD;
+  --color-primary-light: #ECF4E8;
   --color-dark-text: #1e293b;
   --color-medium-text: #64748b;
 }
@@ -97,7 +97,7 @@
 .table tbody tr:hover {
   background: linear-gradient(135deg, rgba(203, 243, 187, 0.3) 0%, rgba(171, 231, 178, 0.3) 100%);
   transform: scale(1.01);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(147, 191, 199, 0.2);
 }
 
 /* Modal Styles - Glassmorphic */
@@ -198,7 +198,7 @@
 
 .form-control:focus, .form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 4px rgba(147, 191, 199, 0.2);
   outline: none;
   background: white;
   color: var(--color-dark-text);
@@ -287,7 +287,7 @@ textarea.form-control {
 
 .btn:hover:not(:disabled) {
   transform: translateY(-3px);
-  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 10px 25px rgba(147, 191, 199, 0.3);
 }
 
 .btn:active:not(:disabled) {
@@ -452,7 +452,7 @@ textarea.form-control {
 }
 
 .alert-info {
-  background: linear-gradient(135deg, rgba(59, 130, 246, 0.2) 0%, rgba(128, 203, 196, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(147, 191, 199, 0.2) 0%, rgba(128, 203, 196, 0.2) 100%);
   border-left: 4px solid var(--color-primary-dark);
   color: #5a8a93;
 }
@@ -530,7 +530,7 @@ textarea.form-control {
 .list-group-item:hover {
   background: linear-gradient(135deg, rgba(203, 243, 187, 0.3) 0%, rgba(171, 231, 178, 0.3) 100%);
   transform: translateX(4px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+  box-shadow: 0 4px 12px rgba(147, 191, 199, 0.2);
   border-color: var(--color-primary);
 }
 
@@ -720,5 +720,6 @@ p {
   font-size: 0.875rem;
   margin-top: 4px;
 }
+
 
 

@@ -12,45 +12,45 @@
   --login-gradient-accent: linear-gradient(135deg, #93BFC7 0%, #ABE7B9 100%);
 }
 
-/* Login Page Button Overrides */
-.login-container .btn-primary {
-  background: var(--login-gradient-accent);
-  color: white;
-  box-shadow: 0 4px 12px rgba(147, 191, 199, 0.3);
-}
-
-.login-container .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, #7BA9B0 0%, #93D3A2 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(147, 191, 199, 0.4);
-}
-
-.login-container .btn-secondary {
-  background: var(--login-tea-green);
-  color: var(--color-dark);
-  border: 2px solid var(--login-light-green);
-}
-
-.login-container .btn-secondary:hover:not(:disabled) {
-  background: var(--login-light-green);
-  border-color: var(--login-ocean-green);
-}
-
-.login-container .btn-outline {
-  background: transparent;
-  border: 2px solid var(--login-ocean-green);
-  color: var(--login-ocean-green);
-}
-
-.login-container .btn-outline:hover:not(:disabled) {
-  background: var(--login-ocean-green);
-  color: white;
-}
-
 .login-container {
   display: flex;
   min-height: 100vh;
   background: var(--color-white);
+}
+
+/* Login Page Button Overrides */
+.login-container .btn-primary {
+  background: linear-gradient(135deg, #93BFC7 0%, #ABE7B9 100%) !important;
+  color: white !important;
+  box-shadow: 0 4px 12px rgba(147, 191, 199, 0.3) !important;
+}
+
+.login-container .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7BA9B0 0%, #93D3A2 100%) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(147, 191, 199, 0.4) !important;
+}
+
+.login-container .btn-secondary {
+  background: #CBF3BB !important;
+  color: var(--color-dark) !important;
+  border: 2px solid #ABE7B9 !important;
+}
+
+.login-container .btn-secondary:hover:not(:disabled) {
+  background: #ABE7B9 !important;
+  border-color: #93BFC7 !important;
+}
+
+.login-container .btn-outline {
+  background: transparent !important;
+  border: 2px solid #93BFC7 !important;
+  color: #93BFC7 !important;
+}
+
+.login-container .btn-outline:hover:not(:disabled) {
+  background: #93BFC7 !important;
+  color: white !important;
 }
 
 /* ============================================
@@ -58,7 +58,7 @@
    ============================================ */
 .login-left {
   flex: 1;
-  background: var(--login-gradient);
+  background: linear-gradient(135deg, #ECF4E8 0%, #CBF3BB 100%) !important;
   display: flex;
   align-items: center;
   justify-content: center;

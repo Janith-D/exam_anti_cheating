@@ -4,8 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { TestService } from '../../Services/test.service.service';
 import { QuestionService } from '../../Services/question.service.service';
+import { ExamService } from '../../Services/exam.service';
 import { Test } from '../../models/test.model';
 import { Question, QuestionCreate } from '../../models/question.model';
+import { Exam } from '../../models/exam.model';
 
 interface QuestionForm {
   text: string;
@@ -30,11 +32,15 @@ export class TestManagementComponent implements OnInit {
   selectedTest: Test | null = null;
   existingQuestions: Question[] = []; // Existing questions for edit mode
   
+  // Exams
+  exams: Exam[] = [];
+  
   // Test form
   testForm: Test = {
     title: '',
     description: '',
-    duration: 60
+    duration: 60,
+    examId: undefined
   };
   
   // Questions
@@ -52,11 +58,13 @@ export class TestManagementComponent implements OnInit {
   constructor(
     private testService: TestService,
     private questionService: QuestionService,
+    private examService: ExamService,
     private router: Router
   ) {}
 
   ngOnInit(): void {
     this.loadTests();
+    this.loadExams();
   }
 
   getEmptyQuestion(): QuestionForm {
@@ -93,13 +101,28 @@ export class TestManagementComponent implements OnInit {
     });
   }
 
+  loadExams(): void {
+    console.log('🔄 Loading exams for test creation...');
+    this.examService.getAllExams().subscribe({
+      next: (exams) => {
+        this.exams = exams || [];
+        console.log(`✅ Loaded ${this.exams.length} exam(s)`);
+      },
+      error: (error) => {
+        console.error('❌ Error loading exams:', error);
+        this.error = 'Failed to load exams. Please refresh the page.';
+      }
+    });
+  }
+
   // View navigation
   showCreateTest(): void {
     this.currentView = 'create';
     this.testForm = {
       title: '',
       description: '',
-      duration: 60
+      duration: 60,
+      examId: undefined
     };
     this.questions = [];
     this.currentQuestion = this.getEmptyQuestion();
@@ -231,6 +254,10 @@ export class TestManagementComponent implements OnInit {
   validateTestForm(): boolean {
     this.formErrors = [];
     
+    if (!this.testForm.examId) {
+      this.formErrors.push('⚠️ Exam selection is required - Please select which exam this test belongs to');
+    }
+    
     if (!this.testForm.title.trim()) {
       this.formErrors.push('Test title is required');
     }
@@ -257,6 +284,12 @@ export class TestManagementComponent implements OnInit {
     
     this.loading = true;
     this.error = '';
+    
+    console.log('📤 Creating test with data:', {
+      title: this.testForm.title,
+      examId: this.testForm.examId,
+      duration: this.testForm.duration
+    });
     
     // First, create the test
     this.testService.createTest(this.testForm).subscribe({

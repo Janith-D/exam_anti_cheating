@@ -1,9 +1,9 @@
 /* Color Palette */
 :root {
-  --color-mint-cream: #ECF4E8;
-  --color-pale-green: #CBF3BB;
-  --color-mint-green: #ABE7B2;
-  --color-blue-gray: #93BFC7;
+  --color-mint-cream: var(--color-gray-lighter);
+  --color-pale-green: var(--color-primary-lighter);
+  --color-mint-green: var(--color-primary-light);
+  --color-blue-gray: var(--color-primary);
   --color-dark-text: #2d4a3e;
   --color-medium-text: #4a6b5a;
   --color-critical: #dc3545;
@@ -861,3 +861,4 @@
     text-align: center;
   }
 }
+

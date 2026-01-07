@@ -47,6 +47,13 @@ public class TestController {
             LOGGER.info("Authenticated user: " + createdBy);
             LOGGER.info("Authorities: " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
             LOGGER.info("Test data received - Title: " + request.getTitle() + ", Exam ID: " + request.getExamId());
+            LOGGER.info("Full request: " + request.toString());
+            
+            // Validate examId is present
+            if (request.getExamId() == null) {
+                LOGGER.severe("ExamId is NULL in the request! Request data: " + request.toString());
+                throw new IllegalArgumentException("Exam ID is required. Please select an exam before creating a test.");
+            }
             
             // Create Test entity from DTO
             Test test = new Test();
@@ -65,6 +72,9 @@ public class TestController {
             Test savedTest = testService.createTest(test, createdBy);
             LOGGER.info("Test created successfully with ID: " + savedTest.getId());
             return ResponseEntity.ok(savedTest);
+        } catch (IllegalArgumentException e){
+            LOGGER.severe("Validation error creating test: " + e.getMessage());
+            return ResponseEntity.badRequest().body(null);
         } catch (Exception e){
             LOGGER.severe("Error creating test: " + e.getMessage());
             e.printStackTrace();

@@ -7,7 +7,7 @@
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   padding: 30px;
   border-radius: 15px;
@@ -88,7 +88,7 @@
 }
 
 .info-item i {
-  color: #667eea;
+  color: var(--color-primary);
   width: 16px;
 }
 
@@ -124,7 +124,7 @@
 }
 
 .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   border-radius: 20px 20px 0 0;
   padding: 20px 25px;
@@ -237,7 +237,7 @@
 }
 
 .btn-capture {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
 }
 
@@ -417,7 +417,7 @@
 }
 
 .published-exam-card:hover {
-  border-color: #667eea;
+  border-color: var(--color-primary);
   box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
 }
 
@@ -520,3 +520,5 @@
     margin-bottom: 25px !important;
   }
 }
+
+

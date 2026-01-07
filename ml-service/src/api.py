@@ -15,7 +15,8 @@ import base64
 # Import enrollment and verification
 from enroll import FaceEnrollmentSystem
 from verify import FaceVerificationSystem
-from utils import load_config, preprocess_image, detect_face, compute_embedding, cosine_similarity
+from utils import (load_config, preprocess_image, detect_face, compute_embedding, 
+                   cosine_similarity, perform_liveness_check)
 
 # Configure logging
 logging.basicConfig(
@@ -228,6 +229,125 @@ def verify():
     except Exception as e:
         error_msg = f"Unexpected error during verification: {str(e)}"
         logging.error(error_msg)
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/liveness-check', methods=['POST'])
+def liveness_check():
+    """Standalone liveness detection endpoint"""
+    try:
+        if not request.is_json:
+            raise ValueError("Content-Type must be application/json")
+        
+        data = request.json
+        frames = data.get('frames', [])
+        
+        if not frames or len(frames) < 3:
+            return jsonify({
+                'error': 'Minimum 3 frames required for liveness detection',
+                'provided': len(frames) if frames else 0
+            }), 400
+        
+        logging.info(f"Performing liveness check on {len(frames)} frames")
+        
+        # Perform liveness check
+        liveness_passed, liveness_result = perform_liveness_check(frames)
+        
+        # Convert numpy types to Python types for JSON serialization
+        def convert_types(obj):
+            if isinstance(obj, np.bool_):
+                return bool(obj)
+            elif isinstance(obj, (np.floating, np.integer)):
+                return float(obj)
+            elif isinstance(obj, dict):
+                return {k: convert_types(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_types(item) for item in obj]
+            return obj
+        
+        liveness_result = convert_types(liveness_result)
+        
+        response = {
+            'liveness_passed': liveness_passed,
+            'details': liveness_result,
+            'timestamp': datetime.now().isoformat()
+        }
+        
+        log_api_request('liveness-check', None, liveness_passed, 
+                       None if liveness_passed else 'Liveness check failed')
+        
+        return jsonify(response), 200 if liveness_passed else 400
+        
+    except ValueError as e:
+        error_msg = f"Validation error: {str(e)}"
+        logging.error(error_msg)
+        return jsonify({'error': error_msg}), 400
+    except Exception as e:
+        error_msg = f"Liveness check error: {str(e)}"
+        logging.error(error_msg)
+        return jsonify({'error': 'Internal server error'}), 500
+
+@app.route('/verify-with-liveness', methods=['POST'])
+def verify_with_liveness():
+    """Combined verification with liveness detection"""
+    student_id = None
+    try:
+        if verification_system is None:
+            raise RuntimeError("Verification system not initialized")
+        
+        if not request.is_json:
+            raise ValueError("Content-Type must be application/json")
+        
+        data = request.json
+        student_id = data.get('studentId')
+        frames = data.get('frames', [])
+        
+        if not student_id:
+            raise ValueError("studentId is required")
+        
+        if not frames or len(frames) < 3:
+            return jsonify({
+                'error': 'Minimum 3 frames required for verification with liveness',
+                'provided': len(frames) if frames else 0
+            }), 400
+        
+        logging.info(f"Performing verification with liveness for student {student_id}")
+        
+        # Call verification with frames for liveness check
+        result = verification_system.verify_with_retry(student_id, frames=frames)
+        
+        # Convert numpy types to Python types
+        def convert_types(obj):
+            if isinstance(obj, np.bool_):
+                return bool(obj)
+            elif isinstance(obj, (np.floating, np.integer)):
+                return float(obj)
+            elif isinstance(obj, dict):
+                return {k: convert_types(v) for k, v in obj.items()}
+            elif isinstance(obj, list):
+                return [convert_types(item) for item in obj]
+            return obj
+        
+        result = convert_types(result)
+        
+        log_api_request('verify-with-liveness', student_id, result['verification_result'], 
+                       None if result['verification_result'] else result.get('final_message'))
+        
+        return jsonify(result), 200 if result['verification_result'] else 400
+        
+    except ValueError as e:
+        error_msg = f"Validation error: {str(e)}"
+        logging.error(error_msg)
+        log_api_request('verify-with-liveness', student_id, False, error_msg)
+        return jsonify({'error': error_msg}), 400
+    except RuntimeError as e:
+        error_msg = f"System error: {str(e)}"
+        logging.error(error_msg)
+        log_api_request('verify-with-liveness', student_id, False, error_msg)
+        return jsonify({'error': error_msg}), 503
+    except Exception as e:
+        error_msg = f"Unexpected error during verification: {str(e)}"
+        logging.error(error_msg)
+        log_api_request('verify-with-liveness', student_id, False, error_msg)
         return jsonify({'error': 'Internal server error'}), 500
 
 @app.errorhandler(413)

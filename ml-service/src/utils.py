@@ -195,6 +195,287 @@ def cosine_similarity(emb1: np.ndarray, emb2: np.ndarray) -> float:
         raise ValueError("Zero norm detected, invalid embeddings")
     return float(dot_product / norm_product)
 
+# ============ LIVENESS DETECTION FUNCTIONS ============
+
+def detect_blink(eye_region: np.ndarray, threshold: float = 0.2) -> bool:
+    """Detect eye blink using Eye Aspect Ratio (EAR)"""
+    try:
+        # Simple blink detection using vertical eye closure
+        gray = cv2.cvtColor(eye_region, cv2.COLOR_BGR2GRAY) if len(eye_region.shape) == 3 else eye_region
+        
+        # Calculate vertical variance (eyes closed = low variance)
+        vertical_profile = np.mean(gray, axis=1)
+        variance = np.var(vertical_profile)
+        
+        # Normalized variance check
+        normalized_var = variance / (gray.shape[0] * gray.shape[1])
+        return normalized_var < threshold
+    except Exception as e:
+        logging.error(f"Blink detection error: {e}")
+        return False
+
+def detect_eye_blink_sequence(frames: list, min_blinks: int = 1) -> Tuple[bool, int]:
+    """Detect blinks across multiple frames"""
+    try:
+        # Load eye cascade classifier
+        eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
+        
+        blink_count = 0
+        previous_state = None  # None, 'open', 'closed'
+        
+        for frame_data in frames:
+            # Preprocess frame
+            img = preprocess_image(frame_data, (640, 480))
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            
+            # Detect eyes
+            eyes = eye_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
+            
+            if len(eyes) >= 2:
+                # Check eye state (open/closed)
+                eye_states = []
+                for (x, y, w, h) in eyes[:2]:  # Check first 2 eyes
+                    eye_roi = gray[y:y+h, x:x+w]
+                    is_closed = detect_blink(eye_roi)
+                    eye_states.append(is_closed)
+                
+                # If both eyes closed
+                current_state = 'closed' if all(eye_states) else 'open'
+                
+                # Detect blink transition (open -> closed -> open)
+                if previous_state == 'closed' and current_state == 'open':
+                    blink_count += 1
+                    logging.info(f"Blink detected! Total: {blink_count}")
+                
+                previous_state = current_state
+        
+        return blink_count >= min_blinks, blink_count
+    except Exception as e:
+        logging.error(f"Blink sequence detection error: {e}")
+        return False, 0
+
+def estimate_head_pose(face_image: np.ndarray) -> Tuple[bool, dict]:
+    """Estimate head pose angles (yaw, pitch, roll) to detect head movement"""
+    try:
+        gray = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
+        
+        # Use facial landmarks or simple gradient analysis
+        # Calculate image moments for orientation
+        moments = cv2.moments(gray)
+        
+        if moments['m00'] == 0:
+            return False, {}
+        
+        # Calculate centroid
+        cx = int(moments['m10'] / moments['m00'])
+        cy = int(moments['m01'] / moments['m00'])
+        
+        # Estimate orientation using hu moments
+        hu_moments = cv2.HuMoments(moments).flatten()
+        
+        # Simple pose estimation based on symmetry
+        h, w = gray.shape
+        left_half = gray[:, :w//2]
+        right_half = gray[:, w//2:]
+        
+        # Calculate symmetry score
+        right_flipped = cv2.flip(right_half, 1)
+        min_width = min(left_half.shape[1], right_flipped.shape[1])
+        symmetry = np.mean(np.abs(left_half[:, :min_width].astype(float) - right_flipped[:, :min_width].astype(float)))
+        
+        # Estimate rough yaw angle from asymmetry
+        yaw_estimate = (symmetry / 128.0) * 45  # Rough estimate in degrees
+        
+        pose_info = {
+            'centroid': (cx, cy),
+            'symmetry_score': float(symmetry),
+            'estimated_yaw': float(yaw_estimate),
+            'frontal_face': symmetry < 50  # Lower symmetry = more frontal
+        }
+        
+        return True, pose_info
+    except Exception as e:
+        logging.error(f"Head pose estimation error: {e}")
+        return False, {}
+
+def detect_head_movement(frames: list) -> Tuple[bool, dict]:
+    """Detect head movement across multiple frames"""
+    try:
+        poses = []
+        
+        for frame_data in frames:
+            img = preprocess_image(frame_data, (640, 480))
+            face = detect_face(img)
+            
+            if face is not None:
+                success, pose_info = estimate_head_pose(face)
+                if success:
+                    poses.append(pose_info)
+        
+        if len(poses) < 2:
+            return False, {'error': 'Insufficient frames for movement detection'}
+        
+        # Calculate movement metrics
+        centroids = [p['centroid'] for p in poses]
+        movements = []
+        
+        for i in range(1, len(centroids)):
+            dx = centroids[i][0] - centroids[i-1][0]
+            dy = centroids[i][1] - centroids[i-1][1]
+            movement = np.sqrt(dx**2 + dy**2)
+            movements.append(movement)
+        
+        avg_movement = np.mean(movements) if movements else 0
+        max_movement = np.max(movements) if movements else 0
+        
+        # Check if there's significant movement (indicates live person)
+        has_movement = max_movement > 10  # At least 10 pixels movement
+        
+        movement_info = {
+            'average_movement': float(avg_movement),
+            'max_movement': float(max_movement),
+            'has_movement': has_movement,
+            'frame_count': len(poses)
+        }
+        
+        return has_movement, movement_info
+    except Exception as e:
+        logging.error(f"Head movement detection error: {e}")
+        return False, {'error': str(e)}
+
+def analyze_texture_for_spoofing(face_image: np.ndarray) -> Tuple[bool, dict]:
+    """Analyze texture to detect photo/screen spoofing"""
+    try:
+        gray = cv2.cvtColor(face_image, cv2.COLOR_BGR2GRAY)
+        
+        # 1. Check for screen moiré patterns (high frequency patterns)
+        fft = np.fft.fft2(gray)
+        fft_shift = np.fft.fftshift(fft)
+        magnitude_spectrum = 20 * np.log(np.abs(fft_shift) + 1)
+        
+        # High frequency content indicates possible screen/print
+        h, w = magnitude_spectrum.shape
+        center_region = magnitude_spectrum[h//4:3*h//4, w//4:3*w//4]
+        edge_region = np.concatenate([
+            magnitude_spectrum[:h//4, :].flatten(),
+            magnitude_spectrum[3*h//4:, :].flatten()
+        ])
+        
+        high_freq_ratio = np.mean(edge_region) / (np.mean(center_region) + 1e-6)
+        
+        # 2. Check for color consistency (prints have different color distribution)
+        if len(face_image.shape) == 3:
+            hsv = cv2.cvtColor(face_image, cv2.COLOR_BGR2HSV)
+            saturation = hsv[:, :, 1]
+            saturation_std = np.std(saturation)
+        else:
+            saturation_std = 0
+        
+        # 3. Blur/sharpness check (photos are often too sharp or too blurry)
+        laplacian_var = cv2.Laplacian(gray, cv2.CV_64F).var()
+        
+        # 4. Edge density (prints have different edge characteristics)
+        edges = cv2.Canny(gray, 50, 150)
+        edge_density = np.sum(edges > 0) / (edges.shape[0] * edges.shape[1])
+        
+        # Scoring
+        is_real = True
+        reasons = []
+        
+        # Check for spoofing indicators
+        if high_freq_ratio > 1.5:
+            is_real = False
+            reasons.append("Suspicious high-frequency patterns detected")
+        
+        if saturation_std < 10:
+            is_real = False
+            reasons.append("Unnatural color distribution")
+        
+        if laplacian_var < 50 or laplacian_var > 5000:
+            is_real = False
+            reasons.append("Abnormal sharpness level")
+        
+        if edge_density > 0.3:
+            is_real = False
+            reasons.append("Excessive edge density")
+        
+        texture_info = {
+            'is_real_face': is_real,
+            'high_freq_ratio': float(high_freq_ratio),
+            'saturation_std': float(saturation_std),
+            'sharpness_score': float(laplacian_var),
+            'edge_density': float(edge_density),
+            'spoofing_indicators': reasons
+        }
+        
+        return is_real, texture_info
+    except Exception as e:
+        logging.error(f"Texture analysis error: {e}")
+        return True, {'error': str(e)}  # Default to accepting if analysis fails
+
+def perform_liveness_check(frames: list) -> Tuple[bool, dict]:
+    """Comprehensive liveness check combining multiple techniques"""
+    try:
+        results = {
+            'liveness_passed': False,
+            'checks': {},
+            'overall_score': 0.0,
+            'timestamp': cv2.getTickCount()
+        }
+        
+        if len(frames) < 3:
+            results['error'] = 'Insufficient frames for liveness check (minimum 3 required)'
+            return False, results
+        
+        # 1. Blink detection
+        has_blink, blink_count = detect_eye_blink_sequence(frames, min_blinks=1)
+        results['checks']['blink_detection'] = {
+            'passed': has_blink,
+            'blink_count': blink_count,
+            'score': 30 if has_blink else 0
+        }
+        
+        # 2. Head movement detection
+        has_movement, movement_info = detect_head_movement(frames)
+        results['checks']['head_movement'] = {
+            'passed': has_movement,
+            'details': movement_info,
+            'score': 30 if has_movement else 0
+        }
+        
+        # 3. Texture analysis on middle frame
+        mid_frame = frames[len(frames) // 2]
+        img = preprocess_image(mid_frame, (640, 480))
+        face = detect_face(img)
+        
+        if face is not None:
+            is_real, texture_info = analyze_texture_for_spoofing(face)
+            results['checks']['texture_analysis'] = {
+                'passed': is_real,
+                'details': texture_info,
+                'score': 40 if is_real else 0
+            }
+        else:
+            results['checks']['texture_analysis'] = {
+                'passed': False,
+                'error': 'No face detected for texture analysis',
+                'score': 0
+            }
+        
+        # Calculate overall score
+        total_score = sum(check['score'] for check in results['checks'].values())
+        results['overall_score'] = total_score
+        
+        # Liveness passed if score >= 60 (at least 2 out of 3 checks passed)
+        results['liveness_passed'] = total_score >= 60
+        
+        logging.info(f"Liveness check result: {results['liveness_passed']} (score: {total_score}/100)")
+        return results['liveness_passed'], results
+        
+    except Exception as e:
+        logging.error(f"Liveness check error: {e}")
+        return False, {'error': str(e), 'liveness_passed': False}
+
 
 def capture_live_image(countdown: int = 3) -> str:
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
@@ -241,16 +522,26 @@ def capture_live_image(countdown: int = 3) -> str:
         cap.release()
         cv2.destroyAllWindows()
 
-def capture_live_image_advanced(num_frames: int = 5, countdown: int = 2) -> list:
+def capture_live_image_advanced(num_frames: int = 5, countdown: int = 2, liveness_mode: bool = True) -> list:
+    """Capture multiple frames for verification with optional liveness detection"""
     cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
     if not cap.isOpened():
         raise RuntimeError("Cannot access webcam")
 
-    logging.info(f"Starting verification webcam capture: {num_frames} frames")
+    mode_text = "with liveness" if liveness_mode else "standard"
+    logging.info(f"Starting verification webcam capture: {num_frames} frames ({mode_text})")
     frames = []
+    instruction_index = 0
+    instructions = ["Look at camera", "Blink your eyes", "Move your head slightly"] if liveness_mode else ["Look at camera"]
 
     try:
         for frame_idx in range(num_frames):
+            # Update instruction for liveness detection
+            if liveness_mode and frame_idx > 0:
+                instruction_index = min(frame_idx, len(instructions) - 1)
+            
+            current_instruction = instructions[instruction_index]
+            
             for i in range(countdown * 30):
                 ret, frame = cap.read()
                 if not ret:
@@ -258,14 +549,25 @@ def capture_live_image_advanced(num_frames: int = 5, countdown: int = 2) -> list
                 remaining = max(0, countdown - i // 30)
                 status_text = f"Frame {frame_idx+1}/{num_frames} in {remaining}s"
 
-                result = detect_face(frame)
-                if result is not None:
-                    _, (x, y, w, h) = result
+                face = detect_face(frame)
+                if face is not None:
+                    # Draw rectangle on original frame (face detection returns cropped region)
+                    # We need to re-detect to get coordinates for drawing
+                    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                    face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+                    faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(80, 80))
+                    if len(faces) > 0:
+                        x, y, w, h = faces[0]
+                        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                     status_text += " - Face ✓"
-                    cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
                 else:
                     status_text += " - No face ✗"
 
+                # Display instruction for liveness
+                if liveness_mode:
+                    cv2.putText(frame, current_instruction, (20, 60),
+                                cv2.FONT_HERSHEY_SIMPLEX, 0.9, (255, 255, 0), 2)
+                
                 cv2.putText(frame, status_text, (20, 30),
                             cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
                 cv2.imshow("Verification - Face Capture", frame)

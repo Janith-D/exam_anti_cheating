@@ -1,6 +1,51 @@
 /* ============================================
-   LOGIN PAGE STYLES
+   LOGIN PAGE STYLES - Green Theme
    ============================================ */
+
+/* Login Page Specific Colors */
+:root {
+  --login-mint-cream: #ECF4E8;
+  --login-tea-green: #CBF3BB;
+  --login-light-green: #ABE7B9;
+  --login-ocean-green: #93BFC7;
+  --login-gradient: linear-gradient(135deg, #ECF4E8 0%, #CBF3BB 100%);
+  --login-gradient-accent: linear-gradient(135deg, #93BFC7 0%, #ABE7B9 100%);
+}
+
+/* Login Page Button Overrides */
+.login-container .btn-primary {
+  background: var(--login-gradient-accent);
+  color: white;
+  box-shadow: 0 4px 12px rgba(147, 191, 199, 0.3);
+}
+
+.login-container .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, #7BA9B0 0%, #93D3A2 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(147, 191, 199, 0.4);
+}
+
+.login-container .btn-secondary {
+  background: var(--login-tea-green);
+  color: var(--color-dark);
+  border: 2px solid var(--login-light-green);
+}
+
+.login-container .btn-secondary:hover:not(:disabled) {
+  background: var(--login-light-green);
+  border-color: var(--login-ocean-green);
+}
+
+.login-container .btn-outline {
+  background: transparent;
+  border: 2px solid var(--login-ocean-green);
+  color: var(--login-ocean-green);
+}
+
+.login-container .btn-outline:hover:not(:disabled) {
+  background: var(--login-ocean-green);
+  color: white;
+}
 
 .login-container {
   display: flex;
@@ -13,7 +58,7 @@
    ============================================ */
 .login-left {
   flex: 1;
-  background: var(--gradient-light);
+  background: var(--login-gradient);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -158,11 +203,11 @@
   text-align: right;
   margin-top: 0.5rem;
   font-size: var(--font-size-sm);
-  color: var(--color-ocean-green);
+  color: var(--login-ocean-green);
 }
 
 .forgot-password:hover {
-  color: var(--color-light-green);
+  color: var(--login-light-green);
   text-decoration: underline;
 }
 
@@ -181,7 +226,7 @@
   border-radius: var(--radius-md);
   padding: 1rem;
   text-align: center;
-  background: var(--color-mint-cream);
+  background: var(--login-mint-cream);
 }
 
 .face-video {
@@ -298,12 +343,12 @@
 }
 
 .register-link a {
-  color: var(--color-ocean-green);
+  color: var(--login-ocean-green);
   font-weight: 600;
 }
 
 .register-link a:hover {
-  color: var(--color-light-green);
+  color: var(--login-light-green);
   text-decoration: underline;
 }
 
@@ -447,7 +492,7 @@
 
 .instruction-text {
   font-size: 1.125rem;
-  color: var(--color-primary);
+  color: var(--login-ocean-green);
   font-weight: 700;
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -462,7 +507,7 @@
 
 .progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-success));
+  background: var(--login-gradient-accent);
   transition: width 0.3s ease;
   border-radius: 4px;
 }

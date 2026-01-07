@@ -69,6 +69,22 @@
       <h2>Test Details</h2>
       
       <div class="form-group">
+        <label for="examId">Select Exam * 📚</label>
+        <select 
+          id="examId" 
+          [(ngModel)]="testForm.examId"
+          class="form-control"
+          [class.error]="!testForm.examId && formErrors.length > 0"
+        >
+          <option [ngValue]="undefined">-- Select an Exam --</option>
+          <option *ngFor="let exam of exams" [ngValue]="exam.id">
+            {{ exam.title }} ({{ exam.status }})
+          </option>
+        </select>
+        <small class="form-hint">Choose which exam this test belongs to</small>
+      </div>
+
+      <div class="form-group">
         <label for="title">Test Title *</label>
         <input 
           type="text" 

@@ -6,7 +6,8 @@ import json
 from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple, Dict
-from utils import load_config, preprocess_image, detect_face, compute_embedding, cosine_similarity
+from utils import (load_config, preprocess_image, detect_face, compute_embedding, 
+                   cosine_similarity, capture_live_image_advanced, perform_liveness_check)
 
 # ------------------ Logging ------------------
 logging.basicConfig(
@@ -59,15 +60,30 @@ class FaceVerificationSystem:
 
     # ------------------ Advanced face verification ------------------
     def verify_face_advanced(self, student_id: str, image_input: str, stored_embedding: np.ndarray,
-                             attempt_number: int = 1) -> Tuple[bool, float, str]:
+                             attempt_number: int = 1, frames: Optional[list] = None) -> Tuple[bool, float, str, dict]:
+        """Verify face with optional liveness detection"""
+        liveness_result = None
+        
         try:
+            # Perform liveness check if enabled and frames provided
+            if self.liveness_checks and frames and len(frames) >= 3:
+                logging.info(f"Performing liveness check for {student_id}...")
+                liveness_passed, liveness_result = perform_liveness_check(frames)
+                
+                if not liveness_passed:
+                    msg = f"Liveness check failed: {liveness_result.get('checks', {})}"
+                    self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
+                    return False, 0.0, msg, liveness_result
+                
+                logging.info(f"Liveness check passed (score: {liveness_result.get('overall_score', 0)}/100)")
+            
             img = preprocess_image(image_input, self.config['image_size'])
             face = detect_face(img)
 
             if face is None:
                 msg = "No face detected in image"
                 self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
-                return False, 0.0, msg
+                return False, 0.0, msg, liveness_result
 
             face_resized = cv2.resize(face, tuple(self.config['face_size']))
             new_embedding = compute_embedding(face_resized)
@@ -75,20 +91,20 @@ class FaceVerificationSystem:
             if new_embedding is None or len(new_embedding) == 0:
                 msg = "Failed to compute embedding from image"
                 self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
-                return False, 0.0, msg
+                return False, 0.0, msg, liveness_result
 
             similarity = cosine_similarity(stored_embedding, new_embedding)
             is_verified = similarity >= self.similarity_threshold
-            status_msg = (f"Verification successful (similarity: {similarity:.3f})"
-                          if is_verified else
+            status_msg = (f"Verification successful (similarity: {similarity:.3f})"  
+                          if is_verified else  
                           f"Verification failed - insufficient similarity ({similarity:.3f} < {self.similarity_threshold})")
             self.log_verification_attempt(student_id, similarity, is_verified, attempt_number, status_msg)
-            return is_verified, similarity, status_msg
+            return is_verified, similarity, status_msg, liveness_result
         except Exception as e:
             error_msg = f"Verification error: {str(e)}"
             logging.error(error_msg)
             self.log_verification_attempt(student_id, 0.0, False, attempt_number, error_msg)
-            return False, 0.0, error_msg
+            return False, 0.0, error_msg, liveness_result
 
     # ------------------ Webcam capture ------------------
     def capture_live_image(self, countdown: int = 3) -> str:
@@ -120,11 +136,14 @@ class FaceVerificationSystem:
             cv2.destroyAllWindows()
 
     # ------------------ Verify with retries ------------------
-    def verify_with_retry(self, student_id: str, image_input: Optional[str] = None) -> Dict:
+    def verify_with_retry(self, student_id: str, image_input: Optional[str] = None, 
+                          frames: Optional[list] = None) -> Dict:
+        """Verify with retry support and optional liveness detection"""
         result = {
             'studentId': student_id,
             'verification_result': False,
             'attempts': [],
+            'liveness_check': None,
             'final_message': '',
             'timestamp': datetime.now().isoformat()
         }
@@ -136,22 +155,47 @@ class FaceVerificationSystem:
             result['final_message'] = msg
             return result
 
+        # Capture frames if liveness is enabled and no frames/image provided
+        if self.liveness_checks and frames is None and (image_input is None or image_input == 'webcam'):
+            try:
+                logging.info("Capturing frames for liveness detection...")
+                frames = capture_live_image_advanced(num_frames=5, countdown=2, liveness_mode=True)
+                logging.info(f"Captured {len(frames)} frames for liveness check")
+            except Exception as e:
+                result['final_message'] = f"Failed to capture frames: {str(e)}"
+                return result
+
         for attempt in range(1, self.max_attempts + 1):
             logging.info(f"Verification attempt {attempt}/{self.max_attempts} for {student_id}")
-            if image_input is None or image_input == 'webcam':
+            
+            # Use first frame as the verification image if frames provided
+            if frames:
+                image_input = frames[0]
+            elif image_input is None or image_input == 'webcam':
                 image_input = self.capture_live_image()
-            is_verified, similarity, message = self.verify_face_advanced(student_id, image_input, stored_embedding, attempt)
+            
+            is_verified, similarity, message, liveness_result = self.verify_face_advanced(
+                student_id, image_input, stored_embedding, attempt, frames
+            )
+            
             attempt_result = {
                 'attempt_number': attempt,
                 'success': is_verified,
                 'similarity': float(similarity),
                 'message': message
             }
+            
+            if liveness_result:
+                attempt_result['liveness_check'] = liveness_result
+                result['liveness_check'] = liveness_result
+            
             result['attempts'].append(attempt_result)
+            
             if is_verified:
                 result['verification_result'] = True
                 result['final_message'] = f"Verification successful on attempt {attempt}"
                 break
+            
             if attempt < self.max_attempts:
                 logging.info(f"Attempt {attempt} failed. {self.max_attempts - attempt} attempts remaining.")
 

@@ -4,7 +4,7 @@
 }
 
 .exam-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   padding: 40px;
   border-radius: 0 0 30px 30px;
@@ -65,7 +65,7 @@
 
 .info-icon {
   font-size: 2rem;
-  color: #667eea;
+  color: var(--color-primary);
   margin-bottom: 10px;
 }
 
@@ -114,7 +114,7 @@
 
 .test-number {
   display: inline-block;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   padding: 5px 15px;
   border-radius: 20px;
@@ -153,7 +153,7 @@
 }
 
 .info-item i {
-  color: #667eea;
+  color: var(--color-primary);
   font-size: 1.1rem;
 }
 
@@ -247,7 +247,7 @@
 }
 
 .modal-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
   color: white;
   border-radius: 15px 15px 0 0;
   border: none;
@@ -290,3 +290,5 @@
   opacity: 0.6;
   cursor: not-allowed;
 }
+
+

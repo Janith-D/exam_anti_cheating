@@ -45,9 +45,13 @@ public class TestService {
         }
         
         // CRITICAL FIX: Validate and load the exam from database
-        if (test.getExam() == null || test.getExam().getId() == null) {
-            LOGGER.severe("Test must be associated with a valid exam");
-            throw new IllegalArgumentException("Test must be associated with a valid exam");
+        if (test.getExam() == null) {
+            LOGGER.severe("Test exam is NULL");
+            throw new IllegalArgumentException("Test must be associated with an exam (exam object is null)");
+        }
+        if (test.getExam().getId() == null) {
+            LOGGER.severe("Test exam ID is NULL");
+            throw new IllegalArgumentException("Test must be associated with an exam (exam ID is null)");
         }
         
         // Load the exam from database to ensure it exists

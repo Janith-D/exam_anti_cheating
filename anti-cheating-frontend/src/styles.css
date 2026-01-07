@@ -1,42 +1,49 @@
 /* ============================================
    EXAM MASTERY HUB - GLOBAL STYLES
-   Color Palette: #ECF4E8, #CBF3BB, #ABE7B9, #93BFC7
+   Professional Green/Teal Color Palette
    ============================================ */
 
 /* ============================================
    CSS VARIABLES - COLOR PALETTE
    ============================================ */
 :root {
-  /* Primary Colors */
-  --color-mint-cream: #ECF4E8;      /* Lightest - Main backgrounds */
-  --color-tea-green: #CBF3BB;        /* Light - Card backgrounds */
-  --color-light-green: #ABE7B9;      /* Medium - Buttons, accents */
-  --color-ocean-green: #93BFC7;      /* Darker - Headers, active states */
+  /* Primary Colors - Professional Green/Teal */
+  --color-primary: #93BFC7;          /* Ocean Teal - Main actions */
+  --color-primary-dark: #6BA5AD;     /* Dark Teal - Hover states */
+  --color-primary-light: #ABE7B9;    /* Light Green - Backgrounds */
+  --color-primary-lighter: #ECF4E8;  /* Mint Cream - Subtle backgrounds */
   
-  /* Semantic Colors */
-  --color-success: #ABE7B9;
-  --color-warning: #FFD93D;
-  --color-danger: #FF6B6B;
-  --color-info: #93BFC7;
+  /* Secondary Colors - Complementary */
+  --color-secondary: #8EC5A8;        /* Sage Green - Secondary actions */
+  --color-secondary-light: #CBF3BB;  /* Tea Green - Light accents */
   
-  /* Neutral Colors */
-  --color-dark: #2C3E50;
-  --color-gray: #95A5A6;
-  --color-gray-light: #BDC3C7;
-  --color-gray-lighter: #ECF0F1;
-  --color-white: #FFFFFF;
+  /* Neutral Colors - Grays */
+  --color-dark: #1e293b;            /* Almost Black - Text */
+  --color-gray: #64748b;            /* Medium Gray - Secondary text */
+  --color-gray-light: #cbd5e1;      /* Light Gray - Borders */
+  --color-gray-lighter: #f1f5f9;    /* Lighter Gray - Backgrounds */
+  --color-white: #ffffff;           /* Pure White */
   
-  /* Gradients */
+  /* Semantic Colors - Status Indicators */
+  --color-success: #10b981;         /* Green - Success messages */
+  --color-success-light: #d1fae5;   /* Light Green - Success backgrounds */
+  --color-warning: #f59e0b;         /* Orange - Warning messages */
+  --color-warning-light: #fef3c7;   /* Light Yellow - Warning backgrounds */
+  --color-danger: #ef4444;          /* Red - Error messages */
+  --color-danger-light: #fee2e2;    /* Light Red - Error backgrounds */
+  --color-info: #06b6d4;            /* Cyan - Info messages */
+  --color-info-light: #cffafe;      /* Light Cyan - Info backgrounds */
+  
+  /* Gradients - Professional Green Theme */
   --gradient-primary: linear-gradient(135deg, #93BFC7 0%, #ABE7B9 100%);
-  --gradient-secondary: linear-gradient(135deg, #ABE7B9 0%, #CBF3BB 100%);
   --gradient-light: linear-gradient(135deg, #ECF4E8 0%, #CBF3BB 100%);
-  --gradient-ocean: linear-gradient(135deg, #93BFC7 0%, #6BA5AD 100%);
+  --gradient-card: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
   
-  /* Shadows */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  /* Shadows - Depth & Elevation */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
   
   /* Border Radius */
   --radius-sm: 4px;

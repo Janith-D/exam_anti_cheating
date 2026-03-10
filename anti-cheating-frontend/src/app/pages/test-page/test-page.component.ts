@@ -10,6 +10,7 @@ import { ExamSessionService } from '../../Services/exam-session.service';
 import { AuthService } from '../../Services/auth.service.service';
 import { StudentActivityService } from '../../Services/student-activity.service';
 import { EnrollmentService } from '../../Services/enrollment.service';
+import { DesktopMonitorService } from '../../Services/desktop-monitor.service';
 import { Test } from '../../models/test.model';
 import { Question } from '../../models/question.model';
 
@@ -60,7 +61,8 @@ export class TestPageComponent implements OnInit, OnDestroy {
     private examSessionService: ExamSessionService,
     private authService: AuthService,
     private studentActivityService: StudentActivityService,
-    private enrollmentService: EnrollmentService
+    private enrollmentService: EnrollmentService,
+    private desktopMonitorService: DesktopMonitorService
   ) {}
 
   ngOnInit(): void {
@@ -77,7 +79,9 @@ export class TestPageComponent implements OnInit, OnDestroy {
       // Set up periodic block status checking (every 30 seconds)
       this.blockCheckInterval = setInterval(() => {
         this.checkBlockStatus();
-      }, 30000);
+      
+      // Launch desktop monitor for this exam
+      this.launchDesktopMonitor();
     });
     
     // Monitor visibility changes (tab switches)
@@ -87,6 +91,35 @@ export class TestPageComponent implements OnInit, OnDestroy {
     this.setupCopyPasteMonitoring();
     
     // Warn before leaving page
+    this.setupBeforeUnloadHandler();
+  }
+
+  launchDesktopMonitor(): void {
+    // Only launch for students
+    if (!this.currentUser || this.currentUser.role !== 'STUDENT') {
+      return;
+    }
+
+    // Launch desktop monitoring application
+    const launched = this.desktopMonitorService.launchDesktopMonitor(
+      this.currentUser.id,
+      this.sessionId
+    );
+
+    if (launched) {
+      console.log('Desktop monitor launched successfully');
+      this.desktopMonitorService.showDesktopMonitorNotification(
+        'Desktop monitoring has been activated for this exam'
+      );
+    } else {
+      console.warn('Failed to launch desktop monitor');
+      // Check if desktop monitor is installed
+      this.desktopMonitorService.checkDesktopMonitorInstalled().then(installed => {
+        if (!installed) {
+          this.desktopMonitorService.promptInstallDesktopMonitor();
+        }
+      });
+    }
     this.setupBeforeUnloadHandler();
   }
 

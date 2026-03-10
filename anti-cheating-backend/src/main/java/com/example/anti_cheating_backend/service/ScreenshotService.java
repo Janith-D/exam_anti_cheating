@@ -1,0 +1,172 @@
+package com.example.anti_cheating_backend.service;
+
+import com.example.anti_cheating_backend.entity.ExamSession;
+import com.example.anti_cheating_backend.entity.Screenshot;
+import com.example.anti_cheating_backend.entity.Student;
+import com.example.anti_cheating_backend.repo.ExamSessionRepo;
+import com.example.anti_cheating_backend.repo.ScreenshotRepo;
+import com.example.anti_cheating_backend.repo.StudentRepo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class ScreenshotService {
+
+    @Autowired
+    private ScreenshotRepo screenshotRepo;
+    
+    @Autowired
+    private StudentRepo studentRepo;
+    
+    @Autowired
+    private ExamSessionRepo examSessionRepo;
+    
+    private static final String UPLOAD_DIR = "uploads/screenshots/";
+    
+    public ScreenshotService() {
+        // Create upload directory if it doesn't exist
+        try {
+            Files.createDirectories(Paths.get(UPLOAD_DIR));
+        } catch (IOException e) {
+            System.err.println("Failed to create upload directory: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public Screenshot saveScreenshot(Long studentId, Long examSessionId, 
+                                     MultipartFile file, String activeWindow,
+                                     String runningProcesses, String captureSource) throws IOException {
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
+        
+        ExamSession examSession = null;
+        if (examSessionId != null) {
+            examSession = examSessionRepo.findById(examSessionId)
+                    .orElseThrow(() -> new RuntimeException("Exam session not found: " + examSessionId));
+        }
+        
+        // Generate unique filename
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+        String originalFilename = file.getOriginalFilename();
+        String extension = originalFilename != null && originalFilename.contains(".") 
+                ? originalFilename.substring(originalFilename.lastIndexOf(".")) 
+                : ".png";
+        String filename = String.format("screenshot_%d_%s_%s%s", studentId, timestamp, uniqueId, extension);
+        
+        // Create student-specific subdirectory
+        String studentDir = UPLOAD_DIR + "student_" + studentId + "/";
+        Files.createDirectories(Paths.get(studentDir));
+        
+        // Save file
+        Path filePath = Paths.get(studentDir + filename);
+        file.transferTo(filePath.toFile());
+        
+        // Create screenshot record
+        Screenshot screenshot = new Screenshot();
+        screenshot.setStudent(student);
+        screenshot.setExamSession(examSession);
+        screenshot.setFilePath(filePath.toString());
+        screenshot.setActiveWindow(activeWindow);
+        screenshot.setRunningProcesses(runningProcesses);
+        screenshot.setCaptureSource(captureSource != null ? captureSource : "desktop");
+        screenshot.setTimestamp(LocalDateTime.now());
+        
+        // Auto-flag suspicious screenshots
+        if (isSuspicious(activeWindow, runningProcesses)) {
+            screenshot.setFlaggedSuspicious(true);
+            screenshot.setSuspiciousReason(generateSuspiciousReason(activeWindow, runningProcesses));
+        }
+        
+        return screenshotRepo.save(screenshot);
+    }
+
+    public List<Screenshot> getScreenshotsByStudent(Long studentId) {
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
+        return screenshotRepo.findByStudentOrderByTimestampDesc(student);
+    }
+
+    public List<Screenshot> getScreenshotsByExamSession(Long examSessionId) {
+        ExamSession examSession = examSessionRepo.findById(examSessionId)
+                .orElseThrow(() -> new RuntimeException("Exam session not found: " + examSessionId));
+        return screenshotRepo.findByExamSessionOrderByTimestampDesc(examSession);
+    }
+
+    public List<Screenshot> getScreenshotsByStudentAndSession(Long studentId, Long examSessionId) {
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
+        ExamSession examSession = examSessionRepo.findById(examSessionId)
+                .orElseThrow(() -> new RuntimeException("Exam session not found: " + examSessionId));
+        return screenshotRepo.findByStudentAndExamSessionOrderByTimestampDesc(student, examSession);
+    }
+
+    public List<Screenshot> getFlaggedScreenshots() {
+        return screenshotRepo.findByFlaggedSuspicious(true);
+    }
+
+    public byte[] getScreenshotFile(Long screenshotId) throws IOException {
+        Screenshot screenshot = screenshotRepo.findById(screenshotId)
+                .orElseThrow(() -> new RuntimeException("Screenshot not found: " + screenshotId));
+        Path filePath = Paths.get(screenshot.getFilePath());
+        return Files.readAllBytes(filePath);
+    }
+
+    private boolean isSuspicious(String activeWindow, String runningProcesses) {
+        if (activeWindow == null && runningProcesses == null) {
+            return false;
+        }
+        
+        String[] suspiciousApps = {
+            "TeamViewer", "AnyDesk", "Chrome Remote Desktop",
+            "WhatsApp", "Telegram", "Discord", "Slack",
+            "ChatGPT", "Google Search", "Stack Overflow"
+        };
+        
+        String combined = (activeWindow != null ? activeWindow : "") + " " + 
+                         (runningProcesses != null ? runningProcesses : "");
+        
+        for (String app : suspiciousApps) {
+            if (combined.toLowerCase().contains(app.toLowerCase())) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    private String generateSuspiciousReason(String activeWindow, String runningProcesses) {
+        StringBuilder reason = new StringBuilder("Detected suspicious applications: ");
+        String[] suspiciousApps = {
+            "TeamViewer", "AnyDesk", "Chrome Remote Desktop",
+            "WhatsApp", "Telegram", "Discord", "Slack",
+            "ChatGPT", "Google Search", "Stack Overflow"
+        };
+        
+        String combined = (activeWindow != null ? activeWindow : "") + " " + 
+                         (runningProcesses != null ? runningProcesses : "");
+        
+        boolean first = true;
+        for (String app : suspiciousApps) {
+            if (combined.toLowerCase().contains(app.toLowerCase())) {
+                if (!first) reason.append(", ");
+                reason.append(app);
+                first = false;
+            }
+        }
+        
+        return reason.toString();
+    }
+}

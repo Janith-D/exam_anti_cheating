@@ -1,0 +1,166 @@
+<div class="screenshot-viewer-container">
+  <div class="header">
+    <h2>📸 Desktop Monitoring - Screenshot Viewer</h2>
+    <p class="subtitle">View and analyze screenshots captured during exams</p>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filter-row">
+      <div class="filter-group">
+        <label>View Mode:</label>
+        <select [(ngModel)]="filterMode" (change)="onFilterChange()" class="form-select">
+          <option value="all">All Flagged Screenshots</option>
+          <option value="session">By Exam Session</option>
+          <option value="student">By Student</option>
+          <option value="flagged">Flagged Only</option>
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="filterMode === 'session'">
+        <label>Exam Session:</label>
+        <select [(ngModel)]="selectedSessionId" (change)="onFilterChange()" class="form-select">
+          <option [value]="null">Select Session...</option>
+          <option *ngFor="let session of sessions" [value]="session.id">
+            {{ session.examName }} ({{ session.startTime | date:'short' }})
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-group" *ngIf="filterMode === 'student'">
+        <label>Student:</label>
+        <select [(ngModel)]="selectedStudentId" (change)="onFilterChange()" class="form-select">
+          <option [value]="null">Select Student...</option>
+          <option *ngFor="let student of students" [value]="student.id">
+            {{ student.firstName }} {{ student.lastName }} ({{ student.username }})
+          </option>
+        </select>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-label">Total Screenshots:</span>
+        <span class="stat-value">{{ screenshots.length }}</span>
+      </div>
+      <div class="stat-box flagged">
+        <span class="stat-label">Flagged:</span>
+        <span class="stat-value">{{ (screenshots | filter:'flaggedSuspicious':true).length }}</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-label">High-Severity Activities:</span>
+        <span class="stat-value">{{ (activities | filter:'severityLevel':[4,5]).length }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Loading screenshots...</p>
+  </div>
+
+  <!-- Error Message -->
+  <div *ngIf="errorMessage" class="alert alert-danger">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Screenshots Grid -->
+  <div *ngIf="!loading && screenshots.length > 0" class="screenshots-section">
+    <div class="screenshots-grid">
+      <div *ngFor="let screenshot of getPaginatedScreenshots()" 
+           class="screenshot-card"
+           [ngClass]="getSeverityClass(screenshot)"
+           (click)="openScreenshot(screenshot)">
+        <div class="screenshot-image">
+          <img [src]="getScreenshotUrl(screenshot)" 
+               [alt]="'Screenshot ' + screenshot.id"
+               loading="lazy" />
+          <div class="screenshot-overlay">
+            <span class="view-icon">🔍</span>
+          </div>
+        </div>
+        <div class="screenshot-info">
+          <div class="timestamp">⏰ {{ formatTimestamp(screenshot.timestamp) }}</div>
+          <div class="active-window" *ngIf="screenshot.activeWindow">
+            🪟 {{ screenshot.activeWindow.substring(0, 40) }}{{ screenshot.activeWindow.length > 40 ? '...' : '' }}
+          </div>
+          <div class="flagged-badge" *ngIf="screenshot.flaggedSuspicious">
+            ⚠️ FLAGGED: {{ screenshot.suspiciousReason }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="getTotalPages() > 1">
+      <button (click)="prevPage()" [disabled]="currentPage === 1" class="btn btn-secondary">
+        ← Previous
+      </button>
+      <span class="page-info">Page {{ currentPage }} of {{ getTotalPages() }}</span>
+      <button (click)="nextPage()" [disabled]="currentPage === getTotalPages()" class="btn btn-secondary">
+        Next →
+      </button>
+    </div>
+  </div>
+
+  <!-- No Screenshots Message -->
+  <div *ngIf="!loading && screenshots.length === 0" class="no-data">
+    <div class="no-data-icon">📷</div>
+    <h3>No Screenshots Found</h3>
+    <p>No screenshots have been captured yet for the selected filters.</p>
+  </div>
+
+  <!-- Activities Section -->
+  <div *ngIf="activities.length > 0" class="activities-section">
+    <h3>Desktop Activities</h3>
+    <div class="activities-list">
+      <div *ngFor="let activity of activities.slice(0, 10)" 
+           class="activity-item"
+           [ngClass]="getActivitySeverityClass(activity)">
+        <div class="activity-header">
+          <span class="activity-type">{{ activity.activityType }}</span>
+          <span class="activity-time">{{ formatTimestamp(activity.timestamp) }}</span>
+        </div>
+        <div class="activity-details">{{ activity.details }}</div>
+        <div class="activity-window" *ngIf="activity.activeWindow">
+          Active Window: {{ activity.activeWindow }}
+        </div>
+      </div>
+    </div>
+    <p class="activities-note" *ngIf="activities.length > 10">
+      Showing 10 of {{ activities.length }} activities
+    </p>
+  </div>
+</div>
+
+<!-- Screenshot Modal -->
+<div class="modal-backdrop" *ngIf="selectedScreenshot" (click)="closeScreenshot()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>Screenshot Details</h3>
+      <button class="close-btn" (click)="closeScreenshot()">×</button>
+    </div>
+    <div class="modal-body">
+      <img [src]="getScreenshotUrl(selectedScreenshot)" 
+           [alt]="'Screenshot ' + selectedScreenshot.id"
+           class="modal-image" />
+      
+      <div class="screenshot-details">
+        <div class="detail-row">
+          <strong>Timestamp:</strong> {{ formatTimestamp(selectedScreenshot.timestamp) }}
+        </div>
+        <div class="detail-row" *ngIf="selectedScreenshot.activeWindow">
+          <strong>Active Window:</strong> {{ selectedScreenshot.activeWindow }}
+        </div>
+        <div class="detail-row" *ngIf="selectedScreenshot.flaggedSuspicious">
+          <strong>⚠️ Flagged:</strong> {{ selectedScreenshot.suspiciousReason }}
+        </div>
+        <div class="detail-row" *ngIf="selectedScreenshot.runningProcesses">
+          <strong>Running Processes:</strong>
+          <div class="processes-list">{{ selectedScreenshot.runningProcesses }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

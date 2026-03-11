@@ -1,17 +1,5 @@
 package com.example.anti_cheating_backend.service;
 
-import com.example.anti_cheating_backend.entity.ExamSession;
-import com.example.anti_cheating_backend.entity.Screenshot;
-import com.example.anti_cheating_backend.entity.Student;
-import com.example.anti_cheating_backend.repo.ExamSessionRepo;
-import com.example.anti_cheating_backend.repo.ScreenshotRepo;
-import com.example.anti_cheating_backend.repo.StudentRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +8,18 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.example.anti_cheating_backend.entity.ExamSession;
+import com.example.anti_cheating_backend.entity.Screenshot;
+import com.example.anti_cheating_backend.entity.Student;
+import com.example.anti_cheating_backend.repo.ExamSessionRepo;
+import com.example.anti_cheating_backend.repo.ScreenshotRepo;
+import com.example.anti_cheating_backend.repo.StudentRepo;
 
 @Service
 public class ScreenshotService {
@@ -34,11 +34,14 @@ public class ScreenshotService {
     private ExamSessionRepo examSessionRepo;
     
     private static final String UPLOAD_DIR = "uploads/screenshots/";
+    private final Path uploadBasePath;
     
     public ScreenshotService() {
-        // Create upload directory if it doesn't exist
+        // Resolve upload directory as absolute path from working directory
+        this.uploadBasePath = Paths.get(UPLOAD_DIR).toAbsolutePath();
         try {
-            Files.createDirectories(Paths.get(UPLOAD_DIR));
+            Files.createDirectories(this.uploadBasePath);
+            System.out.println("Screenshot upload directory: " + this.uploadBasePath);
         } catch (IOException e) {
             System.err.println("Failed to create upload directory: " + e.getMessage());
         }
@@ -67,11 +70,11 @@ public class ScreenshotService {
         String filename = String.format("screenshot_%d_%s_%s%s", studentId, timestamp, uniqueId, extension);
         
         // Create student-specific subdirectory
-        String studentDir = UPLOAD_DIR + "student_" + studentId + "/";
-        Files.createDirectories(Paths.get(studentDir));
+        Path studentDir = this.uploadBasePath.resolve("student_" + studentId);
+        Files.createDirectories(studentDir);
         
-        // Save file
-        Path filePath = Paths.get(studentDir + filename);
+        // Save file using absolute path
+        Path filePath = studentDir.resolve(filename);
         file.transferTo(filePath.toFile());
         
         // Create screenshot record
@@ -111,6 +114,10 @@ public class ScreenshotService {
         ExamSession examSession = examSessionRepo.findById(examSessionId)
                 .orElseThrow(() -> new RuntimeException("Exam session not found: " + examSessionId));
         return screenshotRepo.findByStudentAndExamSessionOrderByTimestampDesc(student, examSession);
+    }
+
+    public List<Screenshot> getAllScreenshots() {
+        return screenshotRepo.findAll();
     }
 
     public List<Screenshot> getFlaggedScreenshots() {

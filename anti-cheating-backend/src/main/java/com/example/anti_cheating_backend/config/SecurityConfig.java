@@ -56,8 +56,9 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
-                        // Removed: .requestMatchers("/api/test").permitAll() - causes 401 errors with @PreAuthorize
+                        .requestMatchers("/api/desktop-monitor/authenticate").permitAll()
                         .requestMatchers("/health").permitAll()
+                        .requestMatchers("/error").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 );

@@ -1,10 +1,10 @@
 package com.example.anti_cheating_backend.controller;
 
-import com.example.anti_cheating_backend.entity.DesktopActivity;
-import com.example.anti_cheating_backend.entity.Screenshot;
-import com.example.anti_cheating_backend.security.JwtUtil;
-import com.example.anti_cheating_backend.service.DesktopActivityService;
-import com.example.anti_cheating_backend.service.ScreenshotService;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.Resource;
@@ -13,13 +13,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
+import com.example.anti_cheating_backend.entity.DesktopActivity;
+import com.example.anti_cheating_backend.entity.Screenshot;
+import com.example.anti_cheating_backend.security.JwtUtil;
+import com.example.anti_cheating_backend.service.DesktopActivityService;
+import com.example.anti_cheating_backend.service.ScreenshotService;
 
 @RestController
 @RequestMapping("/api/desktop-monitor")
@@ -50,7 +58,7 @@ public class DesktopMonitorController {
             
             // Validate JWT token
             String username = jwtUtil.extractUsername(token);
-            if (username == null || !jwtUtil.validateToken(token, username)) {
+            if (username == null || jwtUtil.isTokenExpired(token)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "Invalid or expired token"));
             }
@@ -182,9 +190,14 @@ public class DesktopMonitorController {
     public ResponseEntity<?> getScreenshotsByStudent(@PathVariable Long studentId) {
         try {
             List<Screenshot> screenshots = screenshotService.getScreenshotsByStudent(studentId);
-            return ResponseEntity.ok(screenshots);
+            LOGGER.info("Found " + screenshots.size() + " screenshots for student " + studentId);
+            List<Map<String, Object>> result = screenshots.stream().map(this::toScreenshotMap).toList();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            LOGGER.severe("Error getting screenshots for student " + studentId + ": " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
         }
     }
 
@@ -196,7 +209,8 @@ public class DesktopMonitorController {
     public ResponseEntity<?> getScreenshotsBySession(@PathVariable Long examSessionId) {
         try {
             List<Screenshot> screenshots = screenshotService.getScreenshotsByExamSession(examSessionId);
-            return ResponseEntity.ok(screenshots);
+            List<Map<String, Object>> result = screenshots.stream().map(this::toScreenshotMap).toList();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -213,7 +227,8 @@ public class DesktopMonitorController {
         try {
             List<Screenshot> screenshots = screenshotService.getScreenshotsByStudentAndSession(
                 studentId, examSessionId);
-            return ResponseEntity.ok(screenshots);
+            List<Map<String, Object>> result = screenshots.stream().map(this::toScreenshotMap).toList();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -241,6 +256,25 @@ public class DesktopMonitorController {
     }
 
     /**
+     * Get all screenshots
+     */
+    @GetMapping("/screenshots/all")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> getAllScreenshots() {
+        try {
+            List<Screenshot> screenshots = screenshotService.getAllScreenshots();
+            LOGGER.info("Found " + screenshots.size() + " screenshots");
+            List<Map<String, Object>> result = screenshots.stream().map(this::toScreenshotMap).toList();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            LOGGER.severe("Error getting all screenshots: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
      * Get flagged screenshots
      */
     @GetMapping("/screenshots/flagged")
@@ -248,7 +282,8 @@ public class DesktopMonitorController {
     public ResponseEntity<?> getFlaggedScreenshots() {
         try {
             List<Screenshot> screenshots = screenshotService.getFlaggedScreenshots();
-            return ResponseEntity.ok(screenshots);
+            List<Map<String, Object>> result = screenshots.stream().map(this::toScreenshotMap).toList();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -306,5 +341,34 @@ public class DesktopMonitorController {
             "message", "Desktop monitoring API is running",
             "timestamp", System.currentTimeMillis()
         ));
+    }
+
+    private Map<String, Object> toScreenshotMap(Screenshot s) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", s.getId());
+        map.put("filePath", s.getFilePath());
+        map.put("timestamp", s.getTimestamp());
+        map.put("activeWindow", s.getActiveWindow());
+        map.put("runningProcesses", s.getRunningProcesses());
+        map.put("captureSource", s.getCaptureSource());
+        map.put("flaggedSuspicious", s.getFlaggedSuspicious());
+        map.put("suspiciousReason", s.getSuspiciousReason());
+        if (s.getStudent() != null) {
+            Map<String, Object> studentMap = new HashMap<>();
+            studentMap.put("id", s.getStudent().getId());
+            studentMap.put("userName", s.getStudent().getUserName());
+            studentMap.put("firstName", s.getStudent().getFirstName());
+            studentMap.put("lastName", s.getStudent().getLastName());
+            studentMap.put("studentId", s.getStudent().getStudentId());
+            map.put("student", studentMap);
+        }
+        if (s.getExamSession() != null) {
+            Map<String, Object> sessionMap = new HashMap<>();
+            sessionMap.put("id", s.getExamSession().getId());
+            sessionMap.put("examName", s.getExamSession().getExamName());
+            sessionMap.put("status", s.getExamSession().getStatus());
+            map.put("examSession", sessionMap);
+        }
+        return map;
     }
 }

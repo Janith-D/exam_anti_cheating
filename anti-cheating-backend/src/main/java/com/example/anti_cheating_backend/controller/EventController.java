@@ -6,12 +6,12 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,14 +44,15 @@ public class EventController {
     @Autowired
     private AlertService alertService;
 
-    @PostMapping(value = "/log", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping("/log")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<?> logEvent(
-            @RequestParam("studentId") Long studentId,
-            @RequestParam("type") String type,
-            @RequestParam(value = "details", required = false) String details,
-            @RequestParam(value = "snapshotPath", required = false) String snapshotPath,
-            @RequestParam(value = "examSessionId", required = false) Long examSessionId) {
+    public ResponseEntity<?> logEvent(@RequestBody Map<String, Object> request) {
+        Long studentId = request.get("studentId") != null ? ((Number) request.get("studentId")).longValue() : null;
+        String type = (String) request.get("eventType");
+        if (type == null) type = (String) request.get("type");
+        String details = (String) request.get("details");
+        String snapshotPath = (String) request.get("snapshotPath");
+        Long examSessionId = request.get("examSessionId") != null ? ((Number) request.get("examSessionId")).longValue() : null;
         try {
             LOGGER.info(String.format("Received event log request - studentId: %d, type: %s, details: %s, examSessionId: %s", 
                 studentId, type, details, examSessionId));

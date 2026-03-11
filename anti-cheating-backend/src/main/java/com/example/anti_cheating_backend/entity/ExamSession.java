@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -38,6 +39,7 @@ public class ExamSession {
     // Many sessions belong to one exam (optional - can be null for test sessions)
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exam_id", nullable = true)
+    @JsonIgnoreProperties({"tests", "enrollments", "hibernateLazyInitializer", "handler"})
     private Exam exam;
     
     @Column(name = "start_time")

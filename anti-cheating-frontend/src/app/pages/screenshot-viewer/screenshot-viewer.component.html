@@ -74,9 +74,14 @@
            [ngClass]="getSeverityClass(screenshot)"
            (click)="openScreenshot(screenshot)">
         <div class="screenshot-image">
-          <img [src]="getScreenshotUrl(screenshot)" 
+          <img *ngIf="getScreenshotUrl(screenshot) && getScreenshotUrl(screenshot) !== 'loading'"
+               [src]="getScreenshotUrl(screenshot)"
                [alt]="'Screenshot ' + screenshot.id"
                loading="lazy" />
+          <div *ngIf="!getScreenshotUrl(screenshot) || getScreenshotUrl(screenshot) === 'loading'"
+               class="screenshot-loading">
+            Loading...
+          </div>
           <div class="screenshot-overlay">
             <span class="view-icon">🔍</span>
           </div>
@@ -138,7 +143,7 @@
   <div *ngIf="alerts.length > 0" class="activities-section">
     <h3>🚨 Student Alerts</h3>
     <div class="activities-list">
-      <div *ngFor="let alert of alerts.slice(0, 10)" class="activity-item" [ngClass]="alert.severity?.toLowerCase()">
+      <div *ngFor="let alert of alerts.slice(0, 10)" class="activity-item" [ngClass]="alert.severity.toLowerCase()">
         <div class="activity-header">
           <span class="activity-type">{{ alert.severity }} - {{ alert.status }}</span>
           <span class="activity-time">{{ formatTimestamp(getAlertTimestamp(alert)) }}</span>

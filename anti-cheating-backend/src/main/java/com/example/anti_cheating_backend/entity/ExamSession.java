@@ -21,7 +21,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "exam_sessions")
@@ -40,6 +42,8 @@ public class ExamSession {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exam_id", nullable = true)
     @JsonIgnoreProperties({"tests", "enrollments", "hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Exam exam;
     
     @Column(name = "start_time")
@@ -59,5 +63,7 @@ public class ExamSession {
     
     @OneToMany(mappedBy = "examSession", cascade = CascadeType.ALL)
     @JsonIgnore  // Prevent infinite recursion when serializing to JSON
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Event> events;
 }

@@ -1,0 +1,8 @@
+<div class="oauth2-callback-container">
+  <div class="oauth2-card">
+    <h2>Google Sign-In</h2>
+
+    <p *ngIf="loading">Signing you in, please wait...</p>
+    <p *ngIf="!loading && errorMessage" class="error-text">{{ errorMessage }}</p>
+  </div>
+</div>

@@ -112,8 +112,42 @@
 }
 
 /* Modal Styles */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  padding: 20px;
+  z-index: 1050;
+}
+
 .modal.show {
   background: rgba(0, 0, 0, 0.6);
+}
+
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1040;
+}
+
+.modal-dialog {
+  margin: 20px 0 0 0;
+  width: auto;
+  max-width: 480px;
+  animation: slideInRight 0.3s ease-out;
+}
+
+.modal-dialog-centered {
+  align-self: flex-start;
 }
 
 .enrollment-modal {
@@ -121,6 +155,7 @@
   border: none;
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
   max-width: 480px;
+  width: 100%;
 }
 
 .modal-header {
@@ -290,9 +325,22 @@
     font-size: 1.2rem;
   }
 
-  /* Mobile-friendly enrollment modal */
+  /* Mobile-friendly enrollment modal - centered on mobile */
+  .modal {
+    align-items: center;
+    justify-content: center;
+    padding: 15px;
+  }
+
+  .modal-dialog {
+    margin: 0;
+    width: 100%;
+    max-width: 90vw;
+  }
+
   .enrollment-modal {
     max-width: 95%;
+    width: 100%;
   }
 
   .camera-frame,
@@ -481,6 +529,17 @@
   }
   50% {
     transform: translateY(-5px);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 

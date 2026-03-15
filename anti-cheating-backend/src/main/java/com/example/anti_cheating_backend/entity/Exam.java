@@ -19,7 +19,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "exams")
@@ -63,11 +65,15 @@ public class Exam {
     // One exam can have multiple tests
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Test> tests;
-    
+
     // One exam can have multiple enrollments
     @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL)
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Enrollment> enrollments;
     
     @PrePersist

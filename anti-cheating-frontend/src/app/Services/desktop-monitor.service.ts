@@ -51,6 +51,7 @@ export interface DesktopActivity {
 })
 export class DesktopMonitorService {
   private apiUrl = 'http://localhost:8080/api/desktop-monitor';
+  private localMonitorUrl = 'http://127.0.0.1:5252';  // Local desktop monitor API
 
   constructor(
     private http: HttpClient,
@@ -58,10 +59,11 @@ export class DesktopMonitorService {
   ) { }
 
   /**
-   * Launch the desktop monitoring application
-   * This triggers the custom protocol handler
+   * Launch the desktop monitoring application via local HTTP API.
+   * The desktop monitor must already be running in the background.
+   * Falls back to custom protocol handler if local API is unavailable.
    */
-  launchDesktopMonitor(studentId: number, examSessionId?: number): boolean {
+  launchDesktopMonitor(studentId: number, examSessionId?: number, isEnrollment: boolean = false): boolean {
     try {
       const token = this.authService.getToken();
       if (!token) {
@@ -69,33 +71,68 @@ export class DesktopMonitorService {
         return false;
       }
 
-      // Build protocol URL
-      let url = `desktop-monitor://login?token=${encodeURIComponent(token)}&studentId=${studentId}`;
-      
+      const mode = isEnrollment ? 'enrollment' : 'authenticated';
+      const payload: any = {
+        token: token,
+        studentId: studentId,
+        mode: mode
+      };
+
       if (examSessionId) {
-        url += `&sessionId=${examSessionId}`;
+        payload.sessionId = examSessionId;
       }
 
-      console.log('Launching desktop monitor:', url);
+      console.log('Sending start command to desktop monitor local API:', { studentId, mode });
 
-      // Use an anchor tag to trigger the protocol without disrupting the page
-      // This is the correct way to launch a custom protocol
-      const link = document.createElement('a');
-      link.href = url;
-      link.style.display = 'none';
-      document.body.appendChild(link);
-      link.click();
-      
-      // Clean up after a short delay
-      setTimeout(() => {
-        document.body.removeChild(link);
-      }, 500);
+      // Try local HTTP API first (desktop monitor already running in background)
+      fetch(`${this.localMonitorUrl}/start`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).then(response => {
+        if (response.ok) {
+          console.log('Desktop monitor started successfully via local API');
+        } else {
+          console.warn('Desktop monitor local API returned error, falling back to protocol handler');
+          this._launchViaProtocol(token, studentId, examSessionId, mode);
+        }
+      }).catch(err => {
+        console.warn('Desktop monitor local API not available, falling back to protocol handler:', err.message);
+        this._launchViaProtocol(token, studentId, examSessionId, mode);
+      });
 
       return true;
     } catch (error) {
       console.error('Error launching desktop monitor:', error);
       return false;
     }
+  }
+
+  /**
+   * Fallback: launch via custom protocol handler (requires protocol registration)
+   */
+  private _launchViaProtocol(token: string, studentId: number, examSessionId?: number, mode?: string): void {
+    let url = `desktop-monitor://login?token=${encodeURIComponent(token)}&studentId=${studentId}`;
+
+    if (examSessionId) {
+      url += `&sessionId=${examSessionId}`;
+    }
+
+    if (mode) {
+      url += `&mode=${mode}`;
+    }
+
+    console.log('Launching desktop monitor via protocol:', url);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+
+    setTimeout(() => {
+      document.body.removeChild(link);
+    }, 500);
   }
 
   /**

@@ -19,7 +19,9 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "tests")
@@ -45,11 +47,15 @@ public class Test {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exam_id", nullable = false)
     @JsonIgnoreProperties({"tests"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Exam exam;
-    
+
     // One test can have multiple questions (cascade delete)
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Question> questions;
     
     @Column(name = "test_order")

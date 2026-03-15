@@ -266,8 +266,8 @@
               </div>
               <div class="alert-student-row">
                 <span class="alert-student-avatar">👤</span>
-                <span class="alert-student-name">{{ selectedStudent?.firstName ? (selectedStudent?.firstName + ' ' + (selectedStudent?.lastName || '')) : selectedStudent?.username }}</span>
-                <span class="alert-student-id" *ngIf="selectedStudent?.studentId">&nbsp;({{ selectedStudent?.studentId }})</span>
+                <span class="alert-student-name">{{ selectedStudent.firstName ? (selectedStudent.firstName + ' ' + (selectedStudent.lastName || '')) : selectedStudent.username }}</span>
+                <span class="alert-student-id" *ngIf="selectedStudent.studentId">&nbsp;({{ selectedStudent.studentId }})</span>
               </div>
               <div class="alert-body">
                 <p class="alert-action">

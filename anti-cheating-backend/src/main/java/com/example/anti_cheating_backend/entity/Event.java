@@ -17,7 +17,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "events")
@@ -31,10 +33,14 @@ public class Event {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id",nullable = false)
     @JsonIgnoreProperties({"events", "enrollments", "password", "hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Student student;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_session_id")
     @JsonIgnoreProperties({"events", "hibernateLazyInitializer", "handler"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ExamSession examSession;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

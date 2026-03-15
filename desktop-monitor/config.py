@@ -14,7 +14,8 @@ class Config:
     API_BASE_URL = f"{BACKEND_URL}/api/desktop-monitor"
     
     # Monitoring Settings
-    SCREENSHOT_INTERVAL = 120  # seconds (2 minutes)
+    SCREENSHOT_INTERVAL = 120  # seconds (2 minutes) - during exam
+    ENROLLMENT_SCREENSHOT_INTERVAL = 5  # seconds (5 seconds) - during enrollment
     ACTIVITY_LOG_INTERVAL = 30  # seconds
     HEARTBEAT_INTERVAL = 60  # seconds
     
@@ -25,26 +26,25 @@ class Config:
     # Application Settings
     APP_NAME = "Exam Desktop Monitor"
     APP_VERSION = "1.0.0"
+    LOCAL_API_PORT = 5252  # Local HTTP API for receiving commands from frontend
     
     # Security
     TOKEN_FILE = Path("token.txt")
     
     # Suspicious Applications (will trigger high-severity alerts)
+    # Only flag apps that could directly enable cheating (remote access, screen sharing, AI tools)
     SUSPICIOUS_APPS = [
         "teamviewer", "anydesk", "chrome remote desktop",
-        "whatsapp", "telegram", "discord", "slack", "messenger",
-        "skype", "zoom", "teams", "webex",
-        "notepad++", "vscode", "pycharm", "intellij",
-        "cmd", "powershell", "terminal",
-        "chatgpt", "google", "stackoverflow", "reddit",
-        "virtualbox", "vmware", "hyper-v"
+        "ultraviewer", "rustdesk", "parsec",
+        "chatgpt", "bard", "copilot",
     ]
-    
+
     # Blocked Applications (will trigger immediate alerts)
     BLOCKED_APPS = [
         "teamviewer",
         "anydesk",
-        "chrome remote desktop"
+        "chrome remote desktop",
+        "ultraviewer"
     ]
     
     @classmethod

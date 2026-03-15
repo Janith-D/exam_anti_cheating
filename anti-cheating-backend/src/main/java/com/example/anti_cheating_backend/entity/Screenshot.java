@@ -16,7 +16,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "screenshots")
@@ -32,11 +34,15 @@ public class Screenshot {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "student_id", nullable = false)
     @JsonIgnoreProperties({"password", "events", "enrollments", "createdAt", "updatedAt"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Student student;
-    
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "exam_session_id")
     @JsonIgnoreProperties({"events", "exam"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ExamSession examSession;
     
     @Column(nullable = false)

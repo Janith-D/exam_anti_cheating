@@ -98,11 +98,11 @@ public class StudentActivityDTO {
         this.description = description;
     }
     
-    public String getMetadata() {
+    public Object getMetadata() {
         return metadata;
     }
-    
-    public void setMetadata(String metadata) {
+
+    public void setMetadata(Object metadata) {
         this.metadata = metadata;
     }
     

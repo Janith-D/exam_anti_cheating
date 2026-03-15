@@ -16,7 +16,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "questions")
@@ -31,6 +33,8 @@ public class Question {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "test_id", nullable = false)
     @JsonIgnoreProperties({"questions", "exam"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Test test;
     
     @Column(columnDefinition = "TEXT")

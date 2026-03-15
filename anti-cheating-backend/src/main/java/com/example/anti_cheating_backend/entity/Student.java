@@ -20,6 +20,8 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 @Entity
 @Data
@@ -51,9 +53,13 @@ public class Student {
     private LocalDateTime updatedAt;
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL)
     @JsonIgnore  // Prevent infinite recursion when serializing to JSON
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Event> events;
     @OneToMany(mappedBy = "student",cascade = CascadeType.ALL)
     @JsonIgnore  // Prevent infinite recursion when serializing to JSON
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<Enrollment> enrollments;
 
 

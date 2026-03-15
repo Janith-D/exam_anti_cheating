@@ -247,6 +247,15 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.successMessage = '';
   }
 
+  onGoogleSignIn(): void {
+    this.errorMessage = '';
+    const started = this.authService.startGoogleSignIn();
+
+    if (!started) {
+      this.errorMessage = 'Google sign-in is not configured yet. Set Google OAuth settings first.';
+    }
+  }
+
   async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       Object.keys(this.loginForm.controls).forEach(key => {

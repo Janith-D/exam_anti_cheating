@@ -17,7 +17,9 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 @Entity
 @Table(name = "alerts")
@@ -31,10 +33,14 @@ public class Alert {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "events", "enrollments"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Event event;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id",nullable = false)
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "events", "enrollments", "password"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Student student;
     @Enumerated(EnumType.STRING)
     private Enums.AlertSeverity severity;
@@ -52,5 +58,7 @@ public class Alert {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_session_id")
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "events", "enrollments", "exam"})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private ExamSession examSession;
 }

@@ -1,0 +1,26 @@
+.oauth2-callback-container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #ECF4E8 0%, #CBF3BB 100%);
+  padding: 1rem;
+}
+
+.oauth2-card {
+  width: 100%;
+  max-width: 420px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  padding: 2rem;
+  text-align: center;
+}
+
+.oauth2-card h2 {
+  margin-bottom: 0.75rem;
+}
+
+.error-text {
+  color: #dc2626;
+}

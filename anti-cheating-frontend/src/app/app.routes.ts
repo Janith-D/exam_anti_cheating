@@ -16,6 +16,10 @@ export const routes: Routes = [
     path: 'register',
     loadComponent: () => import('./pages/register/register.component').then(m => m.RegisterComponent)
   },
+  {
+    path: 'oauth2/callback',
+    loadComponent: () => import('./pages/oauth2-callback/oauth2-callback.component').then(m => m.OAuth2CallbackComponent)
+  },
 
   // Student routes
   {

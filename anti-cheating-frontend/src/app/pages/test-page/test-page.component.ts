@@ -694,7 +694,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
     
     const event = {
       studentId: this.currentUser.userId || this.currentUser.id,
-      testId: this.testId,
+      examSessionId: this.sessionId || null,
       eventType: eventType,
       details: details,
       timestamp: new Date().toISOString()

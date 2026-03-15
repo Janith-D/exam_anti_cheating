@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -45,7 +45,8 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
     private desktopMonitorService: DesktopMonitorService,
     private examSessionService: ExamSessionService,
     private studentService: StudentService,
-    private alertService: AlertService
+    private alertService: AlertService,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
@@ -96,19 +97,25 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
       case 'session':
         if (this.selectedSessionId) {
           this.loadScreenshotsBySession(this.selectedSessionId);
+        } else {
+          this.screenshots = [];
+          this.loading = false;
         }
         break;
-      
+
       case 'student':
         if (this.selectedStudentId) {
           this.loadScreenshotsByStudent(this.selectedStudentId);
+        } else {
+          this.screenshots = [];
+          this.loading = false;
         }
         break;
-      
+
       case 'flagged':
         this.loadFlaggedScreenshots();
         break;
-      
+
       case 'all':
       default:
         this.loadAllScreenshots();
@@ -125,6 +132,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
       next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
+        this.preloadScreenshotImages(screenshots);
       },
       error: (error: any) => {
         console.error('Error loading screenshots:', error);
@@ -136,11 +144,11 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
 
   loadScreenshotsByStudent(studentId: number): void {
     if (this.selectedSessionId) {
-      // Load for specific student and session
       this.desktopMonitorService.getScreenshotsByStudentAndSession(studentId, this.selectedSessionId).subscribe({
         next: (screenshots: Screenshot[]) => {
           this.screenshots = screenshots;
           this.loading = false;
+          this.preloadScreenshotImages(screenshots);
         },
         error: (error: any) => {
           console.error('Error loading screenshots:', error);
@@ -149,11 +157,11 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
         }
       });
     } else {
-      // Load all screenshots for student
       this.desktopMonitorService.getScreenshotsByStudent(studentId).subscribe({
         next: (screenshots: Screenshot[]) => {
           this.screenshots = screenshots;
           this.loading = false;
+          this.preloadScreenshotImages(screenshots);
         },
         error: (error: any) => {
           console.error('Error loading screenshots:', error);
@@ -169,6 +177,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
       next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
+        this.preloadScreenshotImages(screenshots);
       },
       error: (error: any) => {
         console.error('Error loading all screenshots:', error);
@@ -183,6 +192,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
       next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
+        this.preloadScreenshotImages(screenshots);
       },
       error: (error: any) => {
         console.error('Error loading flagged screenshots:', error);
@@ -241,25 +251,38 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
   }
 
   getScreenshotUrl(screenshot: Screenshot): string {
-    if (this.imageUrls.has(screenshot.id)) {
-      return this.imageUrls.get(screenshot.id)!;
+    return this.imageUrls.get(screenshot.id) || '';
+  }
+
+  private preloadScreenshotImages(screenshots: Screenshot[]): void {
+    // Only preload current page screenshots
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    const pageScreenshots = screenshots.slice(start, end);
+
+    for (const screenshot of pageScreenshots) {
+      this.loadScreenshotImage(screenshot.id);
     }
-    // Start loading the image
-    this.loadScreenshotImage(screenshot.id);
-    return '';
   }
 
   private loadScreenshotImage(screenshotId: number): void {
+    // Skip if already loaded or loading
     if (this.imageUrls.has(screenshotId)) return;
-    // Set placeholder to prevent duplicate loads
-    this.imageUrls.set(screenshotId, '');
+
+    // Mark as loading with a sentinel value
+    this.imageUrls.set(screenshotId, 'loading');
+
     this.desktopMonitorService.getScreenshotBlob(screenshotId).subscribe({
       next: (blob: Blob) => {
         const url = URL.createObjectURL(blob);
         this.imageUrls.set(screenshotId, url);
+        // Force Angular to detect the change and re-render
+        this.cdr.detectChanges();
       },
       error: (error: any) => {
         console.error('Error loading screenshot image:', screenshotId, error);
+        // Remove the sentinel so it can be retried
+        this.imageUrls.delete(screenshotId);
       }
     });
   }
@@ -334,12 +357,14 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
   nextPage(): void {
     if (this.currentPage < this.getTotalPages()) {
       this.currentPage++;
+      this.preloadScreenshotImages(this.screenshots);
     }
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
+      this.preloadScreenshotImages(this.screenshots);
     }
   }
 

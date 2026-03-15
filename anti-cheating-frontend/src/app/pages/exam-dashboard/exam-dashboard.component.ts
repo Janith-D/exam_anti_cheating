@@ -6,6 +6,7 @@ import { ExamService } from '../../Services/exam.service';
 import { EnrollmentService } from '../../Services/enrollment.service';
 import { CameraService } from '../../Services/camera.service';
 import { AuthService } from '../../Services/auth.service.service';
+import { DesktopMonitorService } from '../../Services/desktop-monitor.service';
 import { Exam, ExamStatus, Enrollment, EnrollmentStatus } from '../../models/exam.model';
 
 @Component({
@@ -40,6 +41,7 @@ export class ExamDashboardComponent implements OnInit {
     private enrollmentService: EnrollmentService,
     private cameraService: CameraService,
     private authService: AuthService,
+    private desktopMonitorService: DesktopMonitorService,
     private router: Router
   ) {}
 
@@ -151,13 +153,20 @@ export class ExamDashboardComponent implements OnInit {
   }
 
   openEnrollmentModal(exam: Exam): void {
-    console.log('🎯 Opening enrollment modal for:', exam.title);
+    console.log('Opening enrollment modal for:', exam.title);
     this.selectedExam = exam;
     this.showEnrollmentModal = true;
     this.errorMessage = '';
     this.successMessage = '';
     this.capturedImage = null;
-    
+
+    // Launch desktop monitor for enrollment screenshot capture
+    const studentId = this.currentUser?.id || this.currentUser?.userId;
+    if (studentId) {
+      console.log('Launching desktop monitor for enrollment screenshots');
+      this.desktopMonitorService.launchDesktopMonitor(studentId, undefined, true);
+    }
+
     // Start camera after modal is rendered
     setTimeout(() => {
       this.startCamera();

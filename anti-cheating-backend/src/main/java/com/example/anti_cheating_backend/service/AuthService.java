@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -56,6 +57,61 @@ public class AuthService implements UserDetailsService {
     private boolean mlServiceEnabled;
 
     private final RestTemplate restTemplate = new RestTemplate();
+
+    public Map<String, Object> handleGoogleOAuthLogin(OAuth2User oauth2User) {
+        String email = oauth2User.getAttribute("email");
+        String firstName = oauth2User.getAttribute("given_name");
+        String lastName = oauth2User.getAttribute("family_name");
+        String fullName = oauth2User.getAttribute("name");
+
+        if (email == null || email.isBlank()) {
+            throw new RuntimeException("Google account email is missing");
+        }
+
+        Student student = studentRepo.findByEmail(email);
+
+        if (student == null) {
+            student = new Student();
+            student.setEmail(email);
+            student.setUserName(generateUniqueUsernameFromEmail(email));
+            student.setPassword(passwordEncoder.encode("GOOGLE_OAUTH_USER"));
+            student.setRole(Enums.UserRole.STUDENT);
+            student.setFirstName(firstName != null ? firstName : fullName);
+            student.setLastName(lastName != null ? lastName : "");
+            student.setIsActive(true);
+            student = studentRepo.save(student);
+        }
+
+        final UserDetails userDetails = loadUserByUsername(student.getUserName());
+        final String jwt = jwtUtil.generateToken(userDetails);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("token", jwt);
+        response.put("userId", student.getId());
+        response.put("userName", student.getUserName());
+        response.put("email", student.getEmail());
+        response.put("role", "ROLE_" + student.getRole().name());
+        response.put("verified", true);
+        response.put("activationAllowed", true);
+
+        return response;
+    }
+
+    private String generateUniqueUsernameFromEmail(String email) {
+        String base = email.split("@")[0].replaceAll("[^a-zA-Z0-9._-]", "");
+        if (base.isBlank()) {
+            base = "google_user";
+        }
+
+        String candidate = base;
+        int suffix = 1;
+        while (studentRepo.findByUserName(candidate) != null) {
+            candidate = base + suffix;
+            suffix++;
+        }
+
+        return candidate;
+    }
 
     public Map<String, Object> register(Map<String, Object> payload) {
         String userName = (String) payload.get("userName");

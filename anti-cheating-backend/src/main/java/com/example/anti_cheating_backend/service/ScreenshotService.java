@@ -58,9 +58,12 @@ public class ScreenshotService {
                 .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
         
         ExamSession examSession = null;
-        if (examSessionId != null) {
-            examSession = examSessionRepo.findById(examSessionId)
-                    .orElseThrow(() -> new RuntimeException("Exam session not found: " + examSessionId));
+        if (examSessionId != null && examSessionId > 0) {
+            // Look for the exam session, but don't fail if not found
+            examSession = examSessionRepo.findById(examSessionId).orElse(null);
+            if (examSession == null) {
+                LOGGER.warning("Exam session not found: " + examSessionId + ", continuing without session reference");
+            }
         }
         
         // Generate unique filename
@@ -155,25 +158,26 @@ public class ScreenshotService {
     }
 
     private boolean isSuspicious(String activeWindow, String runningProcesses) {
-        if (activeWindow == null && runningProcesses == null) {
+        if (activeWindow == null) {
             return false;
         }
-        
+
+        // Only check the active window (what's actually visible on screen)
+        // Background processes should not trigger flags
         String[] suspiciousApps = {
             "TeamViewer", "AnyDesk", "Chrome Remote Desktop",
-            "WhatsApp", "Telegram", "Discord", "Slack",
-            "ChatGPT", "Google Search", "Stack Overflow"
+            "UltraViewer", "RustDesk", "Parsec",
+            "ChatGPT", "Bard", "Copilot"
         };
-        
-        String combined = (activeWindow != null ? activeWindow : "") + " " + 
-                         (runningProcesses != null ? runningProcesses : "");
-        
+
+        String windowLower = activeWindow.toLowerCase();
+
         for (String app : suspiciousApps) {
-            if (combined.toLowerCase().contains(app.toLowerCase())) {
+            if (windowLower.contains(app.toLowerCase())) {
                 return true;
             }
         }
-        
+
         return false;
     }
 
@@ -181,22 +185,21 @@ public class ScreenshotService {
         StringBuilder reason = new StringBuilder("Detected suspicious applications: ");
         String[] suspiciousApps = {
             "TeamViewer", "AnyDesk", "Chrome Remote Desktop",
-            "WhatsApp", "Telegram", "Discord", "Slack",
-            "ChatGPT", "Google Search", "Stack Overflow"
+            "UltraViewer", "RustDesk", "Parsec",
+            "ChatGPT", "Bard", "Copilot"
         };
-        
-        String combined = (activeWindow != null ? activeWindow : "") + " " + 
-                         (runningProcesses != null ? runningProcesses : "");
-        
+
+        String windowLower = activeWindow != null ? activeWindow.toLowerCase() : "";
+
         boolean first = true;
         for (String app : suspiciousApps) {
-            if (combined.toLowerCase().contains(app.toLowerCase())) {
+            if (windowLower.contains(app.toLowerCase())) {
                 if (!first) reason.append(", ");
                 reason.append(app);
                 first = false;
             }
         }
-        
+
         return reason.toString();
     }
 }

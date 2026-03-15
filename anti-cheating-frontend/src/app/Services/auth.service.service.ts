@@ -2,12 +2,14 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { AuthResponse, LoginRequest, RegisterRequest, Student } from '../models/student.model';
+import { SOCIAL_AUTH_CONFIG } from '../config/social-auth.config';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
   private apiUrl = 'http://localhost:8080/api/auth';
+  private googleAuthConfig = SOCIAL_AUTH_CONFIG.google;
   private currentUserSubject: BehaviorSubject<Student | null>;
   public currentUser: Observable<Student | null>;
 
@@ -86,11 +88,11 @@ export class AuthService {
   }
 
   register(data: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data).pipe(
-      tap(response => {
-        this.setAuth(response);
-      })
-    );
+    return this.http.post<AuthResponse>(`${this.apiUrl}/register`, data);
+  }
+
+  registerWithFace(formData: FormData): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/register`, formData);
   }
 
   login(data: LoginRequest): Observable<AuthResponse> {
@@ -107,6 +109,41 @@ export class AuthService {
         this.setAuth(response);
       })
     );
+  }
+
+  completeOAuthLogin(params: { token: string; userId: number; userName: string; email: string; role: string }): void {
+    const normalizedRole: 'ADMIN' | 'STUDENT' = params.role?.includes('ADMIN') ? 'ADMIN' : 'STUDENT';
+
+    const response: AuthResponse = {
+      token: params.token,
+      userId: Number(params.userId),
+      userName: params.userName,
+      username: params.userName,
+      email: params.email,
+      role: params.role,
+      roles: [params.role]
+    };
+
+    this.setAuth(response);
+
+    // Ensure role normalization is reflected on current user object in local storage.
+    const current = this.currentUserSubject.value;
+    if (current) {
+      const normalizedUser: Student = { ...current, role: normalizedRole };
+      const sessionKey = this.getSessionKey(normalizedUser.username);
+      localStorage.setItem(`user_${sessionKey}`, JSON.stringify(normalizedUser));
+      localStorage.setItem('currentUser', JSON.stringify(normalizedUser));
+      this.currentUserSubject.next(normalizedUser);
+    }
+  }
+
+  startGoogleSignIn(): boolean {
+    if (!this.googleAuthConfig.enabled || !this.googleAuthConfig.authorizationUrl) {
+      return false;
+    }
+
+    window.location.href = this.googleAuthConfig.authorizationUrl;
+    return true;
   }
 
   logout(logoutAll: boolean = false): void {

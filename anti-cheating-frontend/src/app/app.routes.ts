@@ -99,6 +99,21 @@ export const routes: Routes = [
     canActivate: [adminGuard]
   },
   {
+    path: 'admin/screenshots',
+    loadComponent: () => import('./pages/screenshot-viewer/screenshot-viewer.component').then(m => m.ScreenshotViewerComponent),
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'admin/screenshots/student/:studentId',
+    loadComponent: () => import('./pages/screenshot-viewer/screenshot-viewer.component').then(m => m.ScreenshotViewerComponent),
+    canActivate: [adminGuard]
+  },
+  {
+    path: 'admin/screenshots/:sessionId',
+    loadComponent: () => import('./pages/screenshot-viewer/screenshot-viewer.component').then(m => m.ScreenshotViewerComponent),
+    canActivate: [adminGuard]
+  },
+  {
     path: 'admin/results/:testId',
     loadComponent: () => import('./pages/test-results/test-results.component').then(m => m.TestResultsComponent),
     canActivate: [adminGuard]

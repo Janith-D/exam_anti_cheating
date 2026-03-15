@@ -2,6 +2,7 @@
   <div class="header">
     <h2>📸 Desktop Monitoring - Screenshot Viewer</h2>
     <p class="subtitle">View and analyze screenshots captured during exams</p>
+    <button class="btn btn-danger" (click)="clearAllScreenshots()">🗑️ Clear All Screenshots</button>
   </div>
 
   <!-- Filters -->
@@ -10,7 +11,7 @@
       <div class="filter-group">
         <label>View Mode:</label>
         <select [(ngModel)]="filterMode" (change)="onFilterChange()" class="form-select">
-          <option value="all">All Flagged Screenshots</option>
+          <option value="all">All Screenshots</option>
           <option value="session">By Exam Session</option>
           <option value="student">By Student</option>
           <option value="flagged">Flagged Only</option>
@@ -45,11 +46,11 @@
       </div>
       <div class="stat-box flagged">
         <span class="stat-label">Flagged:</span>
-        <span class="stat-value">{{ (screenshots | filter:'flaggedSuspicious':true).length }}</span>
+        <span class="stat-value">{{ getFlaggedScreenshotsCount() }}</span>
       </div>
       <div class="stat-box">
         <span class="stat-label">High-Severity Activities:</span>
-        <span class="stat-value">{{ (activities | filter:'severityLevel':[4,5]).length }}</span>
+        <span class="stat-value">{{ getHighSeverityActivitiesCount() }}</span>
       </div>
     </div>
   </div>
@@ -130,6 +131,23 @@
     </div>
     <p class="activities-note" *ngIf="activities.length > 10">
       Showing 10 of {{ activities.length }} activities
+    </p>
+  </div>
+
+  <!-- Student Alerts Section -->
+  <div *ngIf="alerts.length > 0" class="activities-section">
+    <h3>🚨 Student Alerts</h3>
+    <div class="activities-list">
+      <div *ngFor="let alert of alerts.slice(0, 10)" class="activity-item" [ngClass]="alert.severity?.toLowerCase()">
+        <div class="activity-header">
+          <span class="activity-type">{{ alert.severity }} - {{ alert.status }}</span>
+          <span class="activity-time">{{ formatTimestamp(getAlertTimestamp(alert)) }}</span>
+        </div>
+        <div class="activity-details">{{ alert.message }}</div>
+      </div>
+    </div>
+    <p class="activities-note" *ngIf="alerts.length > 10">
+      Showing 10 of {{ alerts.length }} alerts
     </p>
   </div>
 </div>

@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,8 @@ import com.example.anti_cheating_backend.repo.StudentRepo;
 
 @Service
 public class ScreenshotService {
+
+    private static final Logger LOGGER = Logger.getLogger(ScreenshotService.class.getName());
 
     @Autowired
     private ScreenshotRepo screenshotRepo;
@@ -129,6 +132,26 @@ public class ScreenshotService {
                 .orElseThrow(() -> new RuntimeException("Screenshot not found: " + screenshotId));
         Path filePath = Paths.get(screenshot.getFilePath());
         return Files.readAllBytes(filePath);
+    }
+
+    @Transactional
+    public long clearAllScreenshots() {
+        List<Screenshot> screenshots = screenshotRepo.findAll();
+
+        for (Screenshot screenshot : screenshots) {
+            try {
+                if (screenshot.getFilePath() != null && !screenshot.getFilePath().isBlank()) {
+                    Path path = Paths.get(screenshot.getFilePath());
+                    Files.deleteIfExists(path);
+                }
+            } catch (IOException e) {
+                LOGGER.warning(() -> String.format("Failed to delete screenshot file: %s - %s", screenshot.getFilePath(), e.getMessage()));
+            }
+        }
+
+        long total = screenshots.size();
+        screenshotRepo.deleteAllInBatch();
+        return total;
     }
 
     private boolean isSuspicious(String activeWindow, String runningProcesses) {

@@ -11,8 +11,18 @@ export interface DesktopMonitorStatus {
 
 export interface Screenshot {
   id: number;
-  studentId: number;
-  examSessionId?: number;
+  student?: {
+    id: number;
+    userName: string;
+    firstName: string;
+    lastName: string;
+    studentId: string;
+  };
+  examSession?: {
+    id: number;
+    examName: string;
+    status: string;
+  };
   filePath: string;
   timestamp: string;
   activeWindow?: string;
@@ -20,6 +30,7 @@ export interface Screenshot {
   captureSource: string;
   flaggedSuspicious: boolean;
   suspiciousReason?: string;
+  imageUrl?: string;
 }
 
 export interface DesktopActivity {
@@ -67,8 +78,18 @@ export class DesktopMonitorService {
 
       console.log('Launching desktop monitor:', url);
 
-      // Try to open the custom protocol URL
-      window.location.href = url;
+      // Use an anchor tag to trigger the protocol without disrupting the page
+      // This is the correct way to launch a custom protocol
+      const link = document.createElement('a');
+      link.href = url;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      
+      // Clean up after a short delay
+      setTimeout(() => {
+        document.body.removeChild(link);
+      }, 500);
 
       return true;
     } catch (error) {
@@ -108,6 +129,13 @@ export class DesktopMonitorService {
   }
 
   /**
+   * Get all screenshots
+   */
+  getAllScreenshots(): Observable<Screenshot[]> {
+    return this.http.get<Screenshot[]>(`${this.apiUrl}/screenshots/all`);
+  }
+
+  /**
    * Get flagged (suspicious) screenshots
    */
   getFlaggedScreenshots(): Observable<Screenshot[]> {
@@ -115,10 +143,26 @@ export class DesktopMonitorService {
   }
 
   /**
-   * Download screenshot file
+   * Clear all screenshots (Admin only)
+   */
+  clearAllScreenshots(): Observable<{ message: string; deletedCount: number }> {
+    return this.http.delete<{ message: string; deletedCount: number }>(`${this.apiUrl}/screenshots/clear`);
+  }
+
+  /**
+   * Download screenshot file as blob
    */
   getScreenshotUrl(screenshotId: number): string {
     return `${this.apiUrl}/screenshots/${screenshotId}/download`;
+  }
+
+  /**
+   * Download screenshot as blob for display in img tags (with auth)
+   */
+  getScreenshotBlob(screenshotId: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/screenshots/${screenshotId}/download`, {
+      responseType: 'blob'
+    });
   }
 
   /**

@@ -49,6 +49,7 @@ export interface StudentAlert {
   severity: string;
   type: string;
   message: string;
+  description?: string;
   timestamp: string;
   status: string;
   resolvedAt?: string;

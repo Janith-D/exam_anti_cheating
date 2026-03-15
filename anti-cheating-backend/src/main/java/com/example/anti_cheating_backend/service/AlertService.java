@@ -43,6 +43,12 @@ public class AlertService {
         return alertRepo.findBySeverity(severity);
     }
 
+    public long clearAllAlerts() {
+        long total = alertRepo.count();
+        alertRepo.deleteAllInBatch();
+        return total;
+    }
+
     public Alert resolveAlert(Long alertId, String resolvedBy) {
         Alert alert = alertRepo.findById(alertId)
                 .orElseThrow(() -> new RuntimeException("Alert not found"));

@@ -57,7 +57,24 @@ class MonitorApp:
         
         try:
             self.monitor = DesktopMonitor(token, student_id, exam_session_id)
-            self.monitor.start_monitoring()
+            success = self.monitor.start_monitoring()
+            
+            if not success:
+                logger.error("Authentication failed - will retry in 10 seconds")
+                self.show_notification("Auth Failed", "Will retry connection in 10 seconds...")
+                # Update icon to red (failed)
+                if self.icon:
+                    self.icon.icon = self.create_icon_image("red")
+                    self.icon.title = f"{Config.APP_NAME} - Auth Failed (retrying)"
+                # Retry in background
+                retry_thread = threading.Thread(
+                    target=self._retry_monitoring, 
+                    args=(token, student_id, exam_session_id),
+                    daemon=True
+                )
+                retry_thread.start()
+                return
+            
             self.is_running = True
             
             # Update icon to green (monitoring active)
@@ -85,6 +102,33 @@ class MonitorApp:
             
             logger.info("Monitoring stopped")
             self.show_notification("Monitoring Stopped", "Desktop monitoring has been stopped")
+
+    def _retry_monitoring(self, token, student_id, exam_session_id, max_retries=5):
+        """Retry monitoring connection with exponential backoff"""
+        for attempt in range(1, max_retries + 1):
+            wait_time = 10 * attempt  # 10s, 20s, 30s, 40s, 50s
+            logger.info(f"Retry attempt {attempt}/{max_retries} in {wait_time}s...")
+            time.sleep(wait_time)
+            
+            try:
+                self.monitor = DesktopMonitor(token, student_id, exam_session_id)
+                success = self.monitor.start_monitoring()
+                
+                if success:
+                    self.is_running = True
+                    if self.icon:
+                        self.icon.icon = self.create_icon_image("green")
+                        self.icon.title = f"{Config.APP_NAME} - Monitoring Active"
+                    logger.info(f"Monitoring started on retry {attempt}")
+                    self.show_notification("Monitoring Started", "Desktop monitoring is now active")
+                    return
+                else:
+                    logger.warning(f"Retry {attempt} failed - auth still failing")
+            except Exception as e:
+                logger.error(f"Retry {attempt} error: {e}")
+        
+        logger.error(f"All {max_retries} retry attempts failed")
+        self.show_notification("Connection Failed", "Could not connect to server. Please restart.")
     
     def show_notification(self, title, message):
         """Show system tray notification"""

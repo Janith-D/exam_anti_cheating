@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { StudentService, StudentProfile, StudentStatistics, StudentAlert } from '../../Services/student.service';
 import { EnrollmentService } from '../../Services/enrollment.service';
 import { AuthService } from '../../Services/auth.service.service';
+import { AlertService } from '../../Services/alert.service.service';
 
 @Component({
   selector: 'app-student-management',
@@ -32,6 +33,11 @@ export class StudentManagementComponent implements OnInit {
   // Alert filtering
   alertSeverityFilter: 'all' | 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW' = 'all';
   filteredAlerts: StudentAlert[] = [];
+
+  // Add Alert modal
+  showAddAlertModal = false;
+  addAlertForm = { severity: 'MEDIUM', message: '', description: '' };
+  addingAlert = false;
   
   // Loading states
   loading = false;
@@ -43,6 +49,7 @@ export class StudentManagementComponent implements OnInit {
     private studentService: StudentService,
     private enrollmentService: EnrollmentService,
     private authService: AuthService,
+    private alertService: AlertService,
     private router: Router
   ) {}
 
@@ -175,6 +182,10 @@ export class StudentManagementComponent implements OnInit {
     this.loadStudentProfile(student.id);
   }
 
+  viewStudentScreenshotReport(studentId: number): void {
+    this.router.navigate(['/admin/screenshots/student', studentId]);
+  }
+
   backToList(): void {
     this.currentView = 'list';
     this.selectedStudent = null;
@@ -231,7 +242,48 @@ export class StudentManagementComponent implements OnInit {
   }
 
   // ==================== Helper Methods ====================
-  
+
+  openAddAlertModal(): void {
+    this.addAlertForm = { severity: 'MEDIUM', message: '', description: '' };
+    this.showAddAlertModal = true;
+  }
+
+  closeAddAlertModal(): void {
+    this.showAddAlertModal = false;
+  }
+
+  submitNewAlert(): void {
+    if (!this.selectedStudent || !this.addAlertForm.message.trim()) return;
+    this.addingAlert = true;
+    this.alertService.createAlert({
+      studentId: this.selectedStudent.id,
+      severity: this.addAlertForm.severity as any,
+      message: this.addAlertForm.message.trim()
+    }).subscribe({
+      next: () => {
+        this.addingAlert = false;
+        this.showAddAlertModal = false;
+        this.successMessage = 'Alert added successfully';
+        setTimeout(() => this.successMessage = '', 3000);
+        // Reload alerts
+        this.studentService.getStudentAlerts(this.selectedStudent!.id).subscribe({
+          next: (alerts) => {
+            this.studentAlerts = alerts.sort((a, b) =>
+              new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+            );
+            this.applyAlertFilter();
+          }
+        });
+      },
+      error: (error) => {
+        console.error('Error creating alert:', error);
+        this.addingAlert = false;
+        this.errorMessage = 'Failed to add alert';
+        setTimeout(() => this.errorMessage = '', 3000);
+      }
+    });
+  }
+
   getSeverityClass(severity: string): string {
     switch(severity.toUpperCase()) {
       case 'CRITICAL': return 'severity-critical';

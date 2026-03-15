@@ -393,6 +393,10 @@ export class TestManagementComponent implements OnInit {
         
         // Extract error message from backend
         let errorMessage = 'Failed to delete test';
+        let fullError = error.error?.error || error.error?.message || error.message || 'Unknown error';
+        
+        console.log('📝 Backend error message:', fullError);
+        
         if (error.error && error.error.error) {
           errorMessage = error.error.error;
           
@@ -411,8 +415,11 @@ export class TestManagementComponent implements OnInit {
             return;
           }
           
-          // Check if error is about student results
-          if (errorMessage.includes('student(s) have already taken this test')) {
+          // Check if error is about student results - check multiple patterns
+          if (errorMessage.includes('student') && 
+              (errorMessage.includes('taken') || errorMessage.includes('results') || errorMessage.includes('have already'))) {
+            console.log('🔍 Detected test with student results - offering force delete option');
+            
             // Ask for force delete confirmation
             const forceDelete = confirm(
               '⚠️ WARNING: ' + errorMessage + '\n\n' +
@@ -426,14 +433,24 @@ export class TestManagementComponent implements OnInit {
             );
             
             if (forceDelete) {
+              console.log('🗑️ User confirmed force delete - proceeding...');
               this.forceDeleteTest(testId);
+              return;
+            } else {
+              console.log('ℹ️ User cancelled force delete');
+              this.error = 'Delete cancelled. Test has been kept.';
+              setTimeout(() => this.error = '', 3000);
               return;
             }
           }
+        } else if (error.error && error.error.message) {
+          errorMessage = error.error.message;
         } else if (error.message) {
           errorMessage = error.message;
         }
         
+        // Display the error
+        console.error('💥 Delete failed with error:', errorMessage);
         this.error = errorMessage;
         setTimeout(() => this.error = '', 5000);
       }
@@ -442,21 +459,28 @@ export class TestManagementComponent implements OnInit {
 
   // Force delete test (with student results)
   forceDeleteTest(testId: number): void {
+    console.log('🗑️💪 Force deleting test ID:', testId);
     this.testService.deleteTest(testId, true).subscribe({
       next: (response) => {
+        console.log('✅ Force delete successful:', response);
         this.success = '✅ Test and all student results deleted successfully';
         if (response.warning) {
-          console.warn(response.warning);
+          console.warn('⚠️ Warning:', response.warning);
         }
         this.loadTests();
         setTimeout(() => this.success = '', 5000);
       },
       error: (error: any) => {
-        console.error('Error force deleting test:', error);
+        console.error('❌ Error force deleting test:', error);
         let errorMessage = 'Failed to force delete test';
         if (error.error && error.error.error) {
           errorMessage = error.error.error;
+        } else if (error.error && error.error.message) {
+          errorMessage = error.error.message;
+        } else if (error.message) {
+          errorMessage = error.message;
         }
+        console.error('💥 Force delete failed:', errorMessage);
         this.error = errorMessage;
         setTimeout(() => this.error = '', 5000);
       }

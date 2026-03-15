@@ -500,6 +500,26 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
     this.loadAllData();
   }
 
+  clearAllAlerts(): void {
+    const confirmed = window.confirm(
+      'Delete ALL alerts? This action cannot be undone.'
+    );
+    if (!confirmed) return;
+
+    this.alertService.clearAllAlerts().subscribe({
+      next: (response) => {
+        this.alerts = [];
+        this.stats.totalAlerts = 0;
+        this.stats.criticalAlerts = 0;
+        window.alert(`Cleared ${response.deletedCount} alerts successfully.`);
+      },
+      error: (error: any) => {
+        console.error('Error clearing alerts:', error);
+        this.error = 'Failed to clear alerts';
+      }
+    });
+  }
+
   goBack(): void {
     this.router.navigate(['/admin/dashboard']);
   }

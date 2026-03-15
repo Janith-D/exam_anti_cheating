@@ -12,6 +12,9 @@
       <button class="btn-icon" (click)="refresh()" title="Refresh data">
         🔄
       </button>
+      <button class="btn btn-danger" (click)="clearAllAlerts()" title="Delete all alerts">
+        🗑️ Clear Alerts
+      </button>
       <button class="btn btn-outline" (click)="goBack()">
         ← Back to Dashboard
       </button>
@@ -195,7 +198,7 @@
               <div class="meta-item">
                 <span class="meta-icon">👤</span>
                 <span class="meta-label">Student:</span>
-                <span class="meta-value">{{ alert.student?.username || 'Unknown' }}</span>
+                <span class="meta-value">{{ alert.student?.username || alert.student?.userName || 'Unknown' }}</span>
               </div>
               <div class="meta-item" *ngIf="alert.student?.email">
                 <span class="meta-icon">📧</span>

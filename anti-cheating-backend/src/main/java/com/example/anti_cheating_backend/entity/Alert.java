@@ -2,6 +2,8 @@ package com.example.anti_cheating_backend.entity;
 
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -28,9 +30,11 @@ public class Alert {
     private Long id;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "event_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "events", "enrollments"})
     private Event event;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "student_id",nullable = false)
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "events", "enrollments", "password"})
     private Student student;
     @Enumerated(EnumType.STRING)
     private Enums.AlertSeverity severity;
@@ -47,5 +51,6 @@ public class Alert {
     private LocalDateTime timestamp;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "exam_session_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler", "events", "enrollments", "exam"})
     private ExamSession examSession;
 }

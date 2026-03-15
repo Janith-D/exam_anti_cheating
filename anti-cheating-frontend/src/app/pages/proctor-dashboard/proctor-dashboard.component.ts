@@ -208,6 +208,10 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/sessions']);
   }
 
+  navigateToScreenshots(): void {
+    this.router.navigate(['/admin/screenshots']);
+  }
+
   viewTestDetails(testId: number): void {
     this.router.navigate(['/admin/test-management', testId]);
   }

@@ -31,6 +31,11 @@ export class AlertService {
     return this.http.get<Alert[]>(`${this.apiUrl}/student/${studentId}`);
   }
 
+  // Clear all alerts (Admin only)
+  clearAllAlerts(): Observable<{ message: string; deletedCount: number }> {
+    return this.http.delete<{ message: string; deletedCount: number }>(`${this.apiUrl}/clear`);
+  }
+
   // Get alerts by severity
   getAlertsBySeverity(severity: AlertSeverity): Observable<Alert[]> {
     return this.http.get<Alert[]>(`${this.apiUrl}/severity/${severity}`);

@@ -1,6 +1,7 @@
 export interface Student {
   id?: number;
   username: string;
+  userName?: string;   // backend Java field is userName
   email: string;
   password?: string;
   role: 'STUDENT' | 'ADMIN';

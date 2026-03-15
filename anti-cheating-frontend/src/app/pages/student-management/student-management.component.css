@@ -275,6 +275,16 @@
   box-shadow: 0 4px 12px rgba(147, 191, 199, 0.4);
 }
 
+.btn-screenshot {
+  margin-left: 8px;
+  background: linear-gradient(135deg, #2f80ed, #56ccf2);
+  border-color: #2f80ed;
+}
+
+.profile-actions {
+  margin-top: 12px;
+}
+
 /* ==================== Empty State ==================== */
 .empty-state {
   text-align: center;
@@ -794,12 +804,43 @@
   color: var(--color-medium-text);
 }
 
-.alert-type {
-  font-weight: 600;
+.alert-student-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 8px 0 10px;
+  background: #f0f4ff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
 }
 
-.alert-message {
+.alert-student-avatar {
+  font-size: 1rem;
+}
+
+.alert-student-name {
+  font-weight: 700;
+  color: #2c3e50;
+}
+
+.alert-student-id {
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.alert-action {
   color: var(--color-dark-text);
+  font-size: 0.95rem;
+}
+
+.alert-description {
+  color: var(--color-medium-text);
+  font-size: 0.9rem;
+  font-style: italic;
+  border-left: 3px solid #dee2e6;
+  padding-left: 10px;
+  margin-top: 4px !important;
 }
 
 .alert-footer {
@@ -860,5 +901,181 @@
     flex-direction: column;
     text-align: center;
   }
+}
+
+/* ==================== Add Alert Button ==================== */
+.alert-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-add-alert {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 8px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn-add-alert:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(231, 76, 60, 0.4);
+}
+
+/* ==================== Add Alert Modal ==================== */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: fadeIn 0.2s ease;
+}
+
+.modal-box {
+  background: white;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.25s ease;
+  margin: 16px;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #2c3e50;
+}
+
+.modal-close {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #6c757d;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.modal-close:hover {
+  background: #f8f9fa;
+}
+
+.modal-body {
+  padding: 20px 24px;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 6px;
+}
+
+.form-group .required {
+  color: #e74c3c;
+}
+
+.form-control {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid #dee2e6;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.form-control:focus {
+  outline: none;
+  border-color: #e74c3c;
+  box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.12);
+}
+
+textarea.form-control {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 16px 24px 20px;
+  border-top: 1px solid #e9ecef;
+}
+
+.btn-cancel {
+  background: #f8f9fa;
+  color: #6c757d;
+  border: 1.5px solid #dee2e6;
+  padding: 9px 20px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-cancel:hover {
+  background: #e9ecef;
+}
+
+.btn-submit-alert {
+  background: linear-gradient(135deg, #e74c3c, #c0392b);
+  color: white;
+  border: none;
+  padding: 9px 22px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-submit-alert:hover:not(:disabled) {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.btn-submit-alert:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 

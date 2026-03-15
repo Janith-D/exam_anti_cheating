@@ -79,9 +79,9 @@ export class TestPageComponent implements OnInit, OnDestroy {
       // Set up periodic block status checking (every 30 seconds)
       this.blockCheckInterval = setInterval(() => {
         this.checkBlockStatus();
+      }, 30000);
       
-      // Launch desktop monitor for this exam
-      this.launchDesktopMonitor();
+      // Desktop monitor will be launched after session is created in loadQuestions()
     });
     
     // Monitor visibility changes (tab switches)
@@ -97,8 +97,21 @@ export class TestPageComponent implements OnInit, OnDestroy {
   launchDesktopMonitor(): void {
     // Only launch for students
     if (!this.currentUser || this.currentUser.role !== 'STUDENT') {
+      console.log('⏭️ Skipping desktop monitor - not a student or no user');
       return;
     }
+
+    // Ensure we have a session ID
+    if (!this.sessionId || this.sessionId === 0) {
+      console.error('❌ Cannot launch desktop monitor - no session ID available');
+      return;
+    }
+
+    console.log('🚀 Launching desktop monitor with:', {
+      studentId: this.currentUser.id,
+      sessionId: this.sessionId,
+      testId: this.testId
+    });
 
     // Launch desktop monitoring application
     const launched = this.desktopMonitorService.launchDesktopMonitor(
@@ -107,12 +120,12 @@ export class TestPageComponent implements OnInit, OnDestroy {
     );
 
     if (launched) {
-      console.log('Desktop monitor launched successfully');
+      console.log('✅ Desktop monitor launched successfully');
       this.desktopMonitorService.showDesktopMonitorNotification(
-        'Desktop monitoring has been activated for this exam'
+        'Desktop monitoring has been activated for this exam. Screenshots will be taken every 2 minutes.'
       );
     } else {
-      console.warn('Failed to launch desktop monitor');
+      console.warn('⚠️ Failed to launch desktop monitor');
       // Check if desktop monitor is installed
       this.desktopMonitorService.checkDesktopMonitorInstalled().then(installed => {
         if (!installed) {
@@ -120,7 +133,6 @@ export class TestPageComponent implements OnInit, OnDestroy {
         }
       });
     }
-    this.setupBeforeUnloadHandler();
   }
 
   ngOnDestroy(): void {
@@ -179,6 +191,9 @@ export class TestPageComponent implements OnInit, OnDestroy {
           next: (session) => {
             this.sessionId = session.id || 0;
             console.log('✅ Exam session created/retrieved:', this.sessionId);
+            
+            // Launch desktop monitor NOW that we have the session ID
+            this.launchDesktopMonitor();
             
             // Connect to WebSocket for real-time monitoring
             this.studentActivityService.connect();

@@ -5,6 +5,7 @@ import { ExamService } from '../../Services/exam.service';
 import { EnrollmentService } from '../../Services/enrollment.service';
 import { TestService } from '../../Services/test.service.service';
 import { AuthService } from '../../Services/auth.service.service';
+import { DesktopMonitorService } from '../../Services/desktop-monitor.service';
 import { Exam, ExamStatus, EnrollmentStatus } from '../../models/exam.model';
 import { Test } from '../../models/test.model';
 
@@ -36,7 +37,8 @@ export class ExamDetailsComponent implements OnInit {
     private examService: ExamService,
     private enrollmentService: EnrollmentService,
     private testService: TestService,
-    private authService: AuthService
+    private authService: AuthService,
+    private desktopMonitorService: DesktopMonitorService
   ) {}
 
   ngOnInit(): void {
@@ -161,6 +163,27 @@ export class ExamDetailsComponent implements OnInit {
     this.router.navigate(['/exam-dashboard']);
   }
 
+  // Launch desktop monitoring application
+  launchDesktopMonitor(): void {
+    try {
+      const launched = this.desktopMonitorService.launchDesktopMonitor(
+        this.currentUser.id,
+        undefined // No session ID yet during enrollment
+      );
+
+      if (launched) {
+        console.log('✅ Desktop monitor launched successfully');
+        this.desktopMonitorService.showDesktopMonitorNotification(
+          'Desktop monitoring has been activated for this exam. Screenshots will be taken every 2 minutes.'
+        );
+      } else {
+        console.warn('⚠️ Failed to launch desktop monitor');
+      }
+    } catch (error) {
+      console.error('❌ Error launching desktop monitor:', error);
+    }
+  }
+
   // Enrollment functionality
   openEnrollmentModal(): void {
     this.showEnrollmentModal = true;
@@ -204,6 +227,9 @@ export class ExamDetailsComponent implements OnInit {
       next: (response) => {
         console.log('✅ Enrollment successful:', response);
         this.successMessage = 'Successfully enrolled! Verifying...';
+        
+        // Launch desktop monitor for this exam
+        this.launchDesktopMonitor();
         
         // Wait a moment then refresh enrollment status
         setTimeout(() => {

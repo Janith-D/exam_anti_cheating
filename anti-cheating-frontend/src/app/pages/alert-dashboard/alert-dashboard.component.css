@@ -749,6 +749,17 @@
   color: white;
 }
 
+.btn-danger {
+  background: #d9534f;
+  color: #fff;
+  border: 2px solid #d9534f;
+}
+
+.btn-danger:hover {
+  background: #c9302c;
+  border-color: #c9302c;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .alert-dashboard {

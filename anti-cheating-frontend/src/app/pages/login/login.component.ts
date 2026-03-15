@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } 
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { AuthService } from '../../Services/auth.service.service';
 import { CameraService } from '../../Services/camera.service';
-import { LivenessService } from '../../Services/liveness.service';
 
 @Component({
   selector: 'app-login',
@@ -24,21 +23,11 @@ export class LoginComponent implements OnInit, OnDestroy {
   showCamera = false;
   capturedImage: string | null = null;
   adminLogin = false; // Flag for admin login without face verification
-  
-  // Liveness detection properties
-  useLivenessDetection = true; // Enable by default
-  capturingFrames = false;
-  capturedFrames: string[] = [];
-  currentFrameIndex = 0;
-  currentInstruction = '';
-  totalFrames = 5;
-  livenessScore: number | null = null;
 
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private cameraService: CameraService,
-    private livenessService: LivenessService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -227,145 +216,33 @@ export class LoginComponent implements OnInit, OnDestroy {
         return;
       }
 
-      // Check if liveness detection is enabled
-      if (this.useLivenessDetection && !this.adminLogin) {
-        await this.captureFramesForLiveness();
+      const canvas = document.createElement('canvas');
+      canvas.width = videoEl.videoWidth;
+      canvas.height = videoEl.videoHeight;
+
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+        this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
+        console.log('📸 Face image captured successfully');
       } else {
-        // Single frame capture (legacy mode)
-        const canvas = document.createElement('canvas');
-        canvas.width = videoEl.videoWidth;
-        canvas.height = videoEl.videoHeight;
-        
-        const context = canvas.getContext('2d');
-        if (context) {
-          context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-          this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
-          console.log('📸 Photo captured successfully');
-        } else {
-          throw new Error('Could not get canvas context');
-        }
-        
-        // Stop camera and hide video
-        this.showCamera = false;
-        const stream = videoEl.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
-        videoEl.srcObject = null;
+        throw new Error('Could not get canvas context');
       }
+
+      // Stop camera and hide video
+      this.showCamera = false;
+      const stream = videoEl.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoEl.srcObject = null;
     } catch (error: any) {
       this.errorMessage = 'Failed to capture image: ' + (error.message || 'Unknown error');
       console.error('❌ Capture error:', error);
     }
   }
 
-  async captureFramesForLiveness(): Promise<void> {
-    try {
-      const videoEl = this.videoElement?.nativeElement;
-      if (!videoEl) throw new Error('Video element not available');
-
-      this.capturingFrames = true;
-      this.capturedFrames = [];
-      this.errorMessage = '';
-      this.successMessage = '🎥 Capturing frames for liveness detection...';
-
-      // Capture multiple frames with instructions
-      for (let i = 0; i < this.totalFrames; i++) {
-        this.currentFrameIndex = i + 1;
-        this.currentInstruction = this.cameraService.getLivenessInstruction(i);
-        
-        console.log(`📸 Frame ${this.currentFrameIndex}/${this.totalFrames}: ${this.currentInstruction}`);
-        
-        // Wait 2 seconds for user to follow instruction
-        if (i > 0) {
-          await this.delay(2000);
-        } else {
-          await this.delay(1000); // Shorter delay for first frame
-        }
-        
-        // Capture frame
-        const frame = this.cameraService.captureImage(videoEl);
-        this.capturedFrames.push(frame);
-      }
-
-      this.capturingFrames = false;
-      this.successMessage = `✅ Captured ${this.capturedFrames.length} frames successfully!`;
-      console.log(`✅ All ${this.capturedFrames.length} frames captured`);
-
-      // Perform liveness check
-      await this.performLivenessCheck();
-
-    } catch (error: any) {
-      this.capturingFrames = false;
-      this.errorMessage = 'Frame capture failed: ' + (error.message || 'Unknown error');
-      console.error('❌ Frame capture error:', error);
-    }
-  }
-
-  async performLivenessCheck(): Promise<void> {
-    if (this.capturedFrames.length < 3) {
-      this.errorMessage = 'Not enough frames captured for liveness detection';
-      return;
-    }
-
-    try {
-      this.loading = true;
-      this.successMessage = '🔍 Checking liveness...';
-
-      this.livenessService.checkLiveness(this.capturedFrames).subscribe({
-        next: (result) => {
-          this.loading = false;
-          this.livenessScore = result.details.overall_score;
-
-          if (result.liveness_passed) {
-            this.successMessage = `✅ Liveness verified! Score: ${this.livenessScore}/100`;
-            this.capturedImage = this.capturedFrames[0]; // Use first frame as the main image
-            
-            // Stop camera
-            this.showCamera = false;
-            const videoEl = this.videoElement?.nativeElement;
-            if (videoEl?.srcObject) {
-              const stream = videoEl.srcObject as MediaStream;
-              stream.getTracks().forEach(track => track.stop());
-              videoEl.srcObject = null;
-            }
-
-            console.log('✅ Liveness check passed:', result.details);
-          } else {
-            this.errorMessage = `❌ Liveness check failed (Score: ${this.livenessScore}/100). Please try again with natural movements.`;
-            this.retakePhoto();
-            console.log('❌ Liveness check failed:', result.details);
-          }
-        },
-        error: (error) => {
-          this.loading = false;
-          console.error('❌ Liveness check error:', error);
-          
-          if (error.status === 0) {
-            this.errorMessage = '🌐 Cannot connect to ML service on port 5000. Please start the ML service first.';
-          } else {
-            this.errorMessage = 'Liveness check failed. Please try again.';
-          }
-          
-          this.retakePhoto();
-        }
-      });
-    } catch (error: any) {
-      this.loading = false;
-      this.errorMessage = 'Liveness check error: ' + (error.message || 'Unknown error');
-      console.error('❌ Liveness error:', error);
-    }
-  }
-
-  private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
   retakePhoto(): void {
     this.capturedImage = null;
-    this.capturedFrames = [];
-    this.livenessScore = null;
     this.showCamera = false;
-    this.capturingFrames = false;
-    this.currentInstruction = '';
     this.errorMessage = '';
     this.successMessage = '';
   }
@@ -378,9 +255,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Check if face verification is done (skip for admin login)
     if (!this.adminLogin && !this.capturedImage) {
-      this.errorMessage = 'Please capture your face for verification before signing in, or enable "Admin Login".';
+      this.errorMessage = 'Please capture your face for recognition before signing in.';
       return;
     }
 
@@ -391,31 +267,23 @@ export class LoginComponent implements OnInit, OnDestroy {
     try {
       const username = this.loginForm.get('username')?.value;
       const password = this.loginForm.get('password')?.value;
-      
-      console.log('Logging in with username:', username);
-      console.log('Admin login mode:', this.adminLogin);
-      console.log('Face image captured:', this.capturedImage ? 'Yes' : 'No');
-      
-      // Create FormData for multipart/form-data request
+
       const formData = new FormData();
       formData.append('userName', username);
       formData.append('password', password);
-      
-      // Add image only if not admin login or if image is captured
+
       if (this.capturedImage) {
         const imageBlob = this.base64ToBlob(this.capturedImage);
         formData.append('image', imageBlob, 'face.jpg');
-      } else if (this.adminLogin) {
-        // For admin login without face, send a dummy 1x1 transparent PNG
+      } else {
         const dummyBlob = this.createDummyImage();
         formData.append('image', dummyBlob, 'dummy.png');
       }
-      
-      // Send FormData directly to backend
+
       this.authService.loginWithFace(formData).subscribe({
         next: (response) => {
           this.loading = false;
-          this.successMessage = '✅ Face verified! Login successful! Redirecting...';
+          this.successMessage = '✅ Face recognized! Login successful! Redirecting...';
           setTimeout(() => {
             this.redirectToDashboard();
           }, 1000);
@@ -430,7 +298,7 @@ export class LoginComponent implements OnInit, OnDestroy {
           if (errorMsg.includes('Bad credentials') || error.status === 400) {
             this.errorMessage = '❌ Invalid username or password. Please check your credentials or register a new account.';
           } else if (errorMsg.includes('Face verification failed')) {
-            this.errorMessage = '🔍 Face verification failed. Please try capturing your photo again in good lighting.';
+            this.errorMessage = '🔍 Face recognition failed. Please capture a clear face image and try again.';
           } else if (errorMsg.includes('not found')) {
             this.errorMessage = '👤 User not found. Please register first or check your username.';
           } else if (error.status === 401) {

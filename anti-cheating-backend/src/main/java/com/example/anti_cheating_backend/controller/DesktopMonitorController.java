@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -286,6 +287,24 @@ public class DesktopMonitorController {
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    /**
+     * Clear all screenshots (database + files)
+     */
+    @DeleteMapping("/screenshots/clear")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> clearAllScreenshots() {
+        try {
+            long deleted = screenshotService.clearAllScreenshots();
+            return ResponseEntity.ok(Map.of(
+                "message", "All screenshots cleared successfully",
+                "deletedCount", deleted
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Failed to clear screenshots: " + e.getMessage()));
         }
     }
 

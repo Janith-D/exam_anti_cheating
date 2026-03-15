@@ -1,10 +1,12 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DesktopMonitorService, Screenshot, DesktopActivity } from '../../Services/desktop-monitor.service';
 import { ExamSessionService } from '../../Services/exam-session.service';
 import { StudentService } from '../../Services/student.service';
+import { AlertService } from '../../Services/alert.service.service';
+import { Alert } from '../../models/alert.model';
 
 @Component({
   selector: 'app-screenshot-viewer',
@@ -13,12 +15,14 @@ import { StudentService } from '../../Services/student.service';
   templateUrl: './screenshot-viewer.component.html',
   styleUrls: ['./screenshot-viewer.component.css']
 })
-export class ScreenshotViewerComponent implements OnInit {
+export class ScreenshotViewerComponent implements OnInit, OnDestroy {
   screenshots: Screenshot[] = [];
   activities: DesktopActivity[] = [];
+  alerts: Alert[] = [];
   loading = false;
-  errorMessage = '';
-  
+  errorMessage = '';  
+  // Image blob URLs cache
+  imageUrls: Map<number, string> = new Map();  
   // Filter options
   filterMode: 'session' | 'student' | 'flagged' | 'all' = 'all';
   selectedStudentId: number | null = null;
@@ -40,7 +44,8 @@ export class ScreenshotViewerComponent implements OnInit {
     private router: Router,
     private desktopMonitorService: DesktopMonitorService,
     private examSessionService: ExamSessionService,
-    private studentService: StudentService
+    private studentService: StudentService,
+    private alertService: AlertService
   ) {}
 
   ngOnInit(): void {
@@ -57,26 +62,27 @@ export class ScreenshotViewerComponent implements OnInit {
       // Load initial data
       this.loadFilterOptions();
       this.loadScreenshots();
+      this.loadAlerts();
     });
   }
 
   loadFilterOptions(): void {
     // Load exam sessions
-    this.examSessionService.getAllSessions().subscribe({
-      next: (sessions) => {
+    this.examSessionService.getAllExamSessions().subscribe({
+      next: (sessions: any[]) => {
         this.sessions = sessions;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading sessions:', error);
       }
     });
 
     // Load students
     this.studentService.getAllStudents().subscribe({
-      next: (students) => {
+      next: (students: any[]) => {
         this.students = students;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading students:', error);
       }
     });
@@ -105,22 +111,22 @@ export class ScreenshotViewerComponent implements OnInit {
       
       case 'all':
       default:
-        // Load flagged by default for 'all' mode
-        this.loadFlaggedScreenshots();
+        this.loadAllScreenshots();
         break;
     }
 
     // Also load activities
     this.loadActivities();
+    this.loadAlerts();
   }
 
   loadScreenshotsBySession(sessionId: number): void {
     this.desktopMonitorService.getScreenshotsBySession(sessionId).subscribe({
-      next: (screenshots) => {
+      next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
         console.error('Error loading screenshots:', error);
         this.errorMessage = 'Failed to load screenshots';
         this.loading = false;
@@ -132,11 +138,11 @@ export class ScreenshotViewerComponent implements OnInit {
     if (this.selectedSessionId) {
       // Load for specific student and session
       this.desktopMonitorService.getScreenshotsByStudentAndSession(studentId, this.selectedSessionId).subscribe({
-        next: (screenshots) => {
+        next: (screenshots: Screenshot[]) => {
           this.screenshots = screenshots;
           this.loading = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading screenshots:', error);
           this.errorMessage = 'Failed to load screenshots';
           this.loading = false;
@@ -145,11 +151,11 @@ export class ScreenshotViewerComponent implements OnInit {
     } else {
       // Load all screenshots for student
       this.desktopMonitorService.getScreenshotsByStudent(studentId).subscribe({
-        next: (screenshots) => {
+        next: (screenshots: Screenshot[]) => {
           this.screenshots = screenshots;
           this.loading = false;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading screenshots:', error);
           this.errorMessage = 'Failed to load screenshots';
           this.loading = false;
@@ -158,13 +164,27 @@ export class ScreenshotViewerComponent implements OnInit {
     }
   }
 
-  loadFlaggedScreenshots(): void {
-    this.desktopMonitorService.getFlaggedScreenshots().subscribe({
-      next: (screenshots) => {
+  loadAllScreenshots(): void {
+    this.desktopMonitorService.getAllScreenshots().subscribe({
+      next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
       },
-      error: (error) => {
+      error: (error: any) => {
+        console.error('Error loading all screenshots:', error);
+        this.errorMessage = 'Failed to load screenshots';
+        this.loading = false;
+      }
+    });
+  }
+
+  loadFlaggedScreenshots(): void {
+    this.desktopMonitorService.getFlaggedScreenshots().subscribe({
+      next: (screenshots: Screenshot[]) => {
+        this.screenshots = screenshots;
+        this.loading = false;
+      },
+      error: (error: any) => {
         console.error('Error loading flagged screenshots:', error);
         this.errorMessage = 'Failed to load flagged screenshots';
         this.loading = false;
@@ -175,23 +195,44 @@ export class ScreenshotViewerComponent implements OnInit {
   loadActivities(): void {
     if (this.selectedSessionId) {
       this.desktopMonitorService.getActivitiesBySession(this.selectedSessionId).subscribe({
-        next: (activities) => {
+        next: (activities: DesktopActivity[]) => {
           this.activities = activities;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading activities:', error);
         }
       });
     } else if (this.selectedStudentId) {
       this.desktopMonitorService.getActivitiesByStudent(this.selectedStudentId).subscribe({
-        next: (activities) => {
+        next: (activities: DesktopActivity[]) => {
           this.activities = activities;
         },
-        error: (error) => {
+        error: (error: any) => {
           console.error('Error loading activities:', error);
         }
       });
     }
+  }
+
+  loadAlerts(): void {
+    if (!this.selectedStudentId) {
+      this.alerts = [];
+      return;
+    }
+
+    this.alertService.getAlertsByStudent(this.selectedStudentId).subscribe({
+      next: (alerts: Alert[]) => {
+        this.alerts = alerts.sort((a, b) => {
+          const dateA = new Date(a.timestamp || a.createdAt || '').getTime();
+          const dateB = new Date(b.timestamp || b.createdAt || '').getTime();
+          return dateB - dateA;
+        });
+      },
+      error: (error: any) => {
+        console.error('Error loading student alerts:', error);
+        this.alerts = [];
+      }
+    });
   }
 
   onFilterChange(): void {
@@ -200,7 +241,35 @@ export class ScreenshotViewerComponent implements OnInit {
   }
 
   getScreenshotUrl(screenshot: Screenshot): string {
-    return this.desktopMonitorService.getScreenshotUrl(screenshot.id);
+    if (this.imageUrls.has(screenshot.id)) {
+      return this.imageUrls.get(screenshot.id)!;
+    }
+    // Start loading the image
+    this.loadScreenshotImage(screenshot.id);
+    return '';
+  }
+
+  private loadScreenshotImage(screenshotId: number): void {
+    if (this.imageUrls.has(screenshotId)) return;
+    // Set placeholder to prevent duplicate loads
+    this.imageUrls.set(screenshotId, '');
+    this.desktopMonitorService.getScreenshotBlob(screenshotId).subscribe({
+      next: (blob: Blob) => {
+        const url = URL.createObjectURL(blob);
+        this.imageUrls.set(screenshotId, url);
+      },
+      error: (error: any) => {
+        console.error('Error loading screenshot image:', screenshotId, error);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Clean up blob URLs
+    this.imageUrls.forEach(url => {
+      if (url) URL.revokeObjectURL(url);
+    });
+    this.imageUrls.clear();
   }
 
   openScreenshot(screenshot: Screenshot): void {
@@ -209,6 +278,31 @@ export class ScreenshotViewerComponent implements OnInit {
 
   closeScreenshot(): void {
     this.selectedScreenshot = null;
+  }
+
+  clearAllScreenshots(): void {
+    const confirmed = window.confirm(
+      'Delete ALL screenshots? This action cannot be undone.'
+    );
+    if (!confirmed) return;
+
+    this.desktopMonitorService.clearAllScreenshots().subscribe({
+      next: (response) => {
+        this.screenshots = [];
+        this.selectedScreenshot = null;
+        this.activities = [];
+        this.alerts = [];
+        this.imageUrls.forEach(url => {
+          if (url) URL.revokeObjectURL(url);
+        });
+        this.imageUrls.clear();
+        window.alert(`Cleared ${response.deletedCount} screenshots successfully.`);
+      },
+      error: (error: any) => {
+        console.error('Error clearing screenshots:', error);
+        this.errorMessage = 'Failed to clear screenshots';
+      }
+    });
   }
 
   getSeverityClass(screenshot: Screenshot): string {
@@ -251,5 +345,18 @@ export class ScreenshotViewerComponent implements OnInit {
 
   formatTimestamp(timestamp: string): string {
     return new Date(timestamp).toLocaleString();
+  }
+
+  getAlertTimestamp(alert: Alert): string {
+    return alert.timestamp || alert.createdAt || '';
+  }
+
+  // Helper methods for filtering (replacing pipe functionality)
+  getFlaggedScreenshotsCount(): number {
+    return this.screenshots.filter(s => s.flaggedSuspicious).length;
+  }
+
+  getHighSeverityActivitiesCount(): number {
+    return this.activities.filter(a => a.severityLevel >= 4).length;
   }
 }

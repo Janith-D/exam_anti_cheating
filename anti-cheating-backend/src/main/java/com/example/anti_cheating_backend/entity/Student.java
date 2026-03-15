@@ -3,10 +3,9 @@ package com.example.anti_cheating_backend.entity;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -26,7 +25,6 @@ import lombok.Data;
 @Data
 @Table(name = "students")
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id")
 public class Student {
 
     @Id
@@ -34,6 +32,10 @@ public class Student {
     private Long id;
     @Column(unique = true,nullable = false)
     private String userName;
+
+    // Expose "username" alias so the frontend can use either field name
+    @JsonProperty("username")
+    public String getUsernameAlias() { return userName; }
     @Column(unique = true,nullable = false)
     private String email;
     @Column(nullable = false)

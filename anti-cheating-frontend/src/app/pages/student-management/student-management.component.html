@@ -84,9 +84,17 @@
             </td>
             <td>{{ formatDateShort(student.createdAt) }}</td>
             <td>
-              <button class="btn-view" (click)="viewStudentProfile(student)">
-                📊 View Profile
-              </button>
+              <ng-container *ngIf="student.role !== 'ADMIN'; else noAction">
+                <button class="btn-view" (click)="viewStudentProfile(student)">
+                  📊 View Profile
+                </button>
+                <button class="btn-view btn-screenshot" (click)="viewStudentScreenshotReport(student.id)">
+                  📸 Screenshot Report
+                </button>
+              </ng-container>
+              <ng-template #noAction>
+                <span class="text-muted">—</span>
+              </ng-template>
             </td>
           </tr>
         </tbody>
@@ -119,6 +127,11 @@
           <span class="badge" [ngClass]="selectedStudent.isActive ? 'badge-active' : 'badge-inactive'">
             {{ selectedStudent.isActive ? '✓ Active' : '✗ Inactive' }}
           </span>
+          <div class="profile-actions" *ngIf="selectedStudent.role !== 'ADMIN'">
+            <button class="btn-view btn-screenshot" (click)="viewStudentScreenshotReport(selectedStudent.id)">
+              📸 Open Screenshot + Alert Report
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -226,16 +239,19 @@
     <div class="alert-history">
       <div class="alert-history-header">
         <h3>🚨 Alert History</h3>
-        <div class="filter-display" *ngIf="alertSeverityFilter !== 'all'">
-          <span class="filter-badge">Showing: {{ alertSeverityFilter }} alerts</span>
-          <button class="clear-filter-btn" (click)="filterAlertsBySeverity('all')">✕ Clear Filter</button>
+        <div class="alert-header-actions">
+          <div class="filter-display" *ngIf="alertSeverityFilter !== 'all'">
+            <span class="filter-badge">Showing: {{ alertSeverityFilter }} alerts</span>
+            <button class="clear-filter-btn" (click)="filterAlertsBySeverity('all')">✕ Clear Filter</button>
+          </div>
+          <button class="btn-add-alert" (click)="openAddAlertModal()">+ Add Alert</button>
         </div>
       </div>
       
       <div class="alerts-timeline" *ngIf="filteredAlerts.length > 0">
         <div class="timeline-item" *ngFor="let alert of filteredAlerts">
           <div class="timeline-marker" [ngClass]="getSeverityClass(alert.severity)">
-            {{ getAlertIcon(alert.type) }}
+            {{ getAlertIcon(alert.type || alert.message) }}
           </div>
           <div class="timeline-content">
             <div class="alert-card">
@@ -248,9 +264,18 @@
                 </span>
                 <span class="alert-time">{{ formatDate(alert.timestamp) }}</span>
               </div>
+              <div class="alert-student-row">
+                <span class="alert-student-avatar">👤</span>
+                <span class="alert-student-name">{{ selectedStudent?.firstName ? (selectedStudent?.firstName + ' ' + (selectedStudent?.lastName || '')) : selectedStudent?.username }}</span>
+                <span class="alert-student-id" *ngIf="selectedStudent?.studentId">&nbsp;({{ selectedStudent?.studentId }})</span>
+              </div>
               <div class="alert-body">
-                <p class="alert-type"><strong>Type:</strong> {{ alert.type }}</p>
-                <p class="alert-message">{{ alert.message }}</p>
+                <p class="alert-action">
+                  <strong>Action:</strong> {{ alert.message }}
+                </p>
+                <p class="alert-description" *ngIf="alert.description">
+                  {{ alert.description }}
+                </p>
                 <p class="alert-exam" *ngIf="alert.examSession?.exam">
                   <strong>Exam:</strong> {{ alert.examSession?.exam?.title }}
                 </p>
@@ -270,7 +295,48 @@
 
       <div class="empty-state-small" *ngIf="studentAlerts.length === 0">
         <p>✓ No alerts found for this student</p>
+        <button class="btn-add-alert" (click)="openAddAlertModal()">+ Add First Alert</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Alert Modal -->
+<div class="modal-overlay" *ngIf="showAddAlertModal" (click)="closeAddAlertModal()">
+  <div class="modal-box" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h3>🚨 Add Alert for {{ selectedStudent?.username }}</h3>
+      <button class="modal-close" (click)="closeAddAlertModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Severity</label>
+        <select [(ngModel)]="addAlertForm.severity" class="form-control">
+          <option value="LOW">🟢 LOW — Minor issue</option>
+          <option value="MEDIUM">🟡 MEDIUM — Suspicious behaviour</option>
+          <option value="HIGH">🟠 HIGH — Likely cheating</option>
+          <option value="CRITICAL">🔴 CRITICAL — Confirmed cheating</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>What did the student do? <span class="required">*</span></label>
+        <textarea
+          [(ngModel)]="addAlertForm.message"
+          class="form-control"
+          rows="4"
+          placeholder="e.g. Student was seen looking at phone, switching tabs repeatedly, another person visible on camera…"
+        ></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-cancel" (click)="closeAddAlertModal()">Cancel</button>
+      <button
+        class="btn-submit-alert"
+        (click)="submitNewAlert()"
+        [disabled]="!addAlertForm.message.trim() || addingAlert"
+      >
+        {{ addingAlert ? 'Saving…' : 'Save Alert' }}
+      </button>
     </div>
   </div>
 </div>

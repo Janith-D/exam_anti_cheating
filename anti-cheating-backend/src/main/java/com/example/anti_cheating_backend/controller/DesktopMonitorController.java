@@ -244,14 +244,15 @@ public class DesktopMonitorController {
         try {
             byte[] fileData = screenshotService.getScreenshotFile(screenshotId);
             ByteArrayResource resource = new ByteArrayResource(fileData);
-            
+
             return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=screenshot_" + screenshotId + ".png")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=screenshot_" + screenshotId + ".png")
                 .contentType(MediaType.IMAGE_PNG)
                 .contentLength(fileData.length)
                 .body(resource);
-                
+
         } catch (Exception e) {
+            LOGGER.warning("Failed to download screenshot " + screenshotId + ": " + e.getMessage());
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }

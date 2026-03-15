@@ -10,7 +10,7 @@ public class StudentActivityDTO {
     private String activityType;  // FACE_DETECTED, TAB_SWITCH, COPY_ATTEMPT, PASTE_ATTEMPT, MOUSE_LEAVE, MULTIPLE_FACES, NO_FACE, QUESTION_ANSWERED, TEST_STARTED, TEST_SUBMITTED
     private String severity;      // LOW, MEDIUM, HIGH, CRITICAL
     private String description;
-    private String metadata;      // JSON string with additional data
+    private Object metadata;      // Can be JSON object or string
     private String timestamp;     // Client timestamp
     private String serverTimestamp; // Server timestamp
     

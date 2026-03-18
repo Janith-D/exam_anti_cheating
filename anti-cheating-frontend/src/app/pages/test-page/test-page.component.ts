@@ -390,6 +390,27 @@ export class TestPageComponent implements OnInit, OnDestroy {
   }
 
   autoSubmitTest(): void {
+    const timeoutActivity = this.studentActivityService.createActivity(
+      'TEST_TIMEOUT',
+      'MEDIUM',
+      `Time expired for test: ${this.test?.title}`,
+      {
+        id: this.currentUser.id,
+        name: this.currentUser.username,
+        email: this.currentUser.email
+      },
+      {
+        sessionId: this.sessionId,
+        testId: this.testId,
+        testName: this.test?.title || 'Unknown Test'
+      },
+      {
+        answeredCount: this.answeredCount,
+        totalQuestions: this.questions.length
+      }
+    );
+    this.studentActivityService.sendActivity(timeoutActivity);
+
     alert('⏰ Time is up! Your test will be submitted automatically.');
     this.performSubmission();
   }

@@ -1,7 +1,8 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Subscription, interval } from 'rxjs';
+import { Subscription, interval, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AlertService } from '../../Services/alert.service.service';
 import { EventService } from '../../Services/event.service.service';
 import { ExamSessionService } from '../../Services/exam-session.service';
@@ -114,18 +115,15 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
     
     // Load all alerts
     this.loadAlerts();
-    
-    // Load recent events
-    this.loadRecentEvents();
   }
 
   loadActiveSessions(): void {
     this.examSessionService.getActiveExamSessions().subscribe({
       next: (sessions: ExamSession[]) => {
-        this.activeSessions = sessions;
-        this.stats.activeTests = sessions.length;
-        // Count unique students (would need actual enrollment data)
-        this.stats.totalStudentsInTest = sessions.length * 10; // Placeholder
+        this.activeSessions = sessions.filter(session => !this.isSessionExpired(session));
+        this.stats.activeTests = this.activeSessions.length;
+        this.loadStudentCountsForActiveSessions(this.activeSessions);
+        this.loadRecentEvents();
       },
       error: (error: any) => {
         console.error('Error loading active sessions:', error);
@@ -264,7 +262,11 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
             if (activity.activityType === 'TEST_STARTED') {
               this.activeStudents.add(activity.studentId);
               console.log('👤 Student joined:', activity.studentName, '| Total active:', this.activeStudents.size);
-            } else if (activity.activityType === 'TEST_SUBMITTED') {
+            } else if (
+              activity.activityType === 'TEST_SUBMITTED' ||
+              activity.activityType === 'TEST_TIMEOUT' ||
+              activity.activityType === 'EXAM_TIMEOUT'
+            ) {
               this.activeStudents.delete(activity.studentId);
               console.log('👋 Student left:', activity.studentName, '| Total active:', this.activeStudents.size);
             } else {
@@ -477,6 +479,8 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
     const icons: { [key: string]: string } = {
       'TEST_STARTED': '▶️',
       'TEST_SUBMITTED': '⏹️',
+      'TEST_TIMEOUT': '⏰',
+      'EXAM_TIMEOUT': '⏰',
       'QUESTION_ANSWERED': '✏️',
       'TAB_SWITCH': '🔄',
       'COPY_ATTEMPT': '📋',
@@ -591,5 +595,58 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
         }
       });
     }
+  }
+
+  private isSessionExpired(session: ExamSession): boolean {
+    if (!session.endTime) {
+      return false;
+    }
+    return new Date(session.endTime).getTime() <= Date.now();
+  }
+
+  private loadStudentCountsForActiveSessions(sessions: ExamSession[]): void {
+    const examIds = Array.from(
+      new Set(
+        sessions
+          .map((session) => session.exam?.id)
+          .filter((id): id is number => typeof id === 'number')
+      )
+    );
+
+    if (examIds.length === 0) {
+      this.stats.totalStudentsInTest = this.activeStudents.size;
+      return;
+    }
+
+    const enrollmentRequests = examIds.map((examId) =>
+      this.enrollmentService.getExamEnrollments(examId).pipe(
+        catchError((error) => {
+          console.error(`Error loading enrollments for exam ${examId}:`, error);
+          return of([] as any[]);
+        })
+      )
+    );
+
+    forkJoin(enrollmentRequests).subscribe((enrollmentGroups) => {
+      const activeStudentIds = new Set<number>();
+
+      enrollmentGroups.forEach((enrollments: any[]) => {
+        enrollments.forEach((enrollment: any) => {
+          const status = (enrollment?.status || '').toUpperCase();
+          const studentId = enrollment?.studentId ?? enrollment?.student?.id;
+          const isBlocked = Boolean(enrollment?.isBlocked);
+
+          if (!studentId || isBlocked) {
+            return;
+          }
+
+          if (status === 'APPROVED' || status === 'VERIFIED') {
+            activeStudentIds.add(studentId);
+          }
+        });
+      });
+
+      this.stats.totalStudentsInTest = activeStudentIds.size;
+    });
   }
 }

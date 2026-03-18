@@ -1,15 +1,17 @@
 package com.example.anti_cheating_backend.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.example.anti_cheating_backend.entity.Enums;
 import com.example.anti_cheating_backend.entity.Exam;
 import com.example.anti_cheating_backend.entity.ExamSession;
 import com.example.anti_cheating_backend.repo.ExamRepo;
 import com.example.anti_cheating_backend.repo.ExamSessionRepo;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ExamSessionService {
@@ -58,7 +60,18 @@ public class ExamSessionService {
     }
     
     public List<ExamSession> getActiveSessions(){
-        return examSessionRepo.findByStatus(Enums.SessionStatus.ACTIVE);
+        LocalDateTime now = LocalDateTime.now();
+        return getActiveSessionsTransactional(now);
+    }
+
+    @Transactional
+    protected List<ExamSession> getActiveSessionsTransactional(LocalDateTime now) {
+        examSessionRepo.completeExpiredActiveSessions(
+                Enums.SessionStatus.ACTIVE,
+                Enums.SessionStatus.COMPLETED,
+                now
+        );
+        return examSessionRepo.findCurrentlyActiveSessions(Enums.SessionStatus.ACTIVE, now);
     }
 
     // Update session

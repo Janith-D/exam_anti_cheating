@@ -43,6 +43,6 @@ export class AlertService {
 
   // Resolve alert
   resolveAlert(alertId: number): Observable<Alert> {
-    return this.http.put<Alert>(`${this.apiUrl}/${alertId}/resolve`, {});
+    return this.http.put<Alert>(`${this.apiUrl}/resolve/${alertId}`, {});
   }
 }

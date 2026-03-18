@@ -1,12 +1,15 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Subscription, forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AuthService } from '../../Services/auth.service.service';
 import { WebSocketService } from '../../Services/websocket.service.service';
 import { AlertService } from '../../Services/alert.service.service';
 import { TestService } from '../../Services/test.service.service';
 import { EventService } from '../../Services/event.service.service';
+import { ExamSessionService } from '../../Services/exam-session.service';
+import { StudentService, StudentProfile } from '../../Services/student.service';
 import { Alert } from '../../models/alert.model';
 import { Test } from '../../models/test.model';
 import { Event } from '../../models/event.model';
@@ -52,7 +55,9 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
     private webSocketService: WebSocketService,
     private alertService: AlertService,
     private testService: TestService,
-    private eventService: EventService
+    private eventService: EventService,
+    private examSessionService: ExamSessionService,
+    private studentService: StudentService
   ) {}
 
   ngOnInit(): void {
@@ -104,35 +109,60 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
 
   loadDashboardData(): void {
     this.loading = true;
-    
-    // Load tests
-    this.testService.getAllTests().subscribe({
-      next: (tests) => {
+    this.error = '';
+
+    forkJoin({
+      tests: this.testService.getAllTests().pipe(
+        catchError((error) => {
+          console.error('Error loading tests:', error);
+          return of([] as Test[]);
+        })
+      ),
+      activeSessions: this.examSessionService.getActiveExamSessions().pipe(
+        catchError((error) => {
+          console.error('Error loading active exam sessions:', error);
+          return of([] as any[]);
+        })
+      ),
+      students: this.studentService.getAllStudents().pipe(
+        catchError((error) => {
+          console.error('Error loading students:', error);
+          return of([] as StudentProfile[]);
+        })
+      ),
+      alerts: this.alertService.getAllAlerts().pipe(
+        catchError((error) => {
+          console.error('Error loading alerts:', error);
+          return of([] as Alert[]);
+        })
+      )
+    }).subscribe({
+      next: ({ tests, activeSessions, students, alerts }) => {
         this.tests = tests;
         this.stats.totalTests = tests.length;
+        this.stats.activeExams = activeSessions.length;
+
+        // Keep student count resilient if API payload includes non-student roles.
+        this.stats.totalStudents = students.filter((student) => {
+          const role = (student.role || '').toUpperCase();
+          return role !== 'ADMIN';
+        }).length;
+
+        this.updateAlertState(alerts);
         this.loading = false;
       },
       error: (error) => {
-        console.error('Error loading tests:', error);
+        console.error('Error loading dashboard data:', error);
         this.error = 'Failed to load dashboard data';
         this.loading = false;
       }
     });
-    
-    // Load alerts
-    this.loadAlerts();
   }
 
   loadAlerts(): void {
     this.alertService.getAllAlerts().subscribe({
       next: (alerts: Alert[]) => {
-        this.alerts = alerts.sort((a: Alert, b: Alert) => {
-          return new Date(b.timestamp || b.createdAt || '').getTime() - new Date(a.timestamp || a.createdAt || '').getTime();
-        });
-        this.unreadAlertsCount = alerts.filter((a: Alert) => !a.resolved && a.status !== 'RESOLVED').length;
-        this.stats.criticalAlerts = alerts.filter((a: Alert) => 
-          a.severity === 'RED' || a.severity === 'ORANGE' || a.severity === 'HIGH' || a.severity === 'CRITICAL'
-        ).length;
+        this.updateAlertState(alerts);
       },
       error: (error: any) => {
         console.error('Error loading alerts:', error);
@@ -158,10 +188,12 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
         console.log('New alert received:', alert);
         this.alerts.unshift(alert);
         this.unreadAlertsCount++;
-        this.stats.criticalAlerts++;
+        if (this.isCriticalAlert(alert) && !this.isResolvedAlert(alert)) {
+          this.stats.criticalAlerts++;
+        }
         
         // Show notification for critical alerts
-        if (alert.severity === 'RED' || alert.severity === 'ORANGE') {
+        if (this.isCriticalAlert(alert)) {
           this.showNotification('Critical Alert', alert.message || 'New suspicious activity detected');
         }
       },
@@ -255,6 +287,24 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
 
   goBack(): void {
     this.location.back();
+  }
+
+  private updateAlertState(alerts: Alert[]): void {
+    this.alerts = alerts.sort((a: Alert, b: Alert) => {
+      return new Date(b.timestamp || b.createdAt || '').getTime() - new Date(a.timestamp || a.createdAt || '').getTime();
+    });
+    this.unreadAlertsCount = alerts.filter((alert: Alert) => !this.isResolvedAlert(alert)).length;
+    this.stats.criticalAlerts = alerts.filter((alert: Alert) => {
+      return this.isCriticalAlert(alert) && !this.isResolvedAlert(alert);
+    }).length;
+  }
+
+  private isResolvedAlert(alert: Alert): boolean {
+    return Boolean(alert.resolved) || alert.status === 'RESOLVED';
+  }
+
+  private isCriticalAlert(alert: Alert): boolean {
+    return ['RED', 'ORANGE', 'HIGH', 'CRITICAL'].includes((alert.severity || '').toUpperCase());
   }
 }
 

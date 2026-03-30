@@ -122,6 +122,11 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/test-results/test-results.component').then(m => m.TestResultsComponent),
     canActivate: [adminGuard]
   },
+  {
+    path: 'admin/methodologies',
+    loadComponent: () => import('./pages/methodology-management/methodology-management.component').then(m => m.MethodologyManagementComponent),
+    canActivate: [adminGuard]
+  },
 
   // Fallback
   {

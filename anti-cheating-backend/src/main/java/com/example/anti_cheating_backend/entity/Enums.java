@@ -36,4 +36,16 @@ public class Enums {
     public enum EnrollmentStatus {
         PENDING, VERIFIED, APPROVED, REJECTED
     }
+
+    public enum MethodologyType {
+        PROCTORED, UNPROCTORED, HYBRID, AI_ASSISTED
+    }
+
+    public enum MonitoringLevel {
+        LOW, MEDIUM, HIGH, STRICT
+    }
+
+    public enum MethodologyStatus {
+        ACTIVE, INACTIVE
+    }
 }

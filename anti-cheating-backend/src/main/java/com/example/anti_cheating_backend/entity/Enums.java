@@ -36,4 +36,16 @@ public class Enums {
     public enum EnrollmentStatus {
         PENDING, VERIFIED, APPROVED, REJECTED
     }
+
+    public enum IdentitySessionState {
+        CREATED, SUBMITTED, DECIDED, EXPIRED
+    }
+
+    public enum IdentityDecision {
+        ALLOW, STEP_UP, BLOCK
+    }
+
+    public enum IdentityEnrollmentState {
+        ACTIVE, COMPLETED, EXPIRED
+    }
 }

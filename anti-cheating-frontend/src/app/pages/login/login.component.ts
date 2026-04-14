@@ -22,6 +22,8 @@ export class LoginComponent implements OnInit, OnDestroy {
   successMessage = '';
   showCamera = false;
   capturedImage: string | null = null;
+  audioBase64: string | null = null;
+  recordingStatus = '';
   adminLogin = false; // Flag for admin login without face verification
 
   constructor(
@@ -116,7 +118,7 @@ export class LoginComponent implements OnInit, OnDestroy {
               height: { min: 240, ideal: 480, max: 720 },
               facingMode: 'user'
             },
-            audio: false
+            audio: true
           });
         } catch (primaryErr: any) {
           console.warn('Primary getUserMedia failed, trying fallback via CameraService...', primaryErr);
@@ -216,32 +218,76 @@ export class LoginComponent implements OnInit, OnDestroy {
         return;
       }
 
-      const canvas = document.createElement('canvas');
-      canvas.width = videoEl.videoWidth;
-      canvas.height = videoEl.videoHeight;
-
-      const context = canvas.getContext('2d');
-      if (context) {
-        context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-        this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
-        console.log('📸 Face image captured successfully');
-      } else {
-        throw new Error('Could not get canvas context');
-      }
-
-      // Stop camera and hide video
-      this.showCamera = false;
+      this.recordingStatus = 'Recording Voice (3s)... Please say: "My name is [Your Name]"';
       const stream = videoEl.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoEl.srcObject = null;
+      
+      const audioTracks = stream.getAudioTracks();
+      if (audioTracks.length === 0 || audioTracks[0].readyState !== 'live') {
+        throw new Error('Microphone access is required but no audio track was found or it is inactive.');
+      }
+      
+      // Use the raw stream to prevent "Failed to execute 'start'..." on stripped audio streams
+      const audioChunks: Blob[] = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      mediaRecorder.onerror = (e: any) => {
+        this.errorMessage = 'Media recorder error: ' + (e.error?.message || e.message);
+        this.recordingStatus = '';
+        this.showCamera = false;
+        stream.getTracks().forEach(t => t.stop());
+      };
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = async () => {
+        const audioBlob = new Blob(audioChunks);
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = () => {
+          this.audioBase64 = reader.result as string;
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = videoEl.videoWidth;
+          canvas.height = videoEl.videoHeight;
+
+          const context = canvas.getContext('2d');
+          if (context) {
+            context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+            this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
+            console.log('📸 Face image captured successfully');
+          } else {
+            console.error('Could not get canvas context');
+          }
+
+          this.recordingStatus = '';
+          // Stop camera and hide video
+          this.showCamera = false;
+          stream.getTracks().forEach(track => track.stop());
+          videoEl.srcObject = null;
+        };
+      };
+
+      mediaRecorder.start();
+      
+      // Wait 3 seconds
+      setTimeout(() => {
+        if (mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      }, 3000);
+
     } catch (error: any) {
-      this.errorMessage = 'Failed to capture image: ' + (error.message || 'Unknown error');
+      this.errorMessage = 'Failed to capture image/audio: ' + (error.message || 'Unknown error');
       console.error('❌ Capture error:', error);
+      this.recordingStatus = '';
     }
   }
 
   retakePhoto(): void {
     this.capturedImage = null;
+    this.audioBase64 = null;
     this.showCamera = false;
     this.errorMessage = '';
     this.successMessage = '';
@@ -284,6 +330,10 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (this.capturedImage) {
         const imageBlob = this.base64ToBlob(this.capturedImage);
         formData.append('image', imageBlob, 'face.jpg');
+        
+        if (this.audioBase64) {
+          formData.append('audio', this.audioBase64);
+        }
       } else {
         const dummyBlob = this.createDummyImage();
         formData.append('image', dummyBlob, 'dummy.png');
@@ -360,3 +410,4 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
   }
 }
+

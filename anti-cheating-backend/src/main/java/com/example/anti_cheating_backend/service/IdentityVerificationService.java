@@ -80,7 +80,14 @@ public class IdentityVerificationService {
     }
 
     @SuppressWarnings("unchecked")
-    public Map<String, Object> submitVerification(String sessionId, Long studentId, String image) {
+        public Map<String, Object> submitVerification(
+            String sessionId,
+            Long studentId,
+            String image,
+            String audio,
+            Map<String, Object> behavior,
+            Map<String, Object> challenge
+        ) {
         if (sessionId == null || sessionId.isBlank()) {
             throw new RuntimeException("sessionId is required");
         }
@@ -107,7 +114,7 @@ public class IdentityVerificationService {
         session.setState(Enums.IdentitySessionState.SUBMITTED);
         identitySessionRepo.save(session);
 
-        Map<String, Object> verifyResponse = callMlVerify(studentId, image);
+        Map<String, Object> verifyResponse = callMlVerify(studentId, image, audio, behavior, challenge);
 
         Map<String, Object> scorePacketMap;
         Object packetObj = verifyResponse.get("scorePacket");
@@ -234,7 +241,7 @@ public class IdentityVerificationService {
             return getVerificationResult(sessionId);
         }
 
-        return submitVerification(sessionId, studentId, image);
+        return submitVerification(sessionId, studentId, image, null, null, null);
     }
 
     public Map<String, Object> proctorOverride(String sessionId, String decision, String reason, String proctorId) {
@@ -319,11 +326,25 @@ public class IdentityVerificationService {
         return response;
     }
 
-    private Map<String, Object> callMlVerify(Long studentId, String image) {
-        Map<String, Object> payload = Map.of(
-                "studentId", studentId,
-                "image", image
-        );
+    private Map<String, Object> callMlVerify(
+            Long studentId,
+            String image,
+            String audio,
+            Map<String, Object> behavior,
+            Map<String, Object> challenge
+    ) {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("studentId", studentId);
+        payload.put("image", image);
+        if (audio != null && !audio.isBlank()) {
+            payload.put("audio", audio);
+        }
+        if (behavior != null && !behavior.isEmpty()) {
+            payload.put("behavior", behavior);
+        }
+        if (challenge != null && !challenge.isEmpty()) {
+            payload.put("challenge", challenge);
+        }
 
         if (!mlServiceEnabled) {
             LOGGER.info("ML service disabled; returning mock verify response for Step 2");

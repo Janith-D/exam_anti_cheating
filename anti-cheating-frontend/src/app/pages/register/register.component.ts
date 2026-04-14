@@ -18,6 +18,8 @@ export class RegisterComponent {
   loading = false;
   showCamera = false;
   capturedImage: string | null = null;
+  audioBase64: string | null = null;
+  recordingStatus = '';
   errorMessage = '';
   successMessage = '';
 
@@ -58,9 +60,8 @@ export class RegisterComponent {
 
         const stream = await navigator.mediaDevices.getUserMedia({
           video: { width: { ideal: 640 }, height: { ideal: 480 }, facingMode: 'user' },
-          audio: false
+          audio: true
         });
-
         videoEl.srcObject = stream;
         videoEl.muted = true;
         videoEl.setAttribute('playsinline', 'true');
@@ -74,7 +75,7 @@ export class RegisterComponent {
     }
   }
 
-  capturePhoto(): void {
+  async capturePhoto(): Promise<void> {
     try {
       const videoEl = this.videoElement?.nativeElement;
       if (!videoEl || !videoEl.srcObject) {
@@ -82,30 +83,72 @@ export class RegisterComponent {
         return;
       }
 
-      const canvas = document.createElement('canvas');
-      canvas.width = videoEl.videoWidth;
-      canvas.height = videoEl.videoHeight;
-      const context = canvas.getContext('2d');
-
-      if (!context) {
-        this.errorMessage = 'Could not capture image from camera.';
-        return;
-      }
-
-      context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-      this.capturedImage = canvas.toDataURL('image/jpeg', 0.85);
-
+      this.recordingStatus = 'Recording Voice (3s)... Please say: "My name is [Your Name]"';
       const stream = videoEl.srcObject as MediaStream;
-      stream.getTracks().forEach(track => track.stop());
-      videoEl.srcObject = null;
-      this.showCamera = false;
+      
+      const audioTracks = stream.getAudioTracks();
+      if (audioTracks.length === 0 || audioTracks[0].readyState !== 'live') {
+        throw new Error('Microphone access is required but no audio track was found or it is inactive.');
+      }
+      
+      // Use the raw stream to prevent "Failed to execute 'start'..." on stripped audio streams
+      const audioChunks: Blob[] = [];
+      const mediaRecorder = new MediaRecorder(stream);
+      
+      mediaRecorder.onerror = (e: any) => {
+        this.errorMessage = 'Media recorder error: ' + (e.error?.message || e.message);
+        this.recordingStatus = '';
+        this.showCamera = false;
+        stream.getTracks().forEach(t => t.stop());
+      };
+
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) audioChunks.push(e.data);
+      };
+
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunks);
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = () => {
+          this.audioBase64 = reader.result as string;
+          
+          const canvas = document.createElement('canvas');
+          canvas.width = videoEl.videoWidth;
+          canvas.height = videoEl.videoHeight;
+          const context = canvas.getContext('2d');
+
+          if (!context) {
+            this.errorMessage = 'Could not capture image from camera.';
+            return;
+          }
+
+          context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+          this.capturedImage = canvas.toDataURL('image/jpeg', 0.85);
+
+          this.recordingStatus = '';
+          this.showCamera = false;
+          stream.getTracks().forEach(track => track.stop());
+          videoEl.srcObject = null;
+        };
+      };
+
+      mediaRecorder.start();
+      setTimeout(() => {
+        if (mediaRecorder.state !== 'inactive') {
+          mediaRecorder.stop();
+        }
+      }, 3000);
+
     } catch (error: any) {
-      this.errorMessage = error?.message || 'Failed to capture face image.';
+      this.errorMessage = error?.message || 'Failed to capture face image and audio.';
+      this.recordingStatus = '';
     }
   }
 
   retakePhoto(): void {
     this.capturedImage = null;
+    this.audioBase64 = null;
     this.showCamera = false;
     this.errorMessage = '';
   }
@@ -127,8 +170,8 @@ export class RegisterComponent {
       return;
     }
 
-    if (!this.capturedImage) {
-      this.errorMessage = 'Please capture your face photo before registering.';
+    if (!this.capturedImage || !this.audioBase64) {
+      this.errorMessage = 'Please capture your face photo and voice before registering.';
       return;
     }
 
@@ -146,6 +189,10 @@ export class RegisterComponent {
 
     const imageBlob = this.base64ToBlob(this.capturedImage);
     formData.append('image', imageBlob, 'face.jpg');
+    
+    // Append audio file 
+    // We already have the audio stored in Base64
+    formData.append('audio', this.audioBase64);
 
     this.authService.registerWithFace(formData).subscribe({
       next: () => {
@@ -153,7 +200,7 @@ export class RegisterComponent {
         this.successMessage = 'Registration completed successfully. Redirecting to login...';
         setTimeout(() => this.router.navigate(['/login']), 1200);
       },
-      error: (error) => {
+      error: (error: any) => {
         this.loading = false;
         const msg = error?.error?.error || 'Registration failed. Please try again.';
         this.errorMessage = msg;

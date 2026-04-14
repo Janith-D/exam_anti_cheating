@@ -135,7 +135,10 @@ public class IdentityController {
             Map<String, Object> response = identityVerificationService.submitVerification(
                     request.getSessionId(),
                     request.getStudentId(),
-                    request.getImage()
+                    request.getImage(),
+                    request.getAudio(),
+                    request.getBehavior(),
+                    request.getChallenge()
             );
             return ResponseEntity.ok(response);
         } catch (RuntimeException e) {

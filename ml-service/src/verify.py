@@ -5,9 +5,11 @@ import logging
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple, Dict, Any
 from utils import (load_config, preprocess_image, detect_face, compute_embedding, 
                    cosine_similarity, capture_live_image_advanced, perform_liveness_check)
+from face_stack import FaceStack
+from quality_gates import evaluate_face_quality
 
 # ------------------ Logging ------------------
 logging.basicConfig(
@@ -33,6 +35,7 @@ class FaceVerificationSystem:
         self.similarity_threshold = self.config.get('similarity_threshold', 0.75)
         self.max_attempts = self.config.get('max_verification_attempts', 3)
         self.liveness_checks = self.config.get('enable_liveness_detection', True)
+        self.face_stack = FaceStack(self.config)
 
     # ------------------ Audit logging ------------------
     def log_verification_attempt(self, student_id: str, similarity: float, result: bool,
@@ -60,9 +63,15 @@ class FaceVerificationSystem:
 
     # ------------------ Advanced face verification ------------------
     def verify_face_advanced(self, student_id: str, image_input: str, stored_embedding: np.ndarray,
-                             attempt_number: int = 1, frames: Optional[list] = None) -> Tuple[bool, float, str, dict]:
+                             attempt_number: int = 1, frames: Optional[list] = None) -> Tuple[bool, float, str, dict, dict]:
         """Verify face with optional liveness detection"""
         liveness_result = None
+        quality_result: Dict[str, Any] = {
+            'passed': False,
+            'quality_score': 0.0,
+            'failure_reasons': ['QUALITY_NOT_COMPUTED'],
+            'metrics': {}
+        }
         
         try:
             # Perform liveness check if enabled and frames provided
@@ -73,25 +82,42 @@ class FaceVerificationSystem:
                 if not liveness_passed:
                     msg = f"Liveness check failed: {liveness_result.get('checks', {})}"
                     self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
-                    return False, 0.0, msg, liveness_result
+                    return False, 0.0, msg, liveness_result, quality_result
                 
                 logging.info(f"Liveness check passed (score: {liveness_result.get('overall_score', 0)}/100)")
             
             img = preprocess_image(image_input, self.config['image_size'])
-            face = detect_face(img)
+            extraction = self.face_stack.extract_primary_face(img)
 
-            if face is None:
-                msg = "No face detected in image"
+            if not extraction.get('success', False):
+                msg = f"Face extraction failed: {extraction.get('error', 'UNKNOWN_ERROR')}"
                 self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
-                return False, 0.0, msg, liveness_result
+                return False, 0.0, msg, liveness_result, quality_result
 
-            face_resized = cv2.resize(face, tuple(self.config['face_size']))
-            new_embedding = compute_embedding(face_resized)
+            quality_result = evaluate_face_quality(
+                img,
+                extraction['bbox'],
+                extraction['face_count'],
+                self.config
+            )
+
+            if not quality_result.get('passed', False):
+                reasons = quality_result.get('failure_reasons', [])
+                msg = f"Quality gate failed: {', '.join(reasons)}"
+                self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
+                return False, 0.0, msg, liveness_result, quality_result
+
+            new_embedding = extraction.get('embedding')
 
             if new_embedding is None or len(new_embedding) == 0:
                 msg = "Failed to compute embedding from image"
                 self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
-                return False, 0.0, msg, liveness_result
+                return False, 0.0, msg, liveness_result, quality_result
+
+            if stored_embedding.shape != new_embedding.shape:
+                msg = f"Embedding dimension mismatch ({stored_embedding.shape} vs {new_embedding.shape}); re-enroll required"
+                self.log_verification_attempt(student_id, 0.0, False, attempt_number, msg)
+                return False, 0.0, msg, liveness_result, quality_result
 
             similarity = cosine_similarity(stored_embedding, new_embedding)
             is_verified = similarity >= self.similarity_threshold
@@ -99,12 +125,12 @@ class FaceVerificationSystem:
                           if is_verified else  
                           f"Verification failed - insufficient similarity ({similarity:.3f} < {self.similarity_threshold})")
             self.log_verification_attempt(student_id, similarity, is_verified, attempt_number, status_msg)
-            return is_verified, similarity, status_msg, liveness_result
+            return is_verified, similarity, status_msg, liveness_result, quality_result
         except Exception as e:
             error_msg = f"Verification error: {str(e)}"
             logging.error(error_msg)
             self.log_verification_attempt(student_id, 0.0, False, attempt_number, error_msg)
-            return False, 0.0, error_msg, liveness_result
+            return False, 0.0, error_msg, liveness_result, quality_result
 
     # ------------------ Webcam capture ------------------
     def capture_live_image(self, countdown: int = 3) -> str:
@@ -144,6 +170,8 @@ class FaceVerificationSystem:
             'verification_result': False,
             'attempts': [],
             'liveness_check': None,
+            'quality_gates': None,
+            'model_stack': self.face_stack.model_info(),
             'final_message': '',
             'timestamp': datetime.now().isoformat()
         }
@@ -174,7 +202,7 @@ class FaceVerificationSystem:
             elif image_input is None or image_input == 'webcam':
                 image_input = self.capture_live_image()
             
-            is_verified, similarity, message, liveness_result = self.verify_face_advanced(
+            is_verified, similarity, message, liveness_result, quality_result = self.verify_face_advanced(
                 student_id, image_input, stored_embedding, attempt, frames
             )
             
@@ -182,12 +210,16 @@ class FaceVerificationSystem:
                 'attempt_number': attempt,
                 'success': is_verified,
                 'similarity': float(similarity),
-                'message': message
+                'message': message,
+                'face_quality': float(quality_result.get('quality_score', 0.0)),
+                'quality_gates': quality_result,
             }
             
             if liveness_result:
                 attempt_result['liveness_check'] = liveness_result
                 result['liveness_check'] = liveness_result
+
+            result['quality_gates'] = quality_result
             
             result['attempts'].append(attempt_result)
             

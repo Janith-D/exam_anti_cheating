@@ -66,6 +66,7 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> login(
             @RequestParam("userName") String userName,
             @RequestParam("password") String password,
+            @RequestParam(value = "audio", required = false) String audio,
             @RequestParam("image") MultipartFile image) {
         try {
             // Convert MultipartFile to base64
@@ -76,6 +77,9 @@ public class AuthController {
             payload.put("userName", userName);
             payload.put("password", password);
             payload.put("image", imageBase64);
+            if (audio != null && !audio.isEmpty()) {
+                payload.put("audio", audio);
+            }
 
             Map<String, Object> response = authService.login(payload);
             return ResponseEntity.ok(response);

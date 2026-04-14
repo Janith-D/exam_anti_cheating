@@ -134,12 +134,32 @@ public class IdentityEnrollmentService {
         }
 
         IdentityEnrollmentSession session = getActiveSession(enrollmentToken);
+        Map<String, Object> mlResponse = callMlVoiceEnroll(session.getStudentId(), audio);
         Map<String, Object> qualityMeta = fromJsonMap(session.getQualityMetaJson());
         Map<String, Object> modelVersions = fromJsonMap(session.getModelVersionsJson());
 
-        session.setVoiceTemplate(buildDeterministicTemplate("voice", audio));
+        Object templateObj = mlResponse.get("voiceTemplate");
+        String voiceTemplate = templateObj == null || String.valueOf(templateObj).isBlank()
+                ? buildDeterministicTemplate("voice", audio)
+                : String.valueOf(templateObj);
+
+        session.setVoiceTemplate(voiceTemplate);
         qualityMeta.put("voiceSampleChars", audio.length());
-        modelVersions.put("voiceEnrollment", "ecapa-tdnn-pending");
+
+        Object voiceQuality = mlResponse.get("voiceQuality");
+        if (voiceQuality instanceof Number qualityNumber) {
+            qualityMeta.put("voiceQuality", qualityNumber.doubleValue());
+        }
+        Object voiceSpoofProbability = mlResponse.get("voiceSpoofProbability");
+        if (voiceSpoofProbability instanceof Number spoofNumber) {
+            qualityMeta.put("voiceSpoofProbability", spoofNumber.doubleValue());
+        }
+        Object reasonCodes = mlResponse.get("reasonCodes");
+        if (reasonCodes instanceof List<?> reasonList) {
+            qualityMeta.put("voiceReasonCodes", reasonList);
+        }
+
+        modelVersions.put("voiceEnrollment", String.valueOf(mlResponse.getOrDefault("model", "ecapa-tdnn-fallback")));
 
         session.setQualityMetaJson(toJson(qualityMeta));
         session.setModelVersionsJson(toJson(modelVersions));
@@ -355,6 +375,40 @@ public class IdentityEnrollmentService {
             return objectMapper.convertValue(bodyMap, new TypeReference<Map<String, Object>>() {});
         } catch (RestClientException ex) {
             throw new RuntimeException("ML enroll call failed: " + ex.getMessage());
+        }
+    }
+
+    private Map<String, Object> callMlVoiceEnroll(Long studentId, String audio) {
+        Map<String, Object> payload = Map.of(
+                "studentId", studentId,
+                "audio", audio
+        );
+
+        if (!mlServiceEnabled) {
+            Map<String, Object> fallback = new LinkedHashMap<>();
+            fallback.put("voiceTemplate", buildDeterministicTemplate("voice", audio));
+            fallback.put("voiceQuality", 0.70);
+            fallback.put("voiceSpoofProbability", 0.30);
+            fallback.put("model", "ecapa-tdnn-fallback");
+            fallback.put("reasonCodes", List.of("VOICE_FALLBACK_MODE"));
+            return fallback;
+        }
+
+        try {
+            ResponseEntity<Object> response = restTemplate.postForEntity(
+                    mlServiceUrl + "/voice/enroll",
+                    payload,
+                    Object.class
+            );
+            if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+                throw new RuntimeException("ML voice enroll request failed with status: " + response.getStatusCode());
+            }
+            if (!(response.getBody() instanceof Map<?, ?> bodyMap)) {
+                throw new RuntimeException("ML voice enroll response is not a JSON object");
+            }
+            return objectMapper.convertValue(bodyMap, new TypeReference<Map<String, Object>>() {});
+        } catch (RestClientException ex) {
+            throw new RuntimeException("ML voice enroll call failed: " + ex.getMessage());
         }
     }
 

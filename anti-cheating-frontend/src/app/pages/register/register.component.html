@@ -1,4 +1,4 @@
-<div class="register-container">
+﻿<div class="register-container">
 	<div class="register-left">
 		<div class="illustration-wrapper">
 			<div class="illustration-content">
@@ -6,12 +6,12 @@
 				<p class="brand-tagline">Create your account with secure face enrollment and anti-cheating protection.</p>
 
 				<div class="illustration-decorations">
-					<div class="decoration-item">🛡️</div>
-					<div class="decoration-item">📘</div>
-					<div class="decoration-item">🧠</div>
-					<div class="decoration-item">🧪</div>
-					<div class="decoration-item">📈</div>
-					<div class="decoration-item">🔐</div>
+					<div class="decoration-item">ðŸ›¡ï¸</div>
+					<div class="decoration-item">ðŸ“˜</div>
+					<div class="decoration-item">ðŸ§ </div>
+					<div class="decoration-item">ðŸ§ª</div>
+					<div class="decoration-item">ðŸ“ˆ</div>
+					<div class="decoration-item">ðŸ”</div>
 				</div>
 			</div>
 		</div>
@@ -87,8 +87,9 @@
 							<button type="button" class="btn-retake" (click)="retakePhoto()">Retake</button>
 						</div>
 
-						<button type="button" class="btn btn-outline btn-block" *ngIf="!capturedImage" (click)="toggleCamera()">
-							{{ showCamera ? 'Capture Face' : 'Start Camera' }}
+						<p *ngIf="recordingStatus" style="color: red; font-weight: bold; text-align: center; margin-bottom: 10px;">{{ recordingStatus }}</p>
+                                                <button type="button" class="btn btn-outline btn-block" *ngIf="!capturedImage" (click)="toggleCamera()" [disabled]="!!recordingStatus">
+							{{ showCamera ? 'Capture Face & Voice (3s)' : 'Start Camera' }}
 						</button>
 					</div>
 				</div>
@@ -117,3 +118,4 @@
 		</div>
 	</div>
 </div>
+

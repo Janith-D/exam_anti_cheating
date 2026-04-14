@@ -1,4 +1,4 @@
-<div class="login-container">
+﻿<div class="login-container">
   <!-- LEFT SIDE - Illustration -->
   <div class="login-left">
     <div class="illustration-wrapper">
@@ -8,12 +8,12 @@
         
         <!-- Animated illustration elements -->
         <div class="illustration-decorations">
-          <div class="decoration-item clock">🕐</div>
-          <div class="decoration-item formula">√x</div>
-          <div class="decoration-item angle">∠</div>
-          <div class="decoration-item music">🎵</div>
+          <div class="decoration-item clock">ðŸ•</div>
+          <div class="decoration-item formula">âˆšx</div>
+          <div class="decoration-item angle">âˆ </div>
+          <div class="decoration-item music">ðŸŽµ</div>
           <div class="decoration-item function">f(x)</div>
-          <div class="decoration-item pi">π</div>
+          <div class="decoration-item pi">Ï€</div>
         </div>
       </div>
     </div>
@@ -63,7 +63,7 @@
             type="password"
             formControlName="password"
             class="form-control"
-            placeholder="••••••••••••"
+            placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
             [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
           />
           <div class="form-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
@@ -81,16 +81,16 @@
               [ngModelOptions]="{standalone: true}"
               class="checkbox-input"
             />
-            <span class="checkbox-text">🔑 Admin Login (Skip face recognition)</span>
+            <span class="checkbox-text">ðŸ”‘ Admin Login (Skip face recognition)</span>
           </label>
           <p class="help-text" *ngIf="adminLogin">
             Face recognition is disabled for admin login only.
           </p>
         </div>
 
-        <!-- Face Recognition Section (No Liveness) -->
-        <div class="form-group" *ngIf="!adminLogin">
-          <label class="form-label">📸 Face Recognition</label>
+<!-- Face Registration Section -->
+          <div class="form-group" *ngIf="!adminLogin">
+            <label class="form-label">Face & Voice Registration</label>
           <p class="help-text">Capture one clear face photo to verify identity.</p>
           
           <div class="face-capture-section">
@@ -105,6 +105,10 @@
             ></video>
             
             <canvas #canvasElement class="face-canvas hidden"></canvas>
+
+              <div *ngIf="recordingStatus" class="text-info mt-2 text-center font-weight-bold">
+                {{ recordingStatus }}
+              </div>
             
             <div class="captured-image" *ngIf="capturedImage">
               <img [src]="capturedImage" alt="Captured face" />
@@ -117,7 +121,7 @@
               (click)="toggleCamera()"
               *ngIf="!capturedImage"
             >
-              {{ showCamera ? '📷 Capture Face' : '📹 Start Camera' }}
+              {{ showCamera ? 'Capture Face & Voice (3s)' : 'Start Camera' }}
             </button>
           </div>
         </div>
@@ -126,10 +130,10 @@
         <button
           type="submit"
           class="btn btn-primary btn-block btn-lg"
-          [disabled]="loginForm.invalid || (!adminLogin && !capturedImage) || loading"
+          [disabled]="loginForm.invalid || (!adminLogin && !capturedImage) || loading || !!recordingStatus"
         >
           <span *ngIf="!loading">
-            {{ adminLogin ? '🔑 Sign in as Admin' : (capturedImage ? '✅ Sign in with Face Recognition' : '📸 Capture Face First') }}
+            {{ adminLogin ? 'Sign in as Admin' : (capturedImage ? 'Sign in with Face & Voice' : 'Capture Identity First') }}
           </span>
           <span *ngIf="loading" class="spinner spinner-sm"></span>
         </button>
@@ -158,3 +162,5 @@
     </div>
   </div>
 </div>
+
+

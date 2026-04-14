@@ -118,6 +118,7 @@ public class AuthService implements UserDetailsService {
         String email = (String) payload.get("email");
         String password = (String) payload.get("password");
         String imageBase64 = (String) payload.get("image");
+        String audioBase64 = (String) payload.get("audio");
         String role = (String) payload.get("role");
         String firstName = (String) payload.get("firstName");
         String lastName = (String) payload.get("lastName");
@@ -152,6 +153,10 @@ public class AuthService implements UserDetailsService {
         Enrollment enrollment;
         if (mlServiceEnabled) {
             enrollment = enrollFace(student.getId(), imageBase64);
+            if (audioBase64 != null && !audioBase64.isEmpty()) {
+                LOGGER.info("Calling ML service for voice enrollment: " + mlServiceUrl + "/voice/enroll");
+                enrollVoice(student.getId(), audioBase64);
+            }
         } else {
             LOGGER.info("ML service disabled, using mock enrollment");
             enrollment = createMockEnrollment(student);
@@ -173,6 +178,7 @@ public class AuthService implements UserDetailsService {
         String userName = (String) payload.get("userName");
         String password = (String) payload.get("password");
         String imageBase64 = (String) payload.get("image");
+        String audioBase64 = (String) payload.get("audio");
 
         LOGGER.info("Logging in user: " + userName);
 
@@ -243,7 +249,7 @@ public class AuthService implements UserDetailsService {
 
             // Verify face for students only
             if (mlServiceEnabled) {
-                verified = verifyFace(student.getId(), imageBase64, faceEnrollment.getFaceEmbedding());
+                verified = verifyFace(student.getId(), imageBase64, faceEnrollment.getFaceEmbedding(), audioBase64);
             } else {
                 LOGGER.info("ML service disabled, skipping face verification");
                 verified = true;
@@ -293,6 +299,29 @@ public class AuthService implements UserDetailsService {
         return response;
     }
 
+    private void enrollVoice(Long studentId, String audioBase64) {
+        Map<String, Object> payload = Map.of("studentId", studentId, "audio", audioBase64);
+        LOGGER.info("Sending voice enrollment request to ML service.");
+        ResponseEntity<Map> response;
+        try {
+            response = restTemplate.postForEntity(mlServiceUrl + "/voice/enroll", payload, Map.class);
+        } catch (RestClientException e) {
+            LOGGER.severe("ML voice service connection failed: " + e.getMessage());
+            throw new RuntimeException("ML voice service connection failed: " + e.getMessage());
+        }
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            LOGGER.severe("ML voice enrollment failed: HTTP " + response.getStatusCode());
+            throw new RuntimeException("ML voice enrollment failed: HTTP " + response.getStatusCode());
+        }
+
+        Map<String, Object> result = response.getBody();
+        if (result == null || !Boolean.TRUE.equals(result.get("success"))) {
+            String errorMsg = "Voice Enrollment failed: Invalid ML service response";
+            throw new RuntimeException(errorMsg);
+        }
+    }
+
     private Enrollment enrollFace(Long studentId, String imageBase64) {
         Map<String, Object> payload = Map.of("studentId", studentId, "image", imageBase64);
         LOGGER.info("Sending enrollment request to ML service: " + payload);
@@ -330,13 +359,16 @@ public class AuthService implements UserDetailsService {
         return enrollmentRepo.save(enrollment);
     }
 
-    private boolean verifyFace(Long studentId, String imageBase64, String storedEmbedding) {
-        Map<String, Object> payload = Map.of(
-                "studentId", studentId,
-                "image", imageBase64,
-                "storedEmbedding", storedEmbedding
-        );
-        LOGGER.info("Sending verification request to ML service: " + payload);
+    private boolean verifyFace(Long studentId, String imageBase64, String storedEmbedding, String audioBase64) {
+        Map<String, Object> payload = new java.util.HashMap<>();
+        payload.put("studentId", studentId);
+        payload.put("image", imageBase64);
+        payload.put("storedEmbedding", storedEmbedding);
+        if (audioBase64 != null && !audioBase64.isEmpty()) {
+            payload.put("audio", audioBase64);
+        }
+        
+        LOGGER.info("Sending verification request to ML service: " + payload.keySet());
         ResponseEntity<Map> response;
         try {
             response = restTemplate.postForEntity(mlServiceUrl + "/verify", payload, Map.class);
@@ -356,7 +388,19 @@ public class AuthService implements UserDetailsService {
             LOGGER.severe("Verification failed: Null ML service response");
             return false;
         }
-        return Boolean.TRUE.equals(result.get("match")) && Boolean.TRUE.equals(result.get("liveness"));
+        
+        boolean faceMatch = Boolean.TRUE.equals(result.get("match"));
+        boolean liveness = Boolean.TRUE.equals(result.get("liveness"));
+        
+        // If audio was provided, check if voice matched
+        if (audioBase64 != null && !audioBase64.isEmpty()) {
+            boolean voiceMatch = Boolean.TRUE.equals(result.get("voice"));
+            LOGGER.info("Verification results - Face: " + faceMatch + ", Liveness: " + liveness + ", Voice: " + voiceMatch);
+            return faceMatch && liveness && voiceMatch;
+        }
+        
+        LOGGER.info("Verification results - Face: " + faceMatch + ", Liveness: " + liveness);
+        return faceMatch && liveness;
     }
 
     private Enrollment createMockEnrollment(Student student) {

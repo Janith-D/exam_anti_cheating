@@ -8,6 +8,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Optional, Tuple, Union
 from utils import load_config, preprocess_image, detect_face, compute_embedding
+from face_stack import FaceStack
+from quality_gates import evaluate_face_quality
 
 # Configure logging
 logging.basicConfig(
@@ -25,6 +27,7 @@ class FaceEnrollmentSystem:
         self.enrolled_dir = Path("data/enrolled")
         self.temp_dir = Path("data/temp")
         self.metadata_dir = Path("data/metadata")
+        self.face_stack = FaceStack(self.config)
         for directory in [self.enrolled_dir, self.temp_dir, self.metadata_dir]:
             directory.mkdir(parents=True, exist_ok=True)
 
@@ -70,7 +73,7 @@ class FaceEnrollmentSystem:
             return False, f"Face too blurry (score {blur_score:.2f})"
         return True, "Face quality acceptable"
 
-    def save_enrollment_metadata(self, studentId: str, image_path: str, embedding_quality: float = None):
+    def save_enrollment_metadata(self, studentId: str, image_path: str, embedding_quality: float = None, extra: dict = None):
         metadata = {
             "studentId": studentId,
             "enrollment_date": datetime.now().isoformat(),
@@ -78,6 +81,8 @@ class FaceEnrollmentSystem:
             "embedding_quality": embedding_quality,
             "config_version": self.config.get("version", "1.0")
         }
+        if extra:
+            metadata.update(extra)
         metadata_path = self.metadata_dir / f"{studentId}_metadata.json"
         with open(metadata_path, "w") as f:
             json.dump(metadata, f, indent=2)
@@ -100,33 +105,44 @@ class FaceEnrollmentSystem:
 
             img = preprocess_image(image_path, tuple(self.config["image_size"]))
 
-            # Ensure min_face_size is tuple of ints
-            min_face_size = self.config["min_face_size"]
-            if isinstance(min_face_size, int):
-                min_face_size = (min_face_size, min_face_size)
-            face = detect_face(img, min_face_size)
+            extraction = self.face_stack.extract_primary_face(img)
+            if not extraction.get("success", False):
+                return {"success": False, "error": f"Face extraction failed: {extraction.get('error', 'UNKNOWN_ERROR')}"}
 
-            if face is None:
-                return {"success": False, "error": "No face detected in the image"}
+            quality_result = evaluate_face_quality(
+                img,
+                extraction["bbox"],
+                extraction["face_count"],
+                self.config,
+            )
 
-            valid, msg = self.validate_face_quality(face)
-            if not valid:
-                return {"success": False, "error": msg}
+            if not quality_result.get("passed", False):
+                reasons = quality_result.get("failure_reasons", [])
+                return {"success": False, "error": f"Quality gate failed: {', '.join(reasons)}"}
 
-            face_resized = cv2.resize(face, tuple(self.config["face_size"]))
-            embedding = compute_embedding(face_resized)
+            embedding = extraction.get("embedding")
             if embedding is None:
                 return {"success": False, "error": "Failed to compute embedding"}
 
-            embedding_quality = float(np.linalg.norm(embedding))
+            embedding_quality = float(quality_result.get("quality_score", 0.0))
             np.save(self.enrolled_dir / f"{studentId}.npy", embedding)
-            self.save_enrollment_metadata(studentId, image_path, embedding_quality)
+            self.save_enrollment_metadata(
+                studentId,
+                image_path,
+                embedding_quality,
+                {
+                    "model_stack": self.face_stack.model_info(),
+                    "quality_gates": quality_result,
+                },
+            )
             logging.info(f"User {studentId} enrolled successfully (quality {embedding_quality:.3f})")
 
             return {
                 "success": True, 
                 "embedding": embedding,
-                "quality": embedding_quality
+                "quality": embedding_quality,
+                "qualityGates": quality_result,
+                "modelStack": self.face_stack.model_info(),
             }
 
         except KeyboardInterrupt:

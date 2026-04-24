@@ -16,8 +16,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -118,7 +118,7 @@ public class AuthService implements UserDetailsService {
         String email = (String) payload.get("email");
         String password = (String) payload.get("password");
         String imageBase64 = (String) payload.get("image");
-        String audioBase64 = (String) payload.get("audio");
+        Object audioParams = payload.get("audio");
         String role = (String) payload.get("role");
         String firstName = (String) payload.get("firstName");
         String lastName = (String) payload.get("lastName");
@@ -153,9 +153,9 @@ public class AuthService implements UserDetailsService {
         Enrollment enrollment;
         if (mlServiceEnabled) {
             enrollment = enrollFace(student.getId(), imageBase64);
-            if (audioBase64 != null && !audioBase64.isEmpty()) {
+            if (audioParams != null) {
                 LOGGER.info("Calling ML service for voice enrollment: " + mlServiceUrl + "/voice/enroll");
-                enrollVoice(student.getId(), audioBase64);
+                enrollVoice(student.getId(), audioParams);
             }
         } else {
             LOGGER.info("ML service disabled, using mock enrollment");
@@ -299,7 +299,7 @@ public class AuthService implements UserDetailsService {
         return response;
     }
 
-    private void enrollVoice(Long studentId, String audioBase64) {
+    private void enrollVoice(Long studentId, Object audioBase64) {
         Map<String, Object> payload = Map.of("studentId", studentId, "audio", audioBase64);
         LOGGER.info("Sending voice enrollment request to ML service.");
         ResponseEntity<Map> response;
@@ -392,15 +392,15 @@ public class AuthService implements UserDetailsService {
         boolean faceMatch = Boolean.TRUE.equals(result.get("match"));
         boolean liveness = Boolean.TRUE.equals(result.get("liveness"));
         
-        // If audio was provided, check if voice matched
-        if (audioBase64 != null && !audioBase64.isEmpty()) {
-            boolean voiceMatch = Boolean.TRUE.equals(result.get("voice"));
-            LOGGER.info("Verification results - Face: " + faceMatch + ", Liveness: " + liveness + ", Voice: " + voiceMatch);
-            return faceMatch && liveness && voiceMatch;
+        // Check if voice audio was provided, reject login if someone tries to bypass voice!
+        if (audioBase64 == null || audioBase64.isEmpty()) {
+            LOGGER.warning("Voice audio missing from login request! Rejecting to prevent bypass.");
+            throw new RuntimeException("Voice verification is mandatory. Audio sample missing.");
         }
         
-        LOGGER.info("Verification results - Face: " + faceMatch + ", Liveness: " + liveness);
-        return faceMatch && liveness;
+        boolean voiceMatch = Boolean.TRUE.equals(result.get("voice"));
+        LOGGER.info("Verification results - Face: " + faceMatch + ", Liveness: " + liveness + ", Voice: " + voiceMatch);
+        return faceMatch && liveness && voiceMatch;
     }
 
     private Enrollment createMockEnrollment(Student student) {

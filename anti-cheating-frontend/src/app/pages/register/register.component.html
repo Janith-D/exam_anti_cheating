@@ -94,7 +94,7 @@
 					</div>
 				</div>
 
-				<button type="submit" class="btn btn-primary btn-block btn-lg" [disabled]="loading || registerForm.invalid || passwordsMismatch() || !capturedImage">
+				<button type="submit" class="btn btn-primary btn-block btn-lg" [disabled]="loading">
 					<span *ngIf="!loading">Create Account</span>
 					<span *ngIf="loading" class="spinner spinner-sm"></span>
 				</button>

@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, FormsModule } from '@angular/forms';
 import { Router, RouterModule, ActivatedRoute } from '@angular/router';
@@ -31,7 +31,8 @@ export class LoginComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private cameraService: CameraService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private cdr: ChangeDetectorRef
   ) {
     // Initialize form in constructor to avoid undefined errors
     this.loginForm = this.fb.group({
@@ -218,7 +219,24 @@ export class LoginComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.recordingStatus = 'Recording Voice (3s)... Please say: "My name is [Your Name]"';
+      // --- CAPTURE FACE IMAGE INSTANTLY ---
+      // Fixes the issue where taking the pic 3 seconds later resulted in a black canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = videoEl.videoWidth || 640;
+      canvas.height = videoEl.videoHeight || 480;
+
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+        this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
+        console.log('📸 Face image captured instantly');
+      } else {
+        console.error('Could not get canvas context');
+        this.errorMessage = 'Could not capture image from camera.';
+        return;
+      }
+
+      this.recordingStatus = 'Recording Voice (3.5s)... Please say: "I am ready for my exam today"';
       const stream = videoEl.srcObject as MediaStream;
       
       const audioTracks = stream.getAudioTracks();
@@ -242,41 +260,33 @@ export class LoginComponent implements OnInit, OnDestroy {
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks);
+        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
           this.audioBase64 = reader.result as string;
-          
-          const canvas = document.createElement('canvas');
-          canvas.width = videoEl.videoWidth;
-          canvas.height = videoEl.videoHeight;
-
-          const context = canvas.getContext('2d');
-          if (context) {
-            context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-            this.capturedImage = canvas.toDataURL('image/jpeg', 0.8);
-            console.log('📸 Face image captured successfully');
-          } else {
-            console.error('Could not get canvas context');
-          }
+          console.log('🎙️ Voice audio captured and encoded completely');
 
           this.recordingStatus = '';
+          this.successMessage = '🎙️ Voice captured! You may now sign in.';
           // Stop camera and hide video
           this.showCamera = false;
           stream.getTracks().forEach(track => track.stop());
           videoEl.srcObject = null;
+
+          // Force Angular UI update
+          this.cdr.detectChanges();
         };
       };
 
       mediaRecorder.start();
       
-      // Wait 3 seconds
+      // Wait 3.5 seconds
       setTimeout(() => {
         if (mediaRecorder.state !== 'inactive') {
           mediaRecorder.stop();
         }
-      }, 3000);
+      }, 3500);
 
     } catch (error: any) {
       this.errorMessage = 'Failed to capture image/audio: ' + (error.message || 'Unknown error');
@@ -310,8 +320,8 @@ export class LoginComponent implements OnInit, OnDestroy {
       return;
     }
 
-    if (!this.adminLogin && !this.capturedImage) {
-      this.errorMessage = 'Please capture your face for recognition before signing in.';
+    if (!this.adminLogin && (!this.capturedImage || !this.audioBase64)) {
+      this.errorMessage = 'Please capture your face and complete the voice recording before signing in.';
       return;
     }
 

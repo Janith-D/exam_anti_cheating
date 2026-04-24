@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../Services/auth.service.service';
@@ -18,7 +18,7 @@ export class RegisterComponent {
   loading = false;
   showCamera = false;
   capturedImage: string | null = null;
-  audioBase64: string | null = null;
+  audioSamples: string[] = [];
   recordingStatus = '';
   errorMessage = '';
   successMessage = '';
@@ -26,7 +26,8 @@ export class RegisterComponent {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {
     this.registerForm = this.fb.group({
       firstName: ['', [Validators.required]],
@@ -83,7 +84,21 @@ export class RegisterComponent {
         return;
       }
 
-      this.recordingStatus = 'Recording Voice (3s)... Please say: "My name is [Your Name]"';
+      // --- CAPTURE FACE IMAGE INSTANTLY ---
+      // We do this BEFORE the voice recording so the picture is guaranteed 
+      const canvas = document.createElement('canvas');
+      canvas.width = videoEl.videoWidth || 640;
+      canvas.height = videoEl.videoHeight || 480;
+      const context = canvas.getContext('2d');
+      if (context) {
+        context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
+        this.capturedImage = canvas.toDataURL('image/jpeg', 0.85);
+      } else {
+        this.errorMessage = 'Could not capture image from camera.';
+        return;
+      }
+
+      this.audioSamples = [];
       const stream = videoEl.srcObject as MediaStream;
       
       const audioTracks = stream.getAudioTracks();
@@ -91,15 +106,41 @@ export class RegisterComponent {
         throw new Error('Microphone access is required but no audio track was found or it is inactive.');
       }
       
-      // Use the raw stream to prevent "Failed to execute 'start'..." on stripped audio streams
+      const sentences = [
+        'My exam ID is 1234',
+        'Today is a good day',
+        'The quick brown fox jumps over the lazy dog'
+      ];
+
+      for (let i = 0; i < sentences.length; i++) {
+        await this.recordSingleSentence(stream, sentences[i], i + 1, sentences.length);
+      }
+
+      this.recordingStatus = '';
+      this.successMessage = '🎙️ Voice captured completely (3/3 samples). You may now submit the form.';
+      this.showCamera = false;
+      stream.getTracks().forEach(track => track.stop());
+      videoEl.srcObject = null;
+      this.cdr.detectChanges();
+
+    } catch (error: any) {
+      this.errorMessage = error?.message || 'Media capture failed';
+      this.recordingStatus = '';
+      this.showCamera = false;
+      this.cdr.detectChanges();
+    }
+  }
+
+  private recordSingleSentence(stream: MediaStream, sentence: string, current: number, total: number): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.recordingStatus = `Recording Voice (${current}/${total})... Please say: "${sentence}"`;
+      this.cdr.detectChanges();
+
       const audioChunks: Blob[] = [];
       const mediaRecorder = new MediaRecorder(stream);
       
       mediaRecorder.onerror = (e: any) => {
-        this.errorMessage = 'Media recorder error: ' + (e.error?.message || e.message);
-        this.recordingStatus = '';
-        this.showCamera = false;
-        stream.getTracks().forEach(t => t.stop());
+        reject(new Error('Media recorder error: ' + (e.error?.message || e.message)));
       };
 
       mediaRecorder.ondataavailable = (e) => {
@@ -107,29 +148,12 @@ export class RegisterComponent {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks);
+        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
-          this.audioBase64 = reader.result as string;
-          
-          const canvas = document.createElement('canvas');
-          canvas.width = videoEl.videoWidth;
-          canvas.height = videoEl.videoHeight;
-          const context = canvas.getContext('2d');
-
-          if (!context) {
-            this.errorMessage = 'Could not capture image from camera.';
-            return;
-          }
-
-          context.drawImage(videoEl, 0, 0, canvas.width, canvas.height);
-          this.capturedImage = canvas.toDataURL('image/jpeg', 0.85);
-
-          this.recordingStatus = '';
-          this.showCamera = false;
-          stream.getTracks().forEach(track => track.stop());
-          videoEl.srcObject = null;
+          this.audioSamples.push(reader.result as string);
+          resolve();
         };
       };
 
@@ -138,17 +162,13 @@ export class RegisterComponent {
         if (mediaRecorder.state !== 'inactive') {
           mediaRecorder.stop();
         }
-      }, 3000);
-
-    } catch (error: any) {
-      this.errorMessage = error?.message || 'Failed to capture face image and audio.';
-      this.recordingStatus = '';
-    }
+      }, 3500); // 3.5 seconds per sample
+    });
   }
 
   retakePhoto(): void {
     this.capturedImage = null;
-    this.audioBase64 = null;
+    this.audioSamples = [];
     this.showCamera = false;
     this.errorMessage = '';
   }
@@ -164,14 +184,15 @@ export class RegisterComponent {
 
   onSubmit(): void {
     if (this.registerForm.invalid || this.passwordsMismatch()) {
+      this.errorMessage = 'Please fill out all required fields correctly (e.g., matching passwords, valid email, minimum length).';
       Object.keys(this.registerForm.controls).forEach(key => {
         this.registerForm.get(key)?.markAsTouched();
       });
       return;
     }
 
-    if (!this.capturedImage || !this.audioBase64) {
-      this.errorMessage = 'Please capture your face photo and voice before registering.';
+    if (!this.capturedImage || this.audioSamples.length === 0) {
+      this.errorMessage = 'Please capture your face photo and complete the 3 voice phrases before registering.';
       return;
     }
 
@@ -190,9 +211,10 @@ export class RegisterComponent {
     const imageBlob = this.base64ToBlob(this.capturedImage);
     formData.append('image', imageBlob, 'face.jpg');
     
-    // Append audio file 
-    // We already have the audio stored in Base64
-    formData.append('audio', this.audioBase64);
+    // Append audio files 
+    for (const sample of this.audioSamples) {
+      formData.append('audio', sample);
+    }
 
     this.authService.registerWithFace(formData).subscribe({
       next: () => {

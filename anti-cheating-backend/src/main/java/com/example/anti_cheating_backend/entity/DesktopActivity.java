@@ -64,4 +64,84 @@ public class DesktopActivity {
             timestamp = LocalDateTime.now();
         }
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public ExamSession getExamSession() {
+        return examSession;
+    }
+
+    public void setExamSession(ExamSession examSession) {
+        this.examSession = examSession;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public ActivityType getActivityType() {
+        return activityType;
+    }
+
+    public void setActivityType(ActivityType activityType) {
+        this.activityType = activityType;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
+
+    public String getActiveWindow() {
+        return activeWindow;
+    }
+
+    public void setActiveWindow(String activeWindow) {
+        this.activeWindow = activeWindow;
+    }
+
+    public String getApplicationName() {
+        return applicationName;
+    }
+
+    public void setApplicationName(String applicationName) {
+        this.applicationName = applicationName;
+    }
+
+    public Integer getSeverityLevel() {
+        return severityLevel;
+    }
+
+    public void setSeverityLevel(Integer severityLevel) {
+        this.severityLevel = severityLevel;
+    }
+
+    public Boolean getIsProcessed() {
+        return isProcessed;
+    }
+
+    public void setIsProcessed(Boolean isProcessed) {
+        this.isProcessed = isProcessed;
+    }
 }

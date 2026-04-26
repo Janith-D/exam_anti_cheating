@@ -61,4 +61,92 @@ public class Alert {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private ExamSession examSession;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Event getEvent() {
+        return event;
+    }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public Enums.AlertSeverity getSeverity() {
+        return severity;
+    }
+
+    public void setSeverity(Enums.AlertSeverity severity) {
+        this.severity = severity;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Enums.AlertStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(Enums.AlertStatus status) {
+        this.status = status;
+    }
+
+    public LocalDateTime getResolvedAt() {
+        return resolvedAt;
+    }
+
+    public void setResolvedAt(LocalDateTime resolvedAt) {
+        this.resolvedAt = resolvedAt;
+    }
+
+    public String getResolvedBy() {
+        return resolvedBy;
+    }
+
+    public void setResolvedBy(String resolvedBy) {
+        this.resolvedBy = resolvedBy;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(LocalDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public ExamSession getExamSession() {
+        return examSession;
+    }
+
+    public void setExamSession(ExamSession examSession) {
+        this.examSession = examSession;
+    }
 }

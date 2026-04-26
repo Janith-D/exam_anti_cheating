@@ -1,7 +1,9 @@
 package com.example.anti_cheating_backend.controller;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,13 +34,27 @@ public class AuthController {
             @RequestParam("firstName") String firstName,
             @RequestParam("lastName") String lastName,
             @RequestParam("email") String email,
-            @RequestParam(value = "studentId", required = false) String studentId) {
+            @RequestParam(value = "studentId", required = false) String studentId,
+            @RequestParam(value = "audio", required = false) List<MultipartFile> audioFiles) {
         try {
             // Validate image
             if (image.isEmpty() || !image.getContentType().startsWith("image/")) {
                 throw new RuntimeException("Invalid or missing image file");
             }
             String imageBase64 = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getBytes());
+
+            // Convert audio Blobs to base64 data URLs
+            List<String> audioBase64List = null;
+            if (audioFiles != null && !audioFiles.isEmpty()) {
+                audioBase64List = new ArrayList<>();
+                for (MultipartFile audioFile : audioFiles) {
+                    if (!audioFile.isEmpty()) {
+                        String mime = audioFile.getContentType() != null ? audioFile.getContentType() : "audio/webm";
+                        String encoded = Base64.getEncoder().encodeToString(audioFile.getBytes());
+                        audioBase64List.add("data:" + mime + ";base64," + encoded);
+                    }
+                }
+            }
 
             // Prepare payload for AuthService
             Map<String, Object> payload = new HashMap<>();
@@ -51,6 +67,9 @@ public class AuthController {
             payload.put("email", email);
             if (studentId != null) {
                 payload.put("studentId", studentId);
+            }
+            if (audioBase64List != null && !audioBase64List.isEmpty()) {
+                payload.put("audio", audioBase64List);
             }
 
             Map<String, Object> response = authService.register(payload);
@@ -66,19 +85,26 @@ public class AuthController {
     public ResponseEntity<Map<String, Object>> login(
             @RequestParam("userName") String userName,
             @RequestParam("password") String password,
-            @RequestParam(value = "audio", required = false) String audio,
+            @RequestParam(value = "audio", required = false) MultipartFile audio,
             @RequestParam("image") MultipartFile image) {
         try {
-            // Convert MultipartFile to base64
+            // Convert image MultipartFile to base64
             String imageBase64 = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getBytes());
+
+            // Convert audio MultipartFile to base64 data URL (avoids URL-encoding corruption)
+            String audioBase64 = null;
+            if (audio != null && !audio.isEmpty()) {
+                String mime = audio.getContentType() != null ? audio.getContentType() : "audio/webm";
+                audioBase64 = "data:" + mime + ";base64," + Base64.getEncoder().encodeToString(audio.getBytes());
+            }
 
             // Prepare payload for AuthService
             Map<String, Object> payload = new HashMap<>();
             payload.put("userName", userName);
             payload.put("password", password);
             payload.put("image", imageBase64);
-            if (audio != null && !audio.isEmpty()) {
-                payload.put("audio", audio);
+            if (audioBase64 != null) {
+                payload.put("audio", audioBase64);
             }
 
             Map<String, Object> response = authService.login(payload);

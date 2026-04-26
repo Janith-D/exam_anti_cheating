@@ -243,45 +243,45 @@ export class LoginComponent implements OnInit, OnDestroy {
       if (audioTracks.length === 0 || audioTracks[0].readyState !== 'live') {
         throw new Error('Microphone access is required but no audio track was found or it is inactive.');
       }
-      
-      // Use the raw stream to prevent "Failed to execute 'start'..." on stripped audio streams
+
+      // Record audio-only. WebM is browser-native; we convert to WAV after recording
+      // because soundfile (Python) does NOT support WebM but does support WAV.
+      const audioOnlyStream = new MediaStream(stream.getAudioTracks());
       const audioChunks: Blob[] = [];
-      const mediaRecorder = new MediaRecorder(stream);
-      
+      const mediaRecorder = new MediaRecorder(audioOnlyStream);
+
       mediaRecorder.onerror = (e: any) => {
         this.errorMessage = 'Media recorder error: ' + (e.error?.message || e.message);
         this.recordingStatus = '';
         this.showCamera = false;
         stream.getTracks().forEach(t => t.stop());
       };
-      
+
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) audioChunks.push(e.data);
       };
 
       mediaRecorder.onstop = async () => {
-        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        const webmBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+        // Convert WebM → WAV so Python's soundfile can decode actual speech features
+        const wavBlob = await this.convertBlobToWav(webmBlob);
         const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
+        reader.readAsDataURL(wavBlob);
         reader.onloadend = () => {
           this.audioBase64 = reader.result as string;
-          console.log('🎙️ Voice audio captured and encoded completely');
+          console.log('🎙️ Voice audio captured and converted to WAV');
 
           this.recordingStatus = '';
           this.successMessage = '🎙️ Voice captured! You may now sign in.';
-          // Stop camera and hide video
           this.showCamera = false;
           stream.getTracks().forEach(track => track.stop());
           videoEl.srcObject = null;
-
-          // Force Angular UI update
           this.cdr.detectChanges();
         };
       };
 
       mediaRecorder.start();
-      
-      // Wait 3.5 seconds
+
       setTimeout(() => {
         if (mediaRecorder.state !== 'inactive') {
           mediaRecorder.stop();
@@ -342,7 +342,8 @@ export class LoginComponent implements OnInit, OnDestroy {
         formData.append('image', imageBlob, 'face.jpg');
         
         if (this.audioBase64) {
-          formData.append('audio', this.audioBase64);
+          const audioBlob = this.base64ToBlob(this.audioBase64);
+          formData.append('audio', audioBlob, 'audio.webm');
         }
       } else {
         const dummyBlob = this.createDummyImage();
@@ -399,6 +400,48 @@ export class LoginComponent implements OnInit, OnDestroy {
     }
 
     return new Blob([uInt8Array], { type: contentType });
+  }
+
+  /** Decode any browser-supported audio Blob and re-encode as 16-bit PCM WAV */
+  private async convertBlobToWav(blob: Blob): Promise<Blob> {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioCtx = new AudioContext();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    audioCtx.close();
+    const wavBuffer = this.audioBufferToWav(audioBuffer);
+    return new Blob([wavBuffer], { type: 'audio/wav' });
+  }
+
+  /** Encode an AudioBuffer as 16-bit PCM WAV (mono, native sample rate) */
+  private audioBufferToWav(audioBuffer: AudioBuffer): ArrayBuffer {
+    const numChannels = 1;
+    const sampleRate = audioBuffer.sampleRate;
+    const channelData = audioBuffer.getChannelData(0);
+    const samples = channelData.length;
+    const bitsPerSample = 16;
+    const blockAlign = numChannels * (bitsPerSample / 8);
+    const byteRate = sampleRate * blockAlign;
+    const dataSize = samples * blockAlign;
+    const buffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(buffer);
+    const writeStr = (off: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+    writeStr(0, 'RIFF');  view.setUint32(4, 36 + dataSize, true);
+    writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+    view.setUint32(16, 16, true);   // PCM chunk size
+    view.setUint16(20, 1, true);    // PCM format
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeStr(36, 'data'); view.setUint32(40, dataSize, true);
+    let off = 44;
+    for (let i = 0; i < samples; i++) {
+      const s = Math.max(-1, Math.min(1, channelData[i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      off += 2;
+    }
+    return buffer;
   }
 
   private createDummyImage(): Blob {

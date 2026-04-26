@@ -18,7 +18,7 @@ export class RegisterComponent {
   loading = false;
   showCamera = false;
   capturedImage: string | null = null;
-  audioSamples: string[] = [];
+  audioSamples: Blob[] = [];
   recordingStatus = '';
   errorMessage = '';
   successMessage = '';
@@ -137,8 +137,11 @@ export class RegisterComponent {
       this.cdr.detectChanges();
 
       const audioChunks: Blob[] = [];
-      const mediaRecorder = new MediaRecorder(stream);
-      
+      // Record audio-only in WebM (browser-native); will be converted to WAV after stop.
+      // soundfile does NOT support WebM — we use AudioContext to decode, then re-encode as WAV.
+      const audioOnlyStream = new MediaStream(stream.getAudioTracks());
+      const mediaRecorder = new MediaRecorder(audioOnlyStream);
+
       mediaRecorder.onerror = (e: any) => {
         reject(new Error('Media recorder error: ' + (e.error?.message || e.message)));
       };
@@ -147,14 +150,15 @@ export class RegisterComponent {
         if (e.data.size > 0) audioChunks.push(e.data);
       };
 
-      mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-        const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
-        reader.onloadend = () => {
-          this.audioSamples.push(reader.result as string);
+      mediaRecorder.onstop = async () => {
+        try {
+          const webmBlob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+          const wavBlob = await this.convertBlobToWav(webmBlob);
+          this.audioSamples.push(wavBlob);
           resolve();
-        };
+        } catch (err: any) {
+          reject(new Error('Audio conversion failed: ' + (err.message || err)));
+        }
       };
 
       mediaRecorder.start();
@@ -164,6 +168,48 @@ export class RegisterComponent {
         }
       }, 3500); // 3.5 seconds per sample
     });
+  }
+
+  /** Decode any browser-supported audio Blob and re-encode as 16-bit PCM WAV */
+  private async convertBlobToWav(blob: Blob): Promise<Blob> {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioCtx = new AudioContext();
+    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+    audioCtx.close();
+    const wavBuffer = this.audioBufferToWav(audioBuffer);
+    return new Blob([wavBuffer], { type: 'audio/wav' });
+  }
+
+  /** Encode an AudioBuffer as 16-bit PCM WAV (mono, native sample rate) */
+  private audioBufferToWav(audioBuffer: AudioBuffer): ArrayBuffer {
+    const numChannels = 1;
+    const sampleRate = audioBuffer.sampleRate;
+    const channelData = audioBuffer.getChannelData(0);
+    const samples = channelData.length;
+    const bitsPerSample = 16;
+    const blockAlign = numChannels * (bitsPerSample / 8);
+    const byteRate = sampleRate * blockAlign;
+    const dataSize = samples * blockAlign;
+    const buffer = new ArrayBuffer(44 + dataSize);
+    const view = new DataView(buffer);
+    const writeStr = (off: number, s: string) => { for (let i = 0; i < s.length; i++) view.setUint8(off + i, s.charCodeAt(i)); };
+    writeStr(0, 'RIFF');  view.setUint32(4, 36 + dataSize, true);
+    writeStr(8, 'WAVE'); writeStr(12, 'fmt ');
+    view.setUint32(16, 16, true);   // PCM chunk size
+    view.setUint16(20, 1, true);    // PCM format
+    view.setUint16(22, numChannels, true);
+    view.setUint32(24, sampleRate, true);
+    view.setUint32(28, byteRate, true);
+    view.setUint16(32, blockAlign, true);
+    view.setUint16(34, bitsPerSample, true);
+    writeStr(36, 'data'); view.setUint32(40, dataSize, true);
+    let off = 44;
+    for (let i = 0; i < samples; i++) {
+      const s = Math.max(-1, Math.min(1, channelData[i]));
+      view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      off += 2;
+    }
+    return buffer;
   }
 
   retakePhoto(): void {
@@ -211,10 +257,9 @@ export class RegisterComponent {
     const imageBlob = this.base64ToBlob(this.capturedImage);
     formData.append('image', imageBlob, 'face.jpg');
     
-    // Append audio files 
-    for (const sample of this.audioSamples) {
-      formData.append('audio', sample);
-    }
+    this.audioSamples.forEach((blob, i) => {
+      formData.append('audio', blob, `audio_${i + 1}.wav`);
+    });
 
     this.authService.registerWithFace(formData).subscribe({
       next: () => {

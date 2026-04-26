@@ -2,6 +2,7 @@ package com.example.anti_cheating_backend.service;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -118,7 +119,6 @@ public class AuthService implements UserDetailsService {
         String email = (String) payload.get("email");
         String password = (String) payload.get("password");
         String imageBase64 = (String) payload.get("image");
-        Object audioParams = payload.get("audio");
         String role = (String) payload.get("role");
         String firstName = (String) payload.get("firstName");
         String lastName = (String) payload.get("lastName");
@@ -153,9 +153,13 @@ public class AuthService implements UserDetailsService {
         Enrollment enrollment;
         if (mlServiceEnabled) {
             enrollment = enrollFace(student.getId(), imageBase64);
-            if (audioParams != null) {
-                LOGGER.info("Calling ML service for voice enrollment: " + mlServiceUrl + "/voice/enroll");
-                enrollVoice(student.getId(), audioParams);
+            @SuppressWarnings("unchecked")
+            List<String> audioSamples = (List<String>) payload.get("audio");
+            if (audioSamples != null && !audioSamples.isEmpty()) {
+                LOGGER.info("Calling ML service for voice enrollment with " + audioSamples.size() + " sample(s)");
+                enrollVoice(student.getId(), audioSamples);
+            } else {
+                LOGGER.warning("No audio samples provided during registration — voice enrollment skipped");
             }
         } else {
             LOGGER.info("ML service disabled, using mock enrollment");
@@ -299,26 +303,40 @@ public class AuthService implements UserDetailsService {
         return response;
     }
 
-    private void enrollVoice(Long studentId, Object audioBase64) {
-        Map<String, Object> payload = Map.of("studentId", studentId, "audio", audioBase64);
-        LOGGER.info("Sending voice enrollment request to ML service.");
-        ResponseEntity<Map> response;
-        try {
-            response = restTemplate.postForEntity(mlServiceUrl + "/voice/enroll", payload, Map.class);
-        } catch (RestClientException e) {
-            LOGGER.severe("ML voice service connection failed: " + e.getMessage());
-            throw new RuntimeException("ML voice service connection failed: " + e.getMessage());
+    private void enrollVoice(Long studentId, List<String> audioSamples) {
+        boolean enrolled = false;
+        String lastError = "No valid audio samples provided";
+
+        for (String audioSample : audioSamples) {
+            try {
+                Map<String, Object> payload = new HashMap<>();
+                payload.put("studentId", studentId);
+                payload.put("audio", audioSample);
+                LOGGER.info("Sending voice enrollment sample to ML service");
+                ResponseEntity<Map> response = restTemplate.postForEntity(mlServiceUrl + "/voice/enroll", payload, Map.class);
+
+                if (response.getStatusCode().is2xxSuccessful()) {
+                    Map<String, Object> result = response.getBody();
+                    if (result != null && Boolean.TRUE.equals(result.get("success"))) {
+                        LOGGER.info("Voice enrollment succeeded for student " + studentId);
+                        enrolled = true;
+                        break; // First successful sample is enough
+                    } else {
+                        lastError = result != null ? String.valueOf(result.get("error")) : "Unknown ML error";
+                        LOGGER.warning("Voice sample rejected by ML: " + lastError);
+                    }
+                } else {
+                    lastError = "ML service HTTP " + response.getStatusCode();
+                    LOGGER.warning(lastError);
+                }
+            } catch (RestClientException e) {
+                lastError = "ML voice service connection failed: " + e.getMessage();
+                LOGGER.severe(lastError);
+            }
         }
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            LOGGER.severe("ML voice enrollment failed: HTTP " + response.getStatusCode());
-            throw new RuntimeException("ML voice enrollment failed: HTTP " + response.getStatusCode());
-        }
-
-        Map<String, Object> result = response.getBody();
-        if (result == null || !Boolean.TRUE.equals(result.get("success"))) {
-            String errorMsg = "Voice Enrollment failed: Invalid ML service response";
-            throw new RuntimeException(errorMsg);
+        if (!enrolled) {
+            throw new RuntimeException("Voice enrollment failed — " + lastError);
         }
     }
 

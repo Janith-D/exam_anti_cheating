@@ -1,11 +1,11 @@
-﻿<div class="login-container">
+<div class="login-container">
   <!-- LEFT SIDE - Illustration -->
   <div class="login-left">
     <div class="illustration-wrapper">
       <div class="illustration-content">
         <h1 class="brand-title">Online Exam AntiCheating</h1>
         <p class="brand-tagline">Secure Examination Platform with AI-Powered Proctoring and Real-Time Monitoring</p>
-        
+
         <!-- Animated illustration elements -->
         <div class="illustration-decorations">
           <div class="decoration-item clock">ðŸ•</div>
@@ -44,13 +44,8 @@
         <!-- Username/Email -->
         <div class="form-group">
           <label class="form-label">Username or email</label>
-          <input
-            type="text"
-            formControlName="username"
-            class="form-control"
-            placeholder="Enter your username or email"
-            [class.error]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched"
-          />
+          <input type="text" formControlName="username" class="form-control" placeholder="Enter your username or email"
+            [class.error]="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" />
           <div class="form-error" *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched">
             Username is required
           </div>
@@ -59,13 +54,9 @@
         <!-- Password -->
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input
-            type="password"
-            formControlName="password"
-            class="form-control"
+          <input type="password" formControlName="password" class="form-control"
             placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
-            [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched"
-          />
+            [class.error]="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" />
           <div class="form-error" *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched">
             Password is required
           </div>
@@ -75,12 +66,8 @@
         <!-- Admin Login Checkbox -->
         <div class="form-group">
           <label class="checkbox-label">
-            <input 
-              type="checkbox" 
-              [(ngModel)]="adminLogin" 
-              [ngModelOptions]="{standalone: true}"
-              class="checkbox-input"
-            />
+            <input type="checkbox" [(ngModel)]="adminLogin" [ngModelOptions]="{standalone: true}"
+              class="checkbox-input" />
             <span class="checkbox-text">ðŸ”‘ Admin Login (Skip face recognition)</span>
           </label>
           <p class="help-text" *ngIf="adminLogin">
@@ -88,52 +75,44 @@
           </p>
         </div>
 
-<!-- Face Registration Section -->
-          <div class="form-group" *ngIf="!adminLogin">
-            <label class="form-label">Face & Voice Registration</label>
-          <p class="help-text">Capture one clear face photo to verify identity.</p>
-          
+        <!-- Face Registration Section -->
+        <div class="form-group" *ngIf="!adminLogin">
+          <label class="form-label">Face & Voice Verification</label>
+          <p class="help-text">Capture your face and speak the <strong>exact phrase</strong> you used during
+            registration.</p>
+
+          <div class="voice-phrase-box"
+            style="background: #f0f4f8; padding: 10px; border-left: 4px solid #0056b3; border-radius: 4px; margin-bottom: 15px; text-align: center; font-size: 1.1em; font-weight: bold; color: #0056b3;">
+            "I am verifying my identity for this system."
+          </div>
+
           <div class="face-capture-section">
-            <video 
-              #videoElement 
-              class="face-video" 
-              [class.hidden]="!showCamera"
-              width="640"
-              height="480"
-              autoplay
-              muted
-            ></video>
-            
+            <video #videoElement class="face-video" [class.hidden]="!showCamera" width="640" height="480" autoplay
+              muted></video>
+
             <canvas #canvasElement class="face-canvas hidden"></canvas>
 
-              <div *ngIf="recordingStatus" class="text-info mt-2 text-center font-weight-bold">
-                {{ recordingStatus }}
-              </div>
-            
+            <div *ngIf="recordingStatus" class="text-info mt-2 text-center font-weight-bold">
+              {{ recordingStatus }}
+            </div>
+
             <div class="captured-image" *ngIf="capturedImage">
               <img [src]="capturedImage" alt="Captured face" />
               <button type="button" class="btn-retake" (click)="retakePhoto()">Retake</button>
             </div>
-            
-            <button
-              type="button"
-              class="btn btn-outline btn-block"
-              (click)="toggleCamera()"
-              *ngIf="!capturedImage"
-            >
+
+            <button type="button" class="btn btn-outline btn-block" (click)="toggleCamera()" *ngIf="!capturedImage">
               {{ showCamera ? 'Capture Face & Voice (3s)' : 'Start Camera' }}
             </button>
           </div>
         </div>
 
         <!-- Sign In Button -->
-        <button
-          type="submit"
-          class="btn btn-primary btn-block btn-lg"
-          [disabled]="loginForm.invalid || (!adminLogin && !capturedImage) || loading || !!recordingStatus"
-        >
+        <button type="submit" class="btn btn-primary btn-block btn-lg"
+          [disabled]="loginForm.invalid || (!adminLogin && !capturedImage) || loading || !!recordingStatus">
           <span *ngIf="!loading">
-            {{ adminLogin ? 'Sign in as Admin' : (capturedImage ? 'Sign in with Face & Voice' : 'Capture Identity First') }}
+            {{ adminLogin ? 'Sign in as Admin' : (capturedImage ? 'Sign in with Face & Voice' : 'Capture Identity
+            First') }}
           </span>
           <span *ngIf="loading" class="spinner spinner-sm"></span>
         </button>
@@ -147,10 +126,18 @@
       <!-- Google Sign In -->
       <button type="button" class="btn btn-outline btn-block google-btn" (click)="onGoogleSignIn()">
         <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z" fill="#4285F4"/>
-          <path d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z" fill="#34A853"/>
-          <path d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z" fill="#FBBC05"/>
-          <path d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z" fill="#EA4335"/>
+          <path
+            d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844c-.209 1.125-.843 2.078-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
+            fill="#4285F4" />
+          <path
+            d="M9.003 18c2.43 0 4.467-.806 5.956-2.18L12.05 13.56c-.806.54-1.836.86-3.047.86-2.344 0-4.328-1.584-5.036-3.711H.96v2.332C2.44 15.983 5.485 18 9.003 18z"
+            fill="#34A853" />
+          <path
+            d="M3.964 10.712c-.18-.54-.282-1.117-.282-1.71 0-.593.102-1.17.282-1.71V4.96H.957C.347 6.175 0 7.55 0 9.002c0 1.452.348 2.827.957 4.042l3.007-2.332z"
+            fill="#FBBC05" />
+          <path
+            d="M9.003 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.464.891 11.426 0 9.003 0 5.485 0 2.44 2.017.96 4.958L3.967 7.29c.708-2.127 2.692-3.71 5.036-3.71z"
+            fill="#EA4335" />
         </svg>
         Sign in with Google
       </button>
@@ -162,5 +149,3 @@
     </div>
   </div>
 </div>
-
-

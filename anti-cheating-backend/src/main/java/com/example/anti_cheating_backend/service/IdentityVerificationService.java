@@ -487,6 +487,16 @@ public class IdentityVerificationService {
             return Enums.IdentityDecision.BLOCK;
         }
 
+        if (mlReasonCodes.contains("VOICE_TEMPLATE_MISSING")) {
+            reasonCodes.add("POLICY_BLOCK_VOICE_NOT_ENROLLED");
+            return Enums.IdentityDecision.BLOCK;
+        }
+
+        if (mlReasonCodes.contains("VOICE_SIMILARITY_LOW")) {
+            reasonCodes.add("POLICY_BLOCK_VOICE_MISMATCH");
+            return Enums.IdentityDecision.BLOCK;
+        }
+
         if (mlReasonCodes.contains("FACE_TOO_SMALL")
                 || mlReasonCodes.contains("IMAGE_TOO_BLURRY")
                 || mlReasonCodes.contains("BRIGHTNESS_OUT_OF_RANGE")) {

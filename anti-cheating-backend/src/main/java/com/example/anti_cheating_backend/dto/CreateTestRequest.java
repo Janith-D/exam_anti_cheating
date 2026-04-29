@@ -11,8 +11,9 @@ public class CreateTestRequest {
     private String title;
     private String description;
     private int duration;
-    private Long examId;  // Just the ID, not the full Exam object
+    private Long examId;  // Optional - tests can be created independently and attached to exams later
     private Integer testOrder;
     private Double passingScore;
     private Double totalMarks;
+    private String type; // MCQ or ESSAY
 }

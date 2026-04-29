@@ -10,8 +10,9 @@ export interface Test {
   numberOfQuestions?: number;
   exam?: Exam; // Reference to the parent exam
   examId?: number; // Exam ID
+  type?: 'MCQ' | 'ESSAY';
 }
 
 export interface TestSubmission {
-  [questionId: number]: number; // questionId: selectedOption
+  [questionId: number]: string; // questionId: selectedOption
 }

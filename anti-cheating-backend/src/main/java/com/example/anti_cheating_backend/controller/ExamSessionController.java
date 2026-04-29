@@ -101,22 +101,39 @@ public class ExamSessionController {
 
     @GetMapping("/active")
     @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN')")
-    public ResponseEntity<List<ExamSession>> getActiveSessions() {
-        List<ExamSession> sessions = examSessionService.getActiveSessions();
-        
-        // Validate exam relationships to prevent serialization errors
-        sessions.forEach(session -> {
-            try {
-                if (session.getExam() != null) {
-                    session.getExam().getId(); // Trigger lazy load
-                }
-            } catch (Exception e) {
-                System.err.println("Warning: Active session " + session.getId() + " has invalid exam reference");
-                session.setExam(null); // Clear invalid reference
+    public ResponseEntity<?> getActiveSessions() {
+        try {
+            System.out.println("📋 Loading active exam sessions...");
+            List<ExamSession> sessions = examSessionService.getActiveSessions();
+            
+            if (sessions == null) {
+                System.out.println("⚠️  Active sessions list is null");
+                sessions = new java.util.ArrayList<>();
             }
-        });
-        
-        return ResponseEntity.ok(sessions);
+            
+            System.out.println("✅ Found " + sessions.size() + " active session(s)");
+            
+            // Validate exam relationships to prevent serialization errors
+            sessions.forEach(session -> {
+                try {
+                    if (session.getExam() != null) {
+                        session.getExam().getId(); // Trigger lazy load
+                    }
+                } catch (Exception e) {
+                    System.err.println("⚠️  Active session " + session.getId() + " has invalid exam reference");
+                    session.setExam(null); // Clear invalid reference
+                }
+            });
+            
+            return ResponseEntity.ok(sessions);
+        } catch (Exception e) {
+            System.err.println("❌ Error loading active sessions: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.status(500).body(Map.of(
+                "error", "Failed to load active sessions",
+                "message", e.getMessage()
+            ));
+        }
     }
 
     // Update exam session

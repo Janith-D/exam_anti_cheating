@@ -32,4 +32,7 @@ public class TestResult {
     private double totalQuestions;
     private double scorePercentage;
     private LocalDateTime completedAt;
+    
+    @jakarta.persistence.Column(columnDefinition = "TEXT")
+    private String essayAnswersJson;
 }

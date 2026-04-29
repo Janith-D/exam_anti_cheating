@@ -14,9 +14,11 @@ import com.example.anti_cheating_backend.entity.Enrollment;
 import com.example.anti_cheating_backend.entity.Enums;
 import com.example.anti_cheating_backend.entity.Exam;
 import com.example.anti_cheating_backend.entity.ExamSession;
+import com.example.anti_cheating_backend.entity.Test;
 import com.example.anti_cheating_backend.repo.EnrollmentRepo;
 import com.example.anti_cheating_backend.repo.ExamRepo;
 import com.example.anti_cheating_backend.repo.ExamSessionRepo;
+import com.example.anti_cheating_backend.repo.TestRepo;
 
 @Service
 public class ExamService {
@@ -29,6 +31,9 @@ public class ExamService {
     
     @Autowired
     private EnrollmentRepo enrollmentRepo;
+    
+    @Autowired
+    private TestRepo testRepo;
 
     // Get all exams
     public List<Exam> getAllExams() {
@@ -207,5 +212,26 @@ public class ExamService {
             
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    // Attach a test to an exam
+    public void attachTestToExam(Long examId, Long testId) {
+        Exam exam = getExamById(examId);
+        Test test = testRepo.findById(testId)
+                .orElseThrow(() -> new RuntimeException("Test not found with id: " + testId));
+        
+        // Check if test is already attached to this exam
+        if (exam.getTests() != null && exam.getTests().contains(test)) {
+            throw new RuntimeException("Test is already attached to this exam");
+        }
+        
+        // Attach the test to the exam
+        if (exam.getTests() == null) {
+            exam.setTests(new ArrayList<>());
+        }
+        exam.getTests().add(test);
+        examRepo.save(exam);
+        
+        System.out.println("✅ Test " + testId + " attached to exam " + examId);
     }
 }

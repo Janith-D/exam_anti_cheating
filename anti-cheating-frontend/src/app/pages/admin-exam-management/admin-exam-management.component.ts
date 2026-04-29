@@ -164,6 +164,15 @@ export class AdminExamManagementComponent implements OnInit {
     this.successMessage = '';
   }
 
+  navigateToAddTests(exam: Exam): void {
+    if (!exam.id) {
+      this.errorMessage = 'Cannot add tests: Invalid exam ID';
+      return;
+    }
+    // Navigate to test management page with exam ID
+    this.router.navigate(['/admin/test-management'], { queryParams: { examId: exam.id } });
+  }
+
   closeExamModal(): void {
     this.showExamModal = false;
     this.editingExam = null;

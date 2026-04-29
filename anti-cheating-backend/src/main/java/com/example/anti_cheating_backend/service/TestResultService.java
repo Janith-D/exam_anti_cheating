@@ -30,7 +30,7 @@ public class TestResultService {
     @Autowired
     private StudentRepo studentRepo;
 
-    public TestResult createTestResult(Long testId, Long studentId, Map<Long, Integer> answers) {
+    public TestResult createTestResult(Long testId, Long studentId, Map<Long, String> answers) {
         Test test = testRepo.findById(testId)
                 .orElseThrow(() -> new RuntimeException("Test not found: " + testId));
         Student student = studentRepo.findById(studentId)
@@ -43,20 +43,49 @@ public class TestResultService {
         }
 
         int correctAnswers = 0;
+        int mcqCount = 0;
+        Map<Long, String> essayAnswers = new java.util.HashMap<>();
+        com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+
         for (Question question : questions) {
-            Integer studentAnswer = answers.get(question.getId());
-            if (studentAnswer != null && studentAnswer == question.getCorrectOption()) {
-                correctAnswers++;
+            String studentAnswerStr = answers.get(question.getId());
+            
+            if ("ESSAY".equals(question.getType())) {
+                if (studentAnswerStr != null) {
+                    essayAnswers.put(question.getId(), studentAnswerStr);
+                }
+            } else {
+                mcqCount++;
+                if (studentAnswerStr != null) {
+                    try {
+                        int studentAnswer = Integer.parseInt(studentAnswerStr.toString());
+                        if (studentAnswer == question.getCorrectOption()) {
+                            correctAnswers++;
+                        }
+                    } catch (NumberFormatException e) {
+                        LOGGER.warning("Invalid MCQ answer format for question " + question.getId() + ": " + studentAnswerStr);
+                    }
+                }
             }
+        }
+        
+        String essayAnswersJson = null;
+        try {
+            if (!essayAnswers.isEmpty()) {
+                essayAnswersJson = mapper.writeValueAsString(essayAnswers);
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Failed to serialize essay answers: " + e.getMessage());
         }
 
         TestResult result = new TestResult();
         result.setTest(test);
         result.setStudent(student);
         result.setCorrectAnswers(correctAnswers);
-        result.setTotalQuestions(questions.size());
-        result.setScorePercentage((double) correctAnswers / questions.size() * 100);
+        result.setTotalQuestions(mcqCount > 0 ? mcqCount : questions.size()); // Fallback to avoid dividing by 0 if all are essays
+        result.setScorePercentage(mcqCount > 0 ? (double) correctAnswers / mcqCount * 100 : 0);
         result.setCompletedAt(LocalDateTime.now());
+        result.setEssayAnswersJson(essayAnswersJson);
 
         TestResult savedResult = testResultRepo.save(result);
         LOGGER.info("Created test result for student " + studentId + " on test " + testId + ": " + savedResult.getScorePercentage() + "%");

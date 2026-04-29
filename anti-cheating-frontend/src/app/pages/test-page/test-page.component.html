@@ -75,11 +75,12 @@
           {{ currentQuestion.text }}
         </div>
         
-        <div class="options-container">
+        <!-- MCQ Options -->
+        <div class="options-container" *ngIf="currentQuestion.type !== 'ESSAY'">
           <div 
             class="option-item" 
             *ngFor="let option of currentQuestion.options; let i = index"
-            [class.selected]="answers[currentQuestion.id!] === i"
+            [class.selected]="answers[currentQuestion.id!] === i.toString()"
             (click)="selectAnswer(i)"
           >
             <div class="option-radio">
@@ -88,7 +89,7 @@
                 [id]="'option-' + i"
                 [name]="'question-' + currentQuestion.id"
                 [value]="i"
-                [checked]="answers[currentQuestion.id!] === i"
+                [checked]="answers[currentQuestion.id!] === i.toString()"
                 (change)="selectAnswer(i)"
               />
               <label [for]="'option-' + i"></label>
@@ -98,6 +99,16 @@
               <span class="option-text">{{ option }}</span>
             </div>
           </div>
+        </div>
+
+        <!-- Essay Notepad -->
+        <div class="essay-container" *ngIf="currentQuestion.type === 'ESSAY'">
+          <textarea
+            class="essay-notepad"
+            placeholder="Type your detailed answer here..."
+            [(ngModel)]="answers[currentQuestion.id!]"
+            rows="12"
+          ></textarea>
         </div>
       </div>
 

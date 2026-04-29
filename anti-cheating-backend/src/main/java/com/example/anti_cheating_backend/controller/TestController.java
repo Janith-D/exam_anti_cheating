@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.anti_cheating_backend.dto.CreateTestRequest;
+import com.example.anti_cheating_backend.entity.Enums.TestType;
 import com.example.anti_cheating_backend.entity.Exam;
 import com.example.anti_cheating_backend.entity.Test;
 import com.example.anti_cheating_backend.entity.TestResult;
@@ -45,17 +46,10 @@ public class TestController {
             String createdBy = SecurityContextHolder.getContext().getAuthentication().getName();
             LOGGER.info("=== CREATE TEST REQUEST ===");
             LOGGER.info("Authenticated user: " + createdBy);
-            LOGGER.info("Authorities: " + SecurityContextHolder.getContext().getAuthentication().getAuthorities());
-            LOGGER.info("Test data received - Title: " + request.getTitle() + ", Exam ID: " + request.getExamId());
+            LOGGER.info("Test data received - Title: " + request.getTitle());
             LOGGER.info("Full request: " + request.toString());
             
-            // Validate examId is present
-            if (request.getExamId() == null) {
-                LOGGER.severe("ExamId is NULL in the request! Request data: " + request.toString());
-                throw new IllegalArgumentException("Exam ID is required. Please select an exam before creating a test.");
-            }
-            
-            // Create Test entity from DTO
+            // Create Test entity from DTO (examId is now optional)
             Test test = new Test();
             test.setTitle(request.getTitle());
             test.setDescription(request.getDescription());
@@ -64,13 +58,19 @@ public class TestController {
             test.setPassingScore(request.getPassingScore());
             test.setTotalMarks(request.getTotalMarks());
             
-            // Create Exam object with just the ID
-            Exam exam = new Exam();
-            exam.setId(request.getExamId());
-            test.setExam(exam);
+            if (request.getType() != null) {
+                try {
+                    test.setType(TestType.valueOf(request.getType().toUpperCase()));
+                } catch (IllegalArgumentException e) {
+                    test.setType(TestType.MCQ);
+                }
+            }
+            
+            // Note: With ManyToMany relationship, tests are now created independently
+            // They can be attached to exams later using the attachTestsToExam endpoint
             
             Test savedTest = testService.createTest(test, createdBy);
-            LOGGER.info("Test created successfully with ID: " + savedTest.getId());
+            LOGGER.info("✅ Test created successfully with ID: " + savedTest.getId() + " (can be attached to exams later)");
             return ResponseEntity.ok(savedTest);
         } catch (IllegalArgumentException e){
             LOGGER.severe("Validation error creating test: " + e.getMessage());
@@ -171,10 +171,22 @@ public class TestController {
                 details.put("title", test.getTitle());
                 details.put("description", test.getDescription());
                 details.put("duration", test.getDuration());
-                details.put("examId", test.getExam() != null ? test.getExam().getId() : null);
-                details.put("examTitle", test.getExam() != null ? test.getExam().getTitle() : null);
+                
+                // Handle ManyToMany relationship - test can be in multiple exams
+                List<Map<String, Object>> examsList = new java.util.ArrayList<>();
+                if (test.getExams() != null && !test.getExams().isEmpty()) {
+                    for (Exam exam : test.getExams()) {
+                        Map<String, Object> examInfo = new java.util.HashMap<>();
+                        examInfo.put("id", exam.getId());
+                        examInfo.put("title", exam.getTitle());
+                        examsList.add(examInfo);
+                    }
+                }
+                details.put("exams", examsList);
+                
                 details.put("createdBy", test.getCreatedBy());
                 details.put("createdAt", test.getCreatedAt());
+                details.put("type", test.getType() != null ? test.getType().name() : "MCQ");
                 return details;
             }).collect(java.util.stream.Collectors.toList());
             
@@ -190,7 +202,7 @@ public class TestController {
 
     @PostMapping("/{testId}/submit")
     @PreAuthorize("hasRole('STUDENT')")
-    public ResponseEntity<TestResult> submitTest(@PathVariable Long testId, @RequestBody Map<Long, Integer> answers) {
+    public ResponseEntity<TestResult> submitTest(@PathVariable Long testId, @RequestBody Map<Long, String> answers) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
             LOGGER.info("Submitting test " + testId + " for user: " + username);

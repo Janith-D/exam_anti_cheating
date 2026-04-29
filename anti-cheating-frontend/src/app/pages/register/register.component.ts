@@ -106,18 +106,10 @@ export class RegisterComponent {
         throw new Error('Microphone access is required but no audio track was found or it is inactive.');
       }
       
-      const sentences = [
-        'My exam ID is 1234',
-        'Today is a good day',
-        'The quick brown fox jumps over the lazy dog'
-      ];
-
-      for (let i = 0; i < sentences.length; i++) {
-        await this.recordSingleSentence(stream, sentences[i], i + 1, sentences.length);
-      }
+      await this.recordSingleSentence(stream);
 
       this.recordingStatus = '';
-      this.successMessage = '🎙️ Voice captured completely (3/3 samples). You may now submit the form.';
+      this.successMessage = '🎙️ Voice captured completely. You may now submit the form.';
       this.showCamera = false;
       stream.getTracks().forEach(track => track.stop());
       videoEl.srcObject = null;
@@ -131,9 +123,9 @@ export class RegisterComponent {
     }
   }
 
-  private recordSingleSentence(stream: MediaStream, sentence: string, current: number, total: number): Promise<void> {
+  private recordSingleSentence(stream: MediaStream): Promise<void> {
     return new Promise((resolve, reject) => {
-      this.recordingStatus = `Recording Voice (${current}/${total})... Please say: "${sentence}"`;
+      this.recordingStatus = `Recording Voice (3.5s)... Please read the phrase aloud.`;
       this.cdr.detectChanges();
 
       const audioChunks: Blob[] = [];

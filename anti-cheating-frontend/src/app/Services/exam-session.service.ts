@@ -79,7 +79,8 @@ export class ExamSessionService {
 
   // Get active exam sessions
   getActiveExamSessions(): Observable<ExamSession[]> {
-    return this.http.get<ExamSession[]>(`${this.apiUrl}/active`);
+    return this.http.get<ExamSession[]>(`${this.apiUrl}/active`)
+      .pipe(catchError(this.handleError));
   }
 
   // Get or create session for a test (when student starts test)

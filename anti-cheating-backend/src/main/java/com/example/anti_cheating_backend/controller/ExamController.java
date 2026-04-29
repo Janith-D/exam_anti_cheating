@@ -3,8 +3,6 @@ package com.example.anti_cheating_backend.controller;
 import java.util.List;
 import java.util.Map;
 
-import com.example.anti_cheating_backend.entity.Test;
-import com.example.anti_cheating_backend.service.TestService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,7 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.anti_cheating_backend.dto.AvailableExamDTO;
 import com.example.anti_cheating_backend.entity.Exam;
+import com.example.anti_cheating_backend.entity.Test;
 import com.example.anti_cheating_backend.service.ExamService;
+import com.example.anti_cheating_backend.service.TestService;
 
 @RestController
 @RequestMapping("/api/exams")
@@ -188,6 +188,53 @@ public class ExamController {
         try {
             List<Test> tests = testService.getTestsByExam(examId);
             return ResponseEntity.ok(tests);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Attach a single test to an exam
+    @PostMapping("/{examId}/tests/{testId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> attachTestToExam(@PathVariable Long examId, @PathVariable Long testId) {
+        try {
+            examService.attachTestToExam(examId, testId);
+            return ResponseEntity.ok(Map.of(
+                "message", "Test attached to exam successfully",
+                "examId", examId,
+                "testId", testId
+            ));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    // Attach multiple tests to an exam
+    @PostMapping("/{examId}/tests/batch")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> attachTestsToExam(@PathVariable Long examId, @RequestBody Map<String, List<Long>> payload) {
+        try {
+            List<Long> testIds = payload.get("testIds");
+            if (testIds == null || testIds.isEmpty()) {
+                return ResponseEntity.badRequest().body(Map.of("error", "No test IDs provided"));
+            }
+            
+            int attachedCount = 0;
+            for (Long testId : testIds) {
+                try {
+                    examService.attachTestToExam(examId, testId);
+                    attachedCount++;
+                } catch (RuntimeException e) {
+                    System.err.println("Warning: Could not attach test " + testId + ": " + e.getMessage());
+                }
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "message", attachedCount + " test(s) attached successfully",
+                "examId", examId,
+                "attachedCount", attachedCount,
+                "totalRequested", testIds.size()
+            ));
         } catch (RuntimeException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }

@@ -22,14 +22,36 @@ public class QuestionService {
     private TestRepo testRepo;
 
     public Question createQuestion(Question question) {
-        if (question.getOptions() == null || question.getOptions().size() != 4) {
-            LOGGER.severe("Question must have exactly 4 options");
-            throw new IllegalArgumentException("Question must have exactly 4 options");
+        // Validate based on question type
+        if ("MCQ".equals(question.getType())) {
+            // MCQ questions must have exactly 4 options
+            if (question.getOptions() == null || question.getOptions().size() != 4) {
+                LOGGER.severe("MCQ question must have exactly 4 options");
+                throw new IllegalArgumentException("MCQ question must have exactly 4 options");
+            }
+            if (question.getCorrectOption() < 0 || question.getCorrectOption() >= 4) {
+                LOGGER.severe("Correct option must be between 0 and 3");
+                throw new IllegalArgumentException("Correct option must be between 0 and 3");
+            }
+        } else if ("ESSAY".equals(question.getType())) {
+            // ESSAY questions don't need options or correct answer
+            if (question.getOptions() == null) {
+                question.setOptions(List.of()); // Set to empty list if null
+            }
+            question.setCorrectOption(-1); // No correct option for ESSAY
+        } else {
+            // Default type is MCQ
+            question.setType("MCQ");
+            if (question.getOptions() == null || question.getOptions().size() != 4) {
+                LOGGER.severe("Question must have exactly 4 options");
+                throw new IllegalArgumentException("Question must have exactly 4 options");
+            }
+            if (question.getCorrectOption() < 0 || question.getCorrectOption() >= 4) {
+                LOGGER.severe("Correct option must be between 0 and 3");
+                throw new IllegalArgumentException("Correct option must be between 0 and 3");
+            }
         }
-        if (question.getCorrectOption() < 0 || question.getCorrectOption() >= 4) {
-            LOGGER.severe("Correct option must be between 0 and 3");
-            throw new IllegalArgumentException("Correct option must be between 0 and 3");
-        }
+        
         if (question.getTest() == null || question.getTest().getId() == null) {
             LOGGER.severe("Question must be associated with a valid test");
             throw new IllegalArgumentException("Question must be associated with a valid test");

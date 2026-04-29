@@ -25,7 +25,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
   test: Test | null = null;
   questions: Question[] = [];
   currentQuestionIndex = 0;
-  answers: { [questionId: number]: number } = {}; // Changed from string to number
+  answers: { [questionId: number]: string } = {}; // Changed from number to string to support ESSAY text
   
   // Timer
   timeRemaining = 0; // in seconds
@@ -280,7 +280,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
     }
 
     if (this.currentQuestion && this.currentQuestion.id) {
-      this.answers[this.currentQuestion.id] = optionIndex;
+      this.answers[this.currentQuestion.id] = optionIndex.toString();
       
       // Log answer selected with letter (A, B, C, D)
       const optionLetter = ['A', 'B', 'C', 'D'][optionIndex];
@@ -364,7 +364,11 @@ export class TestPageComponent implements OnInit, OnDestroy {
 
   isAnswered(index: number): boolean {
     const question = this.questions[index];
-    return question && question.id ? this.answers[question.id] !== undefined : false;
+    if (!question || !question.id) return false;
+    const answer = this.answers[question.id];
+    if (answer === undefined || answer === null) return false;
+    if (typeof answer === 'string' && answer.trim() === '') return false;
+    return true;
   }
 
   submitTest(): void {
@@ -431,18 +435,16 @@ export class TestPageComponent implements OnInit, OnDestroy {
     console.log('Number of answers:', Object.keys(this.answers).length);
     console.log('Sample answer:', Object.entries(this.answers)[0]);
     
-    // Ensure all values are numbers
-    const validatedAnswers: { [key: number]: number } = {};
-    for (const [questionId, optionIndex] of Object.entries(this.answers)) {
+    const validatedAnswers: { [key: number]: string } = {};
+    for (const [questionId, value] of Object.entries(this.answers)) {
       const qId = Number(questionId);
-      const oIdx = Number(optionIndex);
-      if (isNaN(qId) || isNaN(oIdx)) {
-        console.error('Invalid answer format:', questionId, '→', optionIndex);
+      if (isNaN(qId)) {
+        console.error('Invalid answer format:', questionId, '→', value);
         this.errorMessage = 'Invalid answer format detected. Please refresh and try again.';
         this.submitting = false;
         return;
       }
-      validatedAnswers[qId] = oIdx;
+      validatedAnswers[qId] = value.toString();
     }
     
     console.log('✅ Validated answers:', validatedAnswers);

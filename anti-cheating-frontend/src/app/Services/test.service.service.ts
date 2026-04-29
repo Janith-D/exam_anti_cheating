@@ -40,6 +40,16 @@ export class TestService {
     return this.http.delete<any>(url);
   }
 
+  // Attach existing test to exam
+  attachTestToExam(examId: number, testId: number): Observable<any> {
+    return this.http.post<any>(`http://localhost:8080/api/exams/${examId}/tests/${testId}`, {});
+  }
+
+  // Attach multiple tests to exam
+  attachTestsToExam(examId: number, testIds: number[]): Observable<any> {
+    return this.http.post<any>(`http://localhost:8080/api/exams/${examId}/tests/batch`, { testIds });
+  }
+
   // Submit test answers
   submitTest(testId: number, answers: TestSubmission): Observable<TestResult> {
     return this.http.post<TestResult>(`${this.apiUrl}/${testId}/submit`, answers);

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { TestService } from '../../Services/test.service.service';
 import { QuestionService } from '../../Services/question.service.service';
 import { ExamService } from '../../Services/exam.service';
@@ -10,6 +10,7 @@ import { Question, QuestionCreate } from '../../models/question.model';
 import { Exam } from '../../models/exam.model';
 
 interface QuestionForm {
+  type: 'MCQ' | 'ESSAY';
   text: string;
   options: [string, string, string, string];
   correctOption: number;
@@ -25,12 +26,15 @@ interface QuestionForm {
 })
 export class TestManagementComponent implements OnInit {
   // View states
-  currentView: 'list' | 'create' | 'edit' = 'list';
+  currentView: 'list' | 'create' | 'edit' | 'selectExisting' = 'list';
   
   // Tests
   tests: Test[] = [];
   selectedTest: Test | null = null;
   existingQuestions: Question[] = []; // Existing questions for edit mode
+  
+  // Selected tests for attaching to exam
+  selectedTestsForExam: Set<number> = new Set();
   
   // Exams
   exams: Exam[] = [];
@@ -40,7 +44,8 @@ export class TestManagementComponent implements OnInit {
     title: '',
     description: '',
     duration: 60,
-    examId: undefined
+    examId: undefined,
+    type: 'MCQ'
   };
   
   // Questions
@@ -54,21 +59,36 @@ export class TestManagementComponent implements OnInit {
   
   // Validation
   formErrors: string[] = [];
+  
+  // Coming from Exam Management
+  comingFromExamId: number | null = null;
+  selectedExamForTesting: Exam | null = null;
 
   constructor(
     private testService: TestService,
     private questionService: QuestionService,
     private examService: ExamService,
-    private router: Router
+    private router: Router,
+    private route: ActivatedRoute
   ) {}
 
   ngOnInit(): void {
+    // Check if coming from exam management with examId
+    this.route.queryParams.subscribe(params => {
+      if (params['examId']) {
+        this.comingFromExamId = parseInt(params['examId'], 10);
+        // Show the list with quick actions to create or select tests
+        this.currentView = 'list';
+      }
+    });
+    
     this.loadTests();
     this.loadExams();
   }
 
   getEmptyQuestion(): QuestionForm {
     return {
+      type: 'MCQ',
       text: '',
       options: ['', '', '', ''],
       correctOption: 0,
@@ -122,7 +142,8 @@ export class TestManagementComponent implements OnInit {
       title: '',
       description: '',
       duration: 60,
-      examId: undefined
+      examId: undefined,
+      type: 'MCQ'
     };
     this.questions = [];
     this.currentQuestion = this.getEmptyQuestion();
@@ -136,6 +157,71 @@ export class TestManagementComponent implements OnInit {
     this.selectedTest = null;
     this.existingQuestions = [];
     this.loadTests();
+  }
+
+  // Show existing tests for selection and attachment to exam
+  showSelectExistingTests(): void {
+    if (!this.comingFromExamId) {
+      this.error = 'Cannot select tests: No exam selected';
+      return;
+    }
+    this.currentView = 'selectExisting';
+    this.selectedTestsForExam.clear();
+    this.error = '';
+    this.success = '';
+  }
+
+  // Toggle test selection for attachment to exam
+  toggleTestSelection(testId: number | undefined): void {
+    if (!testId) return;
+    
+    if (this.selectedTestsForExam.has(testId)) {
+      this.selectedTestsForExam.delete(testId);
+    } else {
+      this.selectedTestsForExam.add(testId);
+    }
+  }
+
+  // Check if a test is selected
+  isTestSelected(testId: number | undefined): boolean {
+    return testId ? this.selectedTestsForExam.has(testId) : false;
+  }
+
+  // Attach selected tests to exam
+  attachSelectedTests(): void {
+    if (!this.comingFromExamId) {
+      this.error = 'Cannot attach tests: No exam selected';
+      return;
+    }
+
+    if (this.selectedTestsForExam.size === 0) {
+      this.error = 'Please select at least one test to attach';
+      return;
+    }
+
+    this.loading = true;
+    this.error = '';
+    const testIds = Array.from(this.selectedTestsForExam);
+
+    console.log(`📎 Attaching ${testIds.length} test(s) to exam ${this.comingFromExamId}`);
+
+    this.testService.attachTestsToExam(this.comingFromExamId, testIds).subscribe({
+      next: () => {
+        this.success = `✅ Successfully attached ${testIds.length} test(s) to the exam!`;
+        this.loading = false;
+        this.selectedTestsForExam.clear();
+        
+        // Return to test list after 2 seconds
+        setTimeout(() => {
+          this.showTestList();
+        }, 2000);
+      },
+      error: (error) => {
+        console.error('❌ Error attaching tests:', error);
+        this.error = 'Failed to attach tests to exam. Please try again.';
+        this.loading = false;
+      }
+    });
   }
 
   // Edit existing test - add more questions
@@ -218,7 +304,7 @@ export class TestManagementComponent implements OnInit {
       this.formErrors.push('Question text is required');
     }
     
-    if (this.currentQuestion.options.some(opt => !opt.trim())) {
+    if (this.currentQuestion.type === 'MCQ' && this.currentQuestion.options.some(opt => !opt.trim())) {
       this.formErrors.push('All four options must be filled');
     }
     
@@ -239,6 +325,14 @@ export class TestManagementComponent implements OnInit {
     setTimeout(() => this.success = '', 3000);
   }
 
+  onTestTypeChange(): void {
+    if (this.testForm.type === 'ESSAY') {
+      this.currentQuestion.type = 'ESSAY';
+    } else {
+      this.currentQuestion.type = 'MCQ';
+    }
+  }
+
   removeQuestion(index: number): void {
     if (confirm('Are you sure you want to remove this question?')) {
       this.questions.splice(index, 1);
@@ -254,9 +348,7 @@ export class TestManagementComponent implements OnInit {
   validateTestForm(): boolean {
     this.formErrors = [];
     
-    if (!this.testForm.examId) {
-      this.formErrors.push('⚠️ Exam selection is required - Please select which exam this test belongs to');
-    }
+    // Exam selection is now optional - tests can be created independently and attached to exams later
     
     if (!this.testForm.title.trim()) {
       this.formErrors.push('Test title is required');
@@ -291,13 +383,29 @@ export class TestManagementComponent implements OnInit {
       duration: this.testForm.duration
     });
     
-    // First, create the test
+    // First, create the test (independently without exam association)
     this.testService.createTest(this.testForm).subscribe({
       next: (createdTest) => {
-        console.log('Test created:', createdTest);
+        console.log('✅ Test created:', createdTest);
         
-        // Then, create all questions
-        this.saveQuestions(createdTest.id!);
+        // If we came from exam management, automatically attach the test to the exam
+        if (this.comingFromExamId && createdTest.id) {
+          this.testService.attachTestsToExam(this.comingFromExamId, [createdTest.id]).subscribe({
+            next: () => {
+              // Then, create all questions
+              this.saveQuestions(createdTest.id!);
+            },
+            error: (error) => {
+              console.error('Error attaching test to exam:', error);
+              this.error = 'Test created but failed to attach to exam. You can attach it manually from the exam view.';
+              // Still create questions even if attachment fails
+              this.saveQuestions(createdTest.id!);
+            }
+          });
+        } else {
+          // Just create questions
+          this.saveQuestions(createdTest.id!);
+        }
       },
       error: (error) => {
         console.error('Error creating test:', error);
@@ -312,9 +420,10 @@ export class TestManagementComponent implements OnInit {
       const questionCreate: QuestionCreate = {
         test: { id: testId },
         text: q.text,
-        options: q.options,
-        correctOption: q.correctOption,
-        topic: q.topic
+        options: q.type === 'ESSAY' ? [] : q.options,
+        correctOption: q.type === 'ESSAY' ? 0 : q.correctOption,
+        topic: q.topic,
+        type: q.type
       };
       
       return this.questionService.createQuestion(questionCreate).toPromise();
@@ -349,19 +458,18 @@ export class TestManagementComponent implements OnInit {
 
   // Delete test
   deleteTest(testId: number | undefined): void {
-    if (!testId) {
+    if (testId === undefined) {
       this.error = 'Cannot delete test: Invalid test ID';
       setTimeout(() => this.error = '', 3000);
       return;
     }
     
-    // Check if test exists in current list
-    const testExists = this.tests.find(t => t.id === testId);
+    const id: number = testId;
+    const testExists = this.tests.find(t => t.id === id);
     if (!testExists) {
-      console.warn(`⚠️  Test ID ${testId} not found in current list`);
-      this.error = `Test ID ${testId} not found. The page may be showing outdated data.`;
+      console.warn(`⚠️  Test ID ${id} not found in current list`);
+      this.error = `Test ID ${id} not found. The page may be showing outdated data.`;
       
-      // Offer to refresh
       if (confirm('This test may have already been deleted or does not exist. Would you like to refresh the page to see current tests?')) {
         this.loadTests();
       }
@@ -369,88 +477,58 @@ export class TestManagementComponent implements OnInit {
       return;
     }
     
-    console.log(`🗑️  Attempting to delete test ID ${testId}: "${testExists.title}"`);
+    console.log(`🗑️  Attempting to delete test ID ${id}: "${testExists.title}"`);
     
     if (!confirm(`Are you sure you want to delete test "${testExists.title}"? This action cannot be undone.`)) {
       return;
     }
     
-    // First try normal delete
-    this.testService.deleteTest(testId, false).subscribe({
-      next: (response) => {
+    this.testService.deleteTest(id, false).subscribe({
+      next: (response: any) => {
         console.log('✅ Test deleted successfully');
         this.success = 'Test deleted successfully';
         this.loadTests();
         setTimeout(() => this.success = '', 3000);
       },
-      error: (error: any) => {
-        console.error('❌ Error deleting test:', error);
-        console.error('Error details:', {
-          status: error.status,
-          statusText: error.statusText,
-          errorBody: error.error
-        });
+      error: (err: any) => {
+        console.error('❌ Error deleting test:', err);
         
-        // Extract error message from backend
         let errorMessage = 'Failed to delete test';
-        let fullError = error.error?.error || error.error?.message || error.message || 'Unknown error';
-        
-        console.log('📝 Backend error message:', fullError);
-        
-        if (error.error && error.error.error) {
-          errorMessage = error.error.error;
+        if (err.error && err.error.error) {
+          errorMessage = err.error.error;
           
-          // Check for specific error types
           if (errorMessage.includes('Test not found')) {
-            console.warn('⚠️  Test no longer exists in database');
-            this.error = `Test ID ${testId} does not exist. It may have been deleted already.`;
-            
-            // Auto-refresh to show current state
+            this.error = `Test ID ${id} does not exist. It may have been deleted already.`;
             setTimeout(() => {
-              console.log('🔄 Auto-refreshing test list...');
               this.loadTests();
             }, 2000);
-            
             setTimeout(() => this.error = '', 5000);
             return;
           }
           
-          // Check if error is about student results - check multiple patterns
-          if (errorMessage.includes('student') && 
-              (errorMessage.includes('taken') || errorMessage.includes('results') || errorMessage.includes('have already'))) {
-            console.log('🔍 Detected test with student results - offering force delete option');
-            
-            // Ask for force delete confirmation
+          if (errorMessage.includes('student') || errorMessage.includes('taken') || errorMessage.includes('results')) {
             const forceDelete = confirm(
               '⚠️ WARNING: ' + errorMessage + '\n\n' +
               '🗑️ Do you want to FORCE DELETE this test?\n\n' +
-              '❌ This will permanently delete:\n' +
-              '   • The test\n' +
-              '   • All student results\n' +
-              '   • All questions\n\n' +
               '⚠️ THIS CANNOT BE UNDONE!\n\n' +
               'Click OK to force delete, or Cancel to keep the test.'
             );
             
             if (forceDelete) {
-              console.log('🗑️ User confirmed force delete - proceeding...');
-              this.forceDeleteTest(testId);
+              this.forceDeleteTest(id);
               return;
             } else {
-              console.log('ℹ️ User cancelled force delete');
               this.error = 'Delete cancelled. Test has been kept.';
               setTimeout(() => this.error = '', 3000);
               return;
             }
           }
-        } else if (error.error && error.error.message) {
-          errorMessage = error.error.message;
-        } else if (error.message) {
-          errorMessage = error.message;
+        } else if (err.error && err.error.message) {
+          errorMessage = err.error.message;
+        } else if (err.message) {
+          errorMessage = err.message;
         }
         
-        // Display the error
-        console.error('💥 Delete failed with error:', errorMessage);
         this.error = errorMessage;
         setTimeout(() => this.error = '', 5000);
       }

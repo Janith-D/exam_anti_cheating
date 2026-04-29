@@ -7,6 +7,7 @@ export interface Question {
   options: string[]; // Array of 4 options
   correctOption?: number; // Index 0-3, not exposed to students
   topic: string;
+  type?: 'MCQ' | 'ESSAY';
 }
 
 export interface QuestionCreate {
@@ -17,4 +18,5 @@ export interface QuestionCreate {
   options: string[];
   correctOption: number;
   topic: string;
+  type?: 'MCQ' | 'ESSAY';
 }

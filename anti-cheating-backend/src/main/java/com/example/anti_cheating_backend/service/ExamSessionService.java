@@ -1,6 +1,7 @@
 package com.example.anti_cheating_backend.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,18 +61,44 @@ public class ExamSessionService {
     }
     
     public List<ExamSession> getActiveSessions(){
-        LocalDateTime now = LocalDateTime.now();
-        return getActiveSessionsTransactional(now);
+        try {
+            LocalDateTime now = LocalDateTime.now();
+            System.out.println("🔍 Checking for active sessions at: " + now);
+            return getActiveSessionsTransactional(now);
+        } catch (Exception e) {
+            System.err.println("❌ Error in getActiveSessions: " + e.getMessage());
+            e.printStackTrace();
+            // Return empty list instead of throwing exception
+            return new ArrayList<>();
+        }
     }
 
     @Transactional
     protected List<ExamSession> getActiveSessionsTransactional(LocalDateTime now) {
-        examSessionRepo.completeExpiredActiveSessions(
-                Enums.SessionStatus.ACTIVE,
-                Enums.SessionStatus.COMPLETED,
-                now
-        );
-        return examSessionRepo.findCurrentlyActiveSessions(Enums.SessionStatus.ACTIVE, now);
+        try {
+            // Mark expired sessions as completed
+            System.out.println("🔄 Updating expired sessions...");
+            int updatedCount = examSessionRepo.completeExpiredActiveSessions(
+                    Enums.SessionStatus.ACTIVE,
+                    Enums.SessionStatus.COMPLETED,
+                    now
+            );
+            System.out.println("✅ Updated " + updatedCount + " expired session(s)");
+            
+            // Get currently active sessions
+            System.out.println("📋 Fetching currently active sessions...");
+            List<ExamSession> activeSessions = examSessionRepo.findCurrentlyActiveSessions(
+                    Enums.SessionStatus.ACTIVE, 
+                    now
+            );
+            System.out.println("✅ Found " + (activeSessions != null ? activeSessions.size() : 0) + " active session(s)");
+            
+            return activeSessions != null ? activeSessions : new ArrayList<>();
+        } catch (Exception e) {
+            System.err.println("❌ Error in getActiveSessionsTransactional: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
 
     // Update session

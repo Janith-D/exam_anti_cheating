@@ -236,10 +236,10 @@
   height: 280px;
   border: 3px dashed rgba(102, 126, 234, 0.6);
   border-radius: 50%;
-  animation: pulse-border 2s ease-in-out infinite;
+  animation: pulse-guide 2s ease-in-out infinite;
 }
 
-@keyframes pulse-border {
+@keyframes pulse-guide {
   0%, 100% {
     border-color: rgba(102, 126, 234, 0.6);
     transform: scale(1);
@@ -396,65 +396,73 @@
 
 /* Ongoing (Live) Exam Card - Highlighted */
 .ongoing-exam-card {
-  background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
-  color: white !important;
-  border: 3px solid #ff4757;
-  box-shadow: 0 10px 30px rgba(255, 75, 87, 0.4);
-  animation: pulse-border 2s ease-in-out infinite;
+  background: linear-gradient(135deg, #e8f4f8 0%, #d4e9f2 100%);
+  color: #333 !important;
+  border: 3px solid #6fa8c2;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
   position: relative;
 }
 
 .ongoing-exam-card:hover {
   transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 15px 40px rgba(255, 75, 87, 0.5);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
 }
 
 .ongoing-exam-card .card-body {
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(238, 90, 111, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(232, 244, 248, 0.95) 0%, rgba(212, 233, 242, 0.95) 100%);
 }
 
 .ongoing-exam-card .card-title {
-  color: white !important;
+  color: #1a5f7a !important;
   font-weight: 700;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .ongoing-exam-card .card-text {
-  color: rgba(255, 255, 255, 0.9) !important;
+  color: #555 !important;
 }
 
 .ongoing-exam-card .exam-info {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid #b0d9e8;
+  border-radius: 8px;
 }
 
 .ongoing-exam-card .info-item {
-  color: white;
+  color: #333;
 }
 
 .ongoing-exam-card .info-item i {
-  color: white;
+  color: #6fa8c2;
 }
 
 .ongoing-exam-card .info-item strong {
-  color: white;
+  color: #1a5f7a;
 }
 
 .ongoing-exam-card .badge {
-  background: rgba(255, 255, 255, 0.3) !important;
+  background: #6fa8c2 !important;
   color: white !important;
-  border: 1px solid rgba(255, 255, 255, 0.5);
-  backdrop-filter: blur(10px);
+  border: none;
 }
 
-@keyframes pulse-border {
-  0%, 100% {
-    box-shadow: 0 10px 30px rgba(255, 75, 87, 0.4), 0 0 0 0 rgba(255, 75, 87, 0.7);
+@keyframes pulse-live {
+  0% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-color: #6fa8c2;
   }
   50% {
-    box-shadow: 0 15px 40px rgba(255, 75, 87, 0.6), 0 0 0 10px rgba(255, 75, 87, 0);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    border-color: #6fa8c2;
   }
+  100% {
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    border-color: #6fa8c2;
+  }
+}
+
+/* Extra blinking effect for the live text */
+.live-text-blink {
+  animation: none;
 }
 
 /* Published Exam Card - Standard */
@@ -487,12 +495,12 @@
   top: -10px;
   right: -10px;
   background: white;
-  color: #ff4757;
+  color: #6fa8c2;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: 700;
   font-size: 0.85rem;
-  box-shadow: 0 4px 12px rgba(255, 75, 87, 0.5);
+  box-shadow: 0 4px 12px rgba(111, 168, 194, 0.3);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -507,7 +515,7 @@
 .pulse-dot {
   width: 8px;
   height: 8px;
-  background: #ff4757;
+  background: #6fa8c2;
   border-radius: 50%;
   animation: pulse-dot 1.5s ease-in-out infinite;
 }
@@ -545,13 +553,13 @@
 
 /* Card Actions for Ongoing Exams */
 .ongoing-exam-card .card-actions {
-  border-top-color: rgba(255, 255, 255, 0.3);
+  border-top-color: #b0d9e8;
 }
 
 .ongoing-exam-card .btn-danger {
-  background: white;
-  color: #ff4757;
-  border: 2px solid white;
+  background: #6fa8c2;
+  color: white;
+  border: 2px solid #6fa8c2;
   font-weight: 700;
   font-size: 1rem;
   text-transform: uppercase;
@@ -559,11 +567,11 @@
 }
 
 .ongoing-exam-card .btn-danger:hover {
-  background: #ff4757;
+  background: #5a8da6;
   color: white;
-  border-color: white;
+  border-color: #5a8da6;
   transform: translateY(-3px);
-  box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(111, 168, 194, 0.3);
 }
 
 /* Responsive for highlighted cards */

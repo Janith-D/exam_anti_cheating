@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.anti_cheating_backend.entity.Exam;
 import com.example.anti_cheating_backend.entity.Test;
 import com.example.anti_cheating_backend.entity.TestResult;
 import com.example.anti_cheating_backend.repo.ExamRepo;
@@ -44,30 +43,13 @@ public class TestService {
             throw new IllegalArgumentException("Test duration must be positive");
         }
         
-        // CRITICAL FIX: Validate and load the exam from database
-        if (test.getExam() == null) {
-            LOGGER.severe("Test exam is NULL");
-            throw new IllegalArgumentException("Test must be associated with an exam (exam object is null)");
-        }
-        if (test.getExam().getId() == null) {
-            LOGGER.severe("Test exam ID is NULL");
-            throw new IllegalArgumentException("Test must be associated with an exam (exam ID is null)");
-        }
-        
-        // Load the exam from database to ensure it exists
-        Exam exam = examRepo.findById(test.getExam().getId())
-                .orElseThrow(() -> {
-                    LOGGER.severe("Exam not found with ID: " + test.getExam().getId());
-                    return new RuntimeException("Exam not found with ID: " + test.getExam().getId());
-                });
-        
-        // Set the exam relationship explicitly
-        test.setExam(exam);
+        // Tests can now be created independently without an exam
+        // They can be attached to exams later using attachTestToExam
         test.setCreatedBy(createdBy);
         test.setCreatedAt(LocalDateTime.now());
         
         Test savedTest = testRepo.save(test);
-        LOGGER.info("Created test: " + savedTest.getId() + " for exam: " + exam.getId() + " by " + createdBy);
+        LOGGER.info("✅ Created test: " + savedTest.getId() + " by " + createdBy + " (not yet attached to any exam)");
         return savedTest;
     }
 
@@ -107,12 +89,15 @@ public class TestService {
         questionRepo.deleteByTestId(testId);
         LOGGER.info("Deleted " + deletedQuestions + " question(s) for test: " + testId);
         
-        // Log exam association if exists
-        if (test.getExam() != null) {
-            LOGGER.info("Removing test " + testId + " from exam: " + test.getExam().getId() + " (" + test.getExam().getTitle() + ")");
+        // Log exam associations - test can now be in multiple exams
+        if (test.getExams() != null && !test.getExams().isEmpty()) {
+            String examList = test.getExams().stream()
+                .map(exam -> exam.getId() + ":" + exam.getTitle())
+                .collect(java.util.stream.Collectors.joining(", "));
+            LOGGER.info("Removing test " + testId + " from exams: " + examList);
         }
         
-        // Delete the test (exam association will be handled by cascade)
+        // Delete the test (ManyToMany relationship will be handled by cascade)
         testRepo.delete(test);
         LOGGER.info("Successfully deleted test: " + testId);
     }

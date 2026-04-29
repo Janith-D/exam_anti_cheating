@@ -14,6 +14,9 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
@@ -62,9 +65,13 @@ public class Exam {
     @Column(name = "passing_score")
     private Double passingScore;
     
-    // One exam can have multiple tests
-    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL)
-    @JsonIgnore
+    // Many exams can have many tests (ManyToMany relationship)
+    @ManyToMany
+    @JoinTable(
+        name = "exam_test",
+        joinColumns = @JoinColumn(name = "exam_id"),
+        inverseJoinColumns = @JoinColumn(name = "test_id")
+    )
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Test> tests;
@@ -75,6 +82,13 @@ public class Exam {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private List<Enrollment> enrollments;
+
+    // One exam can have multiple exam sessions
+    @OneToMany(mappedBy = "exam", cascade = CascadeType.ALL)
+    @JsonIgnore
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<ExamSession> examSessions;
     
     @PrePersist
     protected void onCreate() {

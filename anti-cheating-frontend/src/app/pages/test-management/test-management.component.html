@@ -2,12 +2,20 @@
   <!-- Header -->
   <div class="header">
     <button class="back-btn" (click)="goBack()">
-      <span>←</span> Back to Dashboard
+      <span>←</span> Back to {{ comingFromExamId ? 'Exam Management' : 'Dashboard' }}
     </button>
     <h1>Test Management</h1>
     <button class="create-btn" *ngIf="currentView === 'list'" (click)="showCreateTest()">
       <span>+</span> Create New Test
     </button>
+  </div>
+
+  <!-- Coming from Exam Management Notice -->
+  <div class="alert alert-info" *ngIf="comingFromExamId" style="margin: 15px 20px; padding: 12px 15px; background: #e7f3ff; border-left: 4px solid #2196F3; border-radius: 4px;">
+    <strong>✅ Adding Tests to Exam (ID: {{ comingFromExamId }})</strong>
+    <p style="margin: 5px 0 0 0; font-size: 0.95em; color: #333;">
+      The exam has been selected. Create a new test below or choose an existing test to add to this exam.
+    </p>
   </div>
 
   <!-- Success/Error Messages -->
@@ -31,6 +39,16 @@
 
   <!-- TEST LIST VIEW -->
   <div class="tests-list" *ngIf="currentView === 'list' && !loading">
+    <!-- Quick Actions when coming from exam management -->
+    <div class="quick-actions" *ngIf="comingFromExamId" style="margin: 0 20px 20px; display: flex; gap: 10px;">
+      <button class="btn btn-primary" (click)="showSelectExistingTests()" style="flex: 1;">
+        <i class="bi bi-check2-square"></i> Select Existing Tests to Add
+      </button>
+      <button class="btn btn-success" (click)="showCreateTest()" style="flex: 1;">
+        <i class="bi bi-plus-circle"></i> Create New Test
+      </button>
+    </div>
+
     <div class="tests-grid" *ngIf="tests.length > 0">
       <div class="test-card" *ngFor="let test of tests">
         <div class="test-header">
@@ -44,6 +62,9 @@
           </span>
           <span class="meta-item" *ngIf="test.createdAt">
             <strong>Created:</strong> {{ test.createdAt | date:'short' }}
+          </span>
+          <span class="type-badge" [class.essay]="test.type === 'ESSAY'">
+            {{ test.type === 'ESSAY' ? '📝 Essay' : '🔢 MCQ' }}
           </span>
         </div>
         <div class="test-actions">
@@ -63,25 +84,92 @@
     </div>
   </div>
 
+  <!-- SELECT EXISTING TESTS VIEW -->
+  <div class="select-existing-tests-view" *ngIf="currentView === 'selectExisting' && !loading">
+    <div class="selection-header">
+      <h2>📎 Select Tests to Attach to Exam (ID: {{ comingFromExamId }})</h2>
+      <p class="selection-subtitle">Choose one or more existing tests from the list below to add to your exam</p>
+    </div>
+
+    <div class="tests-selection-grid" *ngIf="tests.length > 0">
+      <div class="test-selection-card" *ngFor="let test of tests">
+        <div class="selection-checkbox">
+          <input 
+            type="checkbox" 
+            [id]="'test-' + test.id"
+            [checked]="isTestSelected(test.id)"
+            (change)="toggleTestSelection(test.id)"
+            class="form-check-input"
+          />
+          <label [for]="'test-' + test.id" class="form-check-label"></label>
+        </div>
+        
+        <div class="test-selection-content">
+          <div class="test-header">
+            <h3>{{ test.title }}</h3>
+            <span class="duration-badge">{{ test.duration }} min</span>
+            <span class="type-badge" [class.essay]="test.type === 'ESSAY'">
+              {{ test.type === 'ESSAY' ? '📝 Essay' : '🔢 MCQ' }}
+            </span>
+          </div>
+          <p class="test-description">{{ test.description }}</p>
+          <div class="test-meta">
+            <span class="meta-item">
+              <strong>Questions:</strong> {{ test.numberOfQuestions || 0 }}
+            </span>
+            <span class="meta-item" *ngIf="test.createdAt">
+              <strong>Created:</strong> {{ test.createdAt | date:'short' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="empty-state" *ngIf="tests.length === 0">
+      <h3>No tests available</h3>
+      <p>Create a test first before you can select one</p>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="selection-actions" *ngIf="tests.length > 0" style="margin: 30px 20px; display: flex; gap: 10px;">
+      <button class="btn btn-secondary" (click)="showTestList()" style="flex: 1;">
+        <i class="bi bi-arrow-left"></i> Back to List
+      </button>
+      <button 
+        class="btn btn-primary" 
+        (click)="attachSelectedTests()"
+        [disabled]="selectedTestsForExam.size === 0"
+        style="flex: 2;">
+        <i class="bi bi-check-circle"></i> Attach {{ selectedTestsForExam.size }} Test(s) to Exam
+      </button>
+    </div>
+  </div>
+
   <!-- CREATE TEST VIEW -->
   <div class="create-test-view" *ngIf="currentView === 'create' && !loading">
     <div class="form-section">
       <h2>Test Details</h2>
       
+      <div class="alert alert-info" style="margin: 0 0 20px 0; padding: 12px 15px; background: #e3f2fd; border-left: 4px solid #2196F3; border-radius: 4px;" *ngIf="comingFromExamId">
+        <strong>ℹ️ Creating Test for Exam</strong>
+        <p style="margin: 5px 0 0 0; font-size: 0.95em; color: #333;">
+          This test will be automatically attached to the selected exam when saved.
+        </p>
+      </div>
+      
       <div class="form-group">
-        <label for="examId">Select Exam * 📚</label>
+        <label for="examId">Select Exam 📚 <span style="color: #999; font-weight: normal;">(Optional)</span></label>
         <select 
           id="examId" 
           [(ngModel)]="testForm.examId"
           class="form-control"
-          [class.error]="!testForm.examId && formErrors.length > 0"
         >
-          <option [ngValue]="undefined">-- Select an Exam --</option>
+          <option [ngValue]="undefined">-- No Exam (Create Standalone) --</option>
           <option *ngFor="let exam of exams" [ngValue]="exam.id">
             {{ exam.title }} ({{ exam.status }})
           </option>
         </select>
-        <small class="form-hint">Choose which exam this test belongs to</small>
+        <small class="form-hint">Choose an exam to attach this test, or leave blank to create a standalone test that you can attach later</small>
       </div>
 
       <div class="form-group">
@@ -117,6 +205,32 @@
           class="form-control"
         />
       </div>
+
+      <div class="form-group">
+        <label>Test Type *</label>
+        <div class="type-selector">
+          <label class="type-option" [class.active]="testForm.type === 'MCQ'">
+            <input type="radio" name="testType" value="MCQ" [(ngModel)]="testForm.type" (change)="onTestTypeChange()">
+            <div class="type-content">
+              <span class="type-icon">🔢</span>
+              <div class="type-text">
+                <span class="type-title">MCQ Test</span>
+                <span class="type-desc">Multiple choice questions</span>
+              </div>
+            </div>
+          </label>
+          <label class="type-option" [class.active]="testForm.type === 'ESSAY'">
+            <input type="radio" name="testType" value="ESSAY" [(ngModel)]="testForm.type" (change)="onTestTypeChange()">
+            <div class="type-content">
+              <span class="type-icon">📝</span>
+              <div class="type-text">
+                <span class="type-title">Essay Test</span>
+                <span class="type-desc">Detailed answer questions</span>
+              </div>
+            </div>
+          </label>
+        </div>
+      </div>
     </div>
 
     <!-- Questions Section -->
@@ -131,7 +245,8 @@
             <span class="question-topic">{{ q.topic }}</span>
           </div>
           <p class="question-text">{{ q.text }}</p>
-          <ul class="options-list">
+          <span class="question-type-badge" *ngIf="q.type === 'ESSAY'">📝 Essay</span>
+          <ul class="options-list" *ngIf="q.type === 'MCQ'">
             <li *ngFor="let opt of q.options; let j = index" 
                 [class.correct]="j === q.correctOption">
               <span class="option-label">{{ ['A', 'B', 'C', 'D'][j] }}.</span>
@@ -150,6 +265,18 @@
       <div class="add-question-form">
         <h3>Add New Question</h3>
         
+        <div class="form-group">
+          <label for="questionType">Question Type *</label>
+          <select 
+            id="questionType" 
+            [(ngModel)]="currentQuestion.type"
+            class="form-control"
+          >
+            <option value="MCQ">Multiple Choice (MCQ)</option>
+            <option value="ESSAY">Essay / Short Answer</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label for="questionText">Question Text *</label>
           <textarea 
@@ -172,7 +299,7 @@
           />
         </div>
 
-        <div class="options-grid">
+        <div class="options-grid" *ngIf="currentQuestion.type === 'MCQ'">
           <div class="option-group" *ngFor="let opt of currentQuestion.options; let i = index">
             <label>Option {{ ['A', 'B', 'C', 'D'][i] }} *</label>
             <div class="option-input-group">
@@ -229,7 +356,8 @@
             <span class="question-topic">{{ q.topic }}</span>
           </div>
           <p class="question-text">{{ q.text }}</p>
-          <ul class="options-list">
+          <span class="question-type-badge" *ngIf="q.type === 'ESSAY'">📝 Essay</span>
+          <ul class="options-list" *ngIf="q.type === 'MCQ'">
             <li *ngFor="let opt of q.options; let j = index" 
                 [class.correct]="j === q.correctOption">
               <span class="option-label">{{ ['A', 'B', 'C', 'D'][j] }}.</span>
@@ -257,7 +385,8 @@
             <span class="new-badge">NEW</span>
           </div>
           <p class="question-text">{{ q.text }}</p>
-          <ul class="options-list">
+          <span class="question-type-badge" *ngIf="q.type === 'ESSAY'">📝 Essay</span>
+          <ul class="options-list" *ngIf="q.type === 'MCQ'">
             <li *ngFor="let opt of q.options; let j = index" 
                 [class.correct]="j === q.correctOption">
               <span class="option-label">{{ ['A', 'B', 'C', 'D'][j] }}.</span>
@@ -276,6 +405,18 @@
       <div class="add-question-form">
         <h4>Create New Question</h4>
         
+        <div class="form-group">
+          <label for="editQuestionType">Question Type *</label>
+          <select 
+            id="editQuestionType" 
+            [(ngModel)]="currentQuestion.type"
+            class="form-control"
+          >
+            <option value="MCQ">Multiple Choice (MCQ)</option>
+            <option value="ESSAY">Essay / Short Answer</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label for="editQuestionText">Question Text *</label>
           <textarea 
@@ -298,7 +439,7 @@
           />
         </div>
 
-        <div class="options-grid">
+        <div class="options-grid" *ngIf="currentQuestion.type === 'MCQ'">
           <div class="option-group" *ngFor="let opt of currentQuestion.options; let i = index">
             <label>Option {{ ['A', 'B', 'C', 'D'][i] }} *</label>
             <div class="option-input-group">

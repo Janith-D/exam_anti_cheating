@@ -47,4 +47,8 @@ public class Question {
     
     private int correctOption;
     private String topic;
+    
+    // Type of question: "MCQ" or "ESSAY". Defaults to "MCQ" for legacy support.
+    @Column(length = 20)
+    private String type = "MCQ";
 }

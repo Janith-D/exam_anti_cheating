@@ -236,7 +236,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         return;
       }
 
-      this.recordingStatus = 'Recording Voice (3.5s)... Please say: "I am ready for my exam today"';
+      this.recordingStatus = 'Recording Voice (3.5s)... Please read the phrase aloud.';
       const stream = videoEl.srcObject as MediaStream;
       
       const audioTracks = stream.getAudioTracks();

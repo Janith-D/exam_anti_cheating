@@ -48,4 +48,8 @@ public class Enums {
     public enum IdentityEnrollmentState {
         ACTIVE, COMPLETED, EXPIRED
     }
+
+    public enum TestType {
+        MCQ, ESSAY
+    }
 }

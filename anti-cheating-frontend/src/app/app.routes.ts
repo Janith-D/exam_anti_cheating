@@ -98,11 +98,6 @@ export const routes: Routes = [
     canActivate: [adminGuard]
   },
   {
-    path: 'admin/sessions',
-    loadComponent: () => import('./pages/exam-session-management/exam-session-management.component').then(m => m.ExamSessionManagementComponent),
-    canActivate: [adminGuard]
-  },
-  {
     path: 'admin/screenshots',
     loadComponent: () => import('./pages/screenshot-viewer/screenshot-viewer.component').then(m => m.ScreenshotViewerComponent),
     canActivate: [adminGuard]

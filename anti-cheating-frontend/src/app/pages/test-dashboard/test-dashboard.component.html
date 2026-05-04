@@ -211,46 +211,7 @@
       <p>There are no exams available at the moment. Please check back later.</p>
     </div>
 
-    <!-- Legacy Tests Section (keeping for backward compatibility) -->
-    <div class="section" *ngIf="tests.length > 0">
-      <div class="section-header">
-        <h2>📝 Quick Tests</h2>
-        <p>Practice tests available</p>
-      </div>
 
-      <div class="tests-grid">
-        <div *ngFor="let test of tests" class="test-card">
-          <div class="test-card-header">
-            <h3>{{ test.title }}</h3>
-            <span class="test-badge">{{ test.duration }} min</span>
-          </div>
-          
-          <div class="test-card-body">
-            <p class="test-description">{{ test.description }}</p>
-            
-            <div class="test-info">
-              <div class="info-item">
-                <span class="info-icon">⏱️</span>
-                <span class="info-text">Duration: {{ test.duration }} minutes</span>
-              </div>
-              <div class="info-item">
-                <span class="info-icon">📝</span>
-                <span class="info-text">Questions: {{ test.numberOfQuestions || 'Multiple' }}</span>
-              </div>
-            </div>
-          </div>
-          
-          <div class="test-card-footer">
-            <button 
-              class="btn btn-primary btn-block"
-              (click)="startTest(test.id!)"
-            >
-              🚀 Start Test
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Recent Results Section -->
     <div id="results-section" class="section" *ngIf="recentResults.length > 0">

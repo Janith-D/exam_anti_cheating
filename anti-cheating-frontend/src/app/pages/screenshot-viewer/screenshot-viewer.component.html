@@ -2,7 +2,13 @@
   <div class="header">
     <h2>📸 Desktop Monitoring - Screenshot Viewer</h2>
     <p class="subtitle">View and analyze screenshots captured during exams</p>
-    <button class="btn btn-danger" (click)="clearAllScreenshots()">🗑️ Clear All Screenshots</button>
+    <div class="header-actions">
+      <button class="btn btn-secondary" (click)="refreshScreenshots()">↻ Refresh</button>
+      <button class="btn btn-danger" (click)="clearAllScreenshots()">🗑️ Clear All Screenshots</button>
+    </div>
+    <p class="refresh-note" *ngIf="lastRefreshedAt">
+      Last refreshed: {{ lastRefreshedAt | date:'mediumTime' }}
+    </p>
   </div>
 
   <!-- Filters -->

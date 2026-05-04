@@ -45,4 +45,14 @@ export class AlertService {
   resolveAlert(alertId: number): Observable<Alert> {
     return this.http.put<Alert>(`${this.apiUrl}/resolve/${alertId}`, {});
   }
+
+  // Delete alert
+  deleteAlert(alertId: number): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/${alertId}`);
+  }
+
+  // Delete multiple alerts
+  deleteMultipleAlerts(alertIds: number[]): Observable<{ message: string }> {
+    return this.http.post<{ message: string }>(`${this.apiUrl}/delete-multiple`, { alertIds });
+  }
 }

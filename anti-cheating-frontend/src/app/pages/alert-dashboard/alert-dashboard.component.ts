@@ -28,6 +28,7 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
   activeSessions: ExamSession[] = [];
   studentActivities: StudentActivity[] = [];
   activeStudents: Set<number> = new Set(); // Track unique active students
+  selectedAlertIds: Set<number> = new Set(); // Track selected alerts for deletion
   
   // Statistics
   stats = {
@@ -372,6 +373,75 @@ export class AlertDashboardComponent implements OnInit, OnDestroy {
         this.error = 'Failed to resolve alert';
       }
     });
+  }
+
+  deleteAlert(alertId: number | undefined): void {
+    if (!alertId) return;
+    if (!confirm('Are you sure you want to delete this alert?')) return;
+
+    this.alertService.deleteAlert(alertId).subscribe({
+      next: () => {
+        this.alerts = this.alerts.filter(a => a.id !== alertId);
+        this.selectedAlertIds.delete(alertId);
+        this.updateStats();
+      },
+      error: (error: any) => {
+        console.error('Error deleting alert:', error);
+        this.error = 'Failed to delete alert';
+      }
+    });
+  }
+
+  toggleAlertSelection(alertId: number | undefined): void {
+    if (!alertId) return;
+    if (this.selectedAlertIds.has(alertId)) {
+      this.selectedAlertIds.delete(alertId);
+    } else {
+      this.selectedAlertIds.add(alertId);
+    }
+  }
+
+  toggleAllAlerts(): void {
+    if (this.selectedAlertIds.size === this.filteredAlerts.length) {
+      this.selectedAlertIds.clear();
+    } else {
+      this.filteredAlerts.forEach(alert => {
+        if (alert.id) this.selectedAlertIds.add(alert.id);
+      });
+    }
+  }
+
+  isAlertSelected(alertId: number | undefined): boolean {
+    return !!alertId && this.selectedAlertIds.has(alertId);
+  }
+
+  deleteSelectedAlerts(): void {
+    if (this.selectedAlertIds.size === 0) return;
+    
+    const count = this.selectedAlertIds.size;
+    if (!confirm(`Are you sure you want to delete ${count} selected alert(s)?`)) return;
+
+    const idsToDelete = Array.from(this.selectedAlertIds);
+    this.alertService.deleteMultipleAlerts(idsToDelete).subscribe({
+      next: () => {
+        this.alerts = this.alerts.filter(a => !a.id || !this.selectedAlertIds.has(a.id));
+        this.selectedAlertIds.clear();
+        this.updateStats();
+        window.alert(`Successfully deleted ${count} alert(s).`);
+      },
+      error: (error: any) => {
+        console.error('Error deleting alerts:', error);
+        this.error = 'Failed to delete selected alerts';
+      }
+    });
+  }
+
+  private updateStats(): void {
+    this.stats.totalAlerts = this.alerts.length;
+    this.stats.criticalAlerts = this.alerts.filter(a => 
+      (a.severity === 'RED' || a.severity === 'CRITICAL' || a.severity === 'ORANGE' || a.severity === 'HIGH') &&
+      (a.status !== 'RESOLVED' && !a.resolved)
+    ).length;
   }
 
   viewAlertDetails(alert: Alert): void {

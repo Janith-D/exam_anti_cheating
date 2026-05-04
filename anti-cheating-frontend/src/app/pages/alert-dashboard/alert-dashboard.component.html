@@ -12,8 +12,11 @@
       <button class="btn-icon" (click)="refresh()" title="Refresh data">
         🔄
       </button>
-      <button class="btn btn-danger" (click)="clearAllAlerts()" title="Delete all alerts">
-        🗑️ Clear Alerts
+      <button *ngIf="selectedAlertIds.size > 0" class="btn btn-danger" (click)="deleteSelectedAlerts()" title="Delete selected alerts">
+        🗑️ Delete Selected ({{ selectedAlertIds.size }})
+      </button>
+      <button class="btn btn-outline-danger" (click)="clearAllAlerts()" title="Delete all alerts">
+        🗑️ Clear All
       </button>
       <button class="btn btn-outline" (click)="goBack()">
         ← Back to Dashboard
@@ -151,8 +154,17 @@
     <!-- Alerts List -->
     <div class="alerts-section">
       <div class="section-header">
-        <h2>🚨 Live Alerts ({{ filteredAlerts.length }})</h2>
-        <span class="live-indicator">● LIVE</span>
+        <div class="section-header-left">
+          <input 
+            type="checkbox" 
+            class="header-checkbox" 
+            [checked]="filteredAlerts.length > 0 && selectedAlertIds.size === filteredAlerts.length"
+            (change)="toggleAllAlerts()"
+            title="Select all filtered alerts"
+          >
+          <h2>🚨 Live Alerts ({{ filteredAlerts.length }})</h2>
+          <span class="live-indicator">● LIVE</span>
+        </div>
       </div>
 
       <!-- Empty State -->
@@ -169,6 +181,15 @@
           class="alert-card"
           [class]="getSeverityClass(alert.severity)"
         >
+          <!-- Selection Checkbox -->
+          <div class="alert-selector">
+            <input 
+              type="checkbox" 
+              [checked]="isAlertSelected(alert.id)" 
+              (change)="toggleAlertSelection(alert.id)"
+            >
+          </div>
+
           <!-- Alert Header -->
           <div class="alert-header">
             <div class="alert-header-left">
@@ -246,6 +267,13 @@
               (click)="resolveAlert(alert.id)"
             >
               ✓ Resolve
+            </button>
+            <button 
+              class="btn btn-sm btn-icon-only btn-outline-danger"
+              (click)="deleteAlert(alert.id)"
+              title="Delete alert"
+            >
+              🗑️
             </button>
           </div>
         </div>

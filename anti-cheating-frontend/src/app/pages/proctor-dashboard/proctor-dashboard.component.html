@@ -131,6 +131,12 @@
           <h3>Student Reports</h3>
           <p>View student performance and activities</p>
         </button>
+
+        <button class="action-card action-card-highlight" (click)="setActiveTab('tests')">
+          <div class="action-icon">✏️</div>
+          <h3>Grade Essays</h3>
+          <p>Review and score pending essay submissions</p>
+        </button>
       </div>
     </div>
 
@@ -178,7 +184,23 @@
           <button class="btn btn-sm btn-warning">ORANGE</button>
           <button class="btn btn-sm btn-info">YELLOW</button>
           <button class="btn btn-sm btn-success">GREEN</button>
+          <button *ngIf="selectedAlertIds.size > 0" class="btn btn-sm btn-danger ms-2" (click)="deleteSelectedAlerts()">
+            🗑️ Delete Selected ({{ selectedAlertIds.size }})
+          </button>
+          <button class="btn btn-sm btn-outline-danger ms-2" (click)="clearAllAlerts()">
+            🗑️ Clear All
+          </button>
         </div>
+      </div>
+      
+      <!-- Selection Header -->
+      <div class="selection-header" *ngIf="alerts.length > 0">
+        <input 
+          type="checkbox" 
+          [checked]="selectedAlertIds.size === alerts.length && alerts.length > 0"
+          (change)="toggleAllAlerts()"
+        >
+        <span class="ms-2">Select All</span>
       </div>
       
       <div *ngIf="alerts.length === 0" class="empty-state">
@@ -193,6 +215,15 @@
           class="alert-card"
           [class]="getSeverityClass(alert.severity)"
         >
+          <!-- Selection Checkbox -->
+          <div class="alert-selector">
+            <input 
+              type="checkbox" 
+              [checked]="isAlertSelected(alert.id)" 
+              (change)="toggleAlertSelection(alert.id)"
+            >
+          </div>
+
           <div class="alert-card-header">
             <span class="severity-badge" [class]="getSeverityClass(alert.severity)">
               {{ alert.severity }}
@@ -227,6 +258,13 @@
               (click)="resolveAlert(alert.id!)"
             >
               ✓ Resolve
+            </button>
+            <button 
+              class="btn btn-sm btn-outline-danger" 
+              (click)="deleteAlert(alert.id!)"
+              title="Delete alert"
+            >
+              🗑️
             </button>
           </div>
         </div>
@@ -267,12 +305,9 @@
             </div>
           </div>
           <div class="test-card-footer">
-            <button class="btn btn-sm btn-primary" (click)="viewTestDetails(test.id!)">
-              View/Edit
-            </button>
-            <button class="btn btn-sm btn-success" (click)="navigateToSessions()">
-              Start Session
-            </button>
+            <button class="btn btn-sm btn-primary" (click)="viewTestDetails(test.id!)">View/Edit</button>
+            <button class="btn btn-sm btn-success" (click)="navigateToSessions()">Start Session</button>
+            <button class="btn btn-sm btn-grade" (click)="viewTestResults(test.id!)">📋 Results</button>
           </div>
         </div>
       </div>

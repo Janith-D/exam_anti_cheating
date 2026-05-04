@@ -42,43 +42,80 @@
   margin: 0 auto;
 }
 
-.exam-info-section {
+.exam-info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
   padding: 30px;
-  margin: -30px 20px 20px;
+  margin: -40px 20px 30px;
   background: white;
-  border-radius: 15px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+  position: relative;
+  z-index: 10;
 }
 
 .info-card {
-  background: #f8f9fa;
-  padding: 20px;
-  border-radius: 12px;
+  background: #ffffff;
+  padding: 25px 20px;
+  border-radius: 16px;
   text-align: center;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid #f0f2f5;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   height: 100%;
-  transition: transform 0.3s ease;
 }
 
 .info-card:hover {
-  transform: translateY(-5px);
+  transform: translateY(-8px);
+  box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+  border-color: #e0e6ed;
+}
+
+.info-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #f0f4f8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover .info-icon-wrapper {
+  background: var(--color-primary, #0d6efd);
 }
 
 .info-icon {
-  font-size: 2rem;
-  color: var(--color-primary);
-  margin-bottom: 10px;
+  font-size: 1.8rem;
+  color: var(--color-primary, #0d6efd);
+  margin: 0;
+  transition: all 0.3s ease;
+}
+
+.info-card:hover .info-icon {
+  color: white;
 }
 
 .info-card h6 {
-  font-weight: 600;
-  color: #666;
-  margin-bottom: 8px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: #718096;
+  margin-bottom: 10px;
+  font-weight: 700;
 }
 
 .info-card p {
-  font-size: 1rem;
-  font-weight: 500;
-  color: #333;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2d3748;
   margin: 0;
 }
 
@@ -212,9 +249,11 @@
     margin-top: 15px;
   }
 
-  .exam-info-section {
+  .exam-info-grid {
     margin: -20px 10px 10px;
-    padding: 15px;
+    padding: 20px;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
   }
 
   .tests-section {

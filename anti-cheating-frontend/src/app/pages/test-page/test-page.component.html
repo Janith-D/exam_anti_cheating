@@ -141,34 +141,6 @@
       </div>
     </div>
 
-    <!-- Question Navigator -->
-    <div class="question-navigator">
-      <h3>Question Navigator</h3>
-      <div class="navigator-grid">
-        <button
-          *ngFor="let question of questions; let i = index"
-          class="navigator-item"
-          [class.current]="i === currentQuestionIndex"
-          [class.answered]="isAnswered(i)"
-          (click)="goToQuestion(i)"
-        >
-          {{ i + 1 }}
-        </button>
-      </div>
-      <div class="navigator-legend">
-        <div class="legend-item">
-          <span class="legend-dot current"></span>
-          <span>Current</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot answered"></span>
-          <span>Answered</span>
-        </div>
-        <div class="legend-item">
-          <span class="legend-dot not-answered"></span>
-          <span>Not Answered</span>
-        </div>
-      </div>
-    </div>
+    <!-- Removed Question Navigator as requested -->
   </div>
 </div>

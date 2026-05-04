@@ -1,193 +1,207 @@
-<div class="exam-dashboard-container">
-  <!-- Header -->
-  <div class="dashboard-header">
-    <div class="header-content">
-      <h1>📚 Available Exams</h1>
-      <p class="welcome-text">Welcome, {{ currentUser?.username || currentUser?.userName }}!</p>
-    </div>
-    <div class="header-actions">
-      <button class="btn btn-secondary" (click)="navigateToTestDashboard()">
-        <i class="bi bi-journal-text"></i> View Tests
-      </button>
-      <button class="btn btn-outline-danger" (click)="logout()">
-        <i class="bi bi-box-arrow-right"></i> Logout
-      </button>
-    </div>
-  </div>
+<div class="dashboard-shell">
+  <div class="dashboard-orb dashboard-orb-left"></div>
+  <div class="dashboard-orb dashboard-orb-right"></div>
 
-  <!-- Messages -->
-  <div *ngIf="errorMessage" class="alert alert-danger alert-dismissible fade show" role="alert">
-    <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+  <section class="hero-panel">
+    <div class="hero-copy">
+      <span class="eyebrow">Student Portal</span>
+      <h1>Available Exams</h1>
+      <p class="hero-description">Track your live and published exams, review your enrollments, and move into the next assessment without friction.</p>
+
+      <div class="hero-stats">
+        <div class="stat-chip">
+          <span class="stat-value">{{ publishedExams.length }}</span>
+          <span class="stat-label">Available</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-value">{{ getLiveExamCount() }}</span>
+          <span class="stat-label">Live now</span>
+        </div>
+        <div class="stat-chip">
+          <span class="stat-value">{{ enrolledExams.length }}</span>
+          <span class="stat-label">My enrollments</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-actions-card">
+      <div class="hero-user">
+        <span class="hero-user-label">Welcome back</span>
+        <strong>{{ getUserDisplayName() }}</strong>
+        <p>Keep your session active to enroll quickly and securely.</p>
+      </div>
+
+      <div class="header-actions">
+        <button class="btn btn-primary action-button" (click)="router.navigate(['/results'])">
+          <i class="bi bi-bar-chart"></i>
+          My Results
+        </button>
+        <button class="btn btn-outline-danger action-button" (click)="logout()">
+          <i class="bi bi-box-arrow-right"></i>
+          Logout
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <div *ngIf="errorMessage" class="status-banner status-banner-danger" role="alert">
+    <i class="bi bi-exclamation-triangle"></i>
+    <div>
+      <strong>Something needs attention.</strong>
+      <p>{{ errorMessage }}</p>
+    </div>
     <button type="button" class="btn-close" (click)="errorMessage = ''" aria-label="Close"></button>
   </div>
 
-  <div *ngIf="successMessage" class="alert alert-success alert-dismissible fade show" role="alert">
-    <i class="bi bi-check-circle"></i> {{ successMessage }}
+  <div *ngIf="successMessage" class="status-banner status-banner-success" role="alert">
+    <i class="bi bi-check-circle"></i>
+    <div>
+      <strong>Success.</strong>
+      <p>{{ successMessage }}</p>
+    </div>
     <button type="button" class="btn-close" (click)="successMessage = ''" aria-label="Close"></button>
   </div>
 
-  <!-- Loading State -->
-  <div *ngIf="loading" class="text-center py-5">
+  <section *ngIf="loading" class="loading-panel">
     <div class="spinner-border text-primary" role="status">
       <span class="visually-hidden">Loading...</span>
     </div>
-    <p class="mt-2">Loading available exams...</p>
-  </div>
+    <h2>Loading your exams</h2>
+    <p>Fetching the latest published and ongoing sessions.</p>
+  </section>
 
-  <!-- My Enrolled Exams Section -->
-  <div *ngIf="!loading && enrolledExams.length > 0" class="enrolled-section mb-4">
-    <h2 class="section-title">
-      <i class="bi bi-bookmark-check"></i> My Enrolled Exams
-    </h2>
-    <div class="row">
-      <div *ngFor="let enrollment of enrolledExams" class="col-md-6 col-lg-4 mb-3">
-        <!-- Only show enrollments with valid exam data -->
-        <div *ngIf="enrollment.exam" class="card exam-card enrolled-card h-100">
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <h5 class="card-title">{{ enrollment.exam.title }}</h5>
-              <span class="badge bg-{{ getEnrollmentStatusColor(enrollment.status) }}">
-                {{ getEnrollmentStatusText(enrollment.status) }}
-              </span>
-            </div>
-            <p class="card-text text-muted">{{ enrollment.exam.description }}</p>
-            
-            <div class="exam-info">
-              <p class="info-item">
-                <i class="bi bi-calendar-event"></i>
-                <strong>Start:</strong> {{ formatDate(enrollment.exam.startDate) }}
-              </p>
-              <p class="info-item">
-                <i class="bi bi-calendar-check"></i>
-                <strong>End:</strong> {{ formatDate(enrollment.exam.endDate) }}
-              </p>
-              <p class="info-item">
-                <i class="bi bi-trophy"></i>
-                <strong>Passing Score:</strong> {{ enrollment.exam.passingScore }}%
-              </p>
-              <p class="info-item">
-                <i class="bi bi-file-earmark-text"></i>
-                <strong>Included Tests:</strong> {{ enrollment.exam.tests?.length || 0 }}
-              </p>
-              <p class="info-item">
-                <i class="bi bi-person-check"></i>
-                <strong>Enrolled:</strong> {{ formatDate(enrollment.enrollmentDate!) }}
-              </p>
-            </div>
+  <section *ngIf="!loading && enrolledExams.length > 0" class="content-panel enrolled-panel">
+    <div class="section-heading">
+      <div>
+        <span class="section-kicker">Current progress</span>
+        <h2>My Enrolled Exams</h2>
+      </div>
+      <span class="section-count">{{ enrolledExams.length }} active</span>
+    </div>
 
-            <div class="card-actions mt-3">
-              <button 
-                class="btn btn-primary w-100"
-                [disabled]="enrollment.status !== EnrollmentStatus.APPROVED"
-                (click)="viewExamDetails(enrollment.exam)">
-                <i class="bi bi-arrow-right-circle"></i>
-                {{ enrollment.status === EnrollmentStatus.APPROVED ? 'View Exam' : 'Awaiting Approval' }}
-              </button>
+    <div class="exam-grid">
+      <ng-container *ngFor="let enrollment of enrolledExams">
+        <article *ngIf="enrollment.exam" class="exam-card enrolled-card">
+          <div class="card-topline">
+            <span class="exam-pill exam-pill-green">{{ getEnrollmentStatusText(enrollment.status) }}</span>
+            <span class="status-chip">Enrolled</span>
+          </div>
+
+          <h3>{{ enrollment.exam.title }}</h3>
+          <p class="card-description">{{ enrollment.exam.description }}</p>
+
+          <div class="meta-grid">
+            <div class="meta-item">
+              <i class="bi bi-calendar-event"></i>
+              <span>{{ formatDate(enrollment.exam.startDate) }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="bi bi-calendar-check"></i>
+              <span>{{ formatDate(enrollment.exam.endDate) }}</span>
+            </div>
+            <div class="meta-item">
+              <i class="bi bi-trophy"></i>
+              <span>{{ enrollment.exam.passingScore }}% pass mark</span>
+            </div>
+            <div class="meta-item">
+              <i class="bi bi-person-check"></i>
+              <span>Enrolled {{ formatDate(enrollment.enrollmentDate!) }}</span>
             </div>
           </div>
-        </div>
+
+          <div class="card-actions">
+            <button class="btn btn-primary w-100" [disabled]="enrollment.status !== EnrollmentStatus.APPROVED" (click)="viewExamDetails(enrollment.exam)">
+              <i class="bi bi-arrow-right-circle"></i>
+              {{ enrollment.status === EnrollmentStatus.APPROVED ? 'View Exam' : 'Awaiting Approval' }}
+            </button>
+          </div>
+        </article>
+      </ng-container>
+    </div>
+  </section>
+
+  <section *ngIf="!loading" class="content-panel exams-panel">
+    <div class="section-heading">
+      <div>
+        <span class="section-kicker">Enroll now</span>
+        <h2>Available Exams</h2>
       </div>
-    </div>
-  </div>
-
-  <!-- Available Exams Section -->
-  <div *ngIf="!loading" class="available-section">
-    <h2 class="section-title">
-      <i class="bi bi-card-list"></i> Available Exams for Enrollment
-    </h2>
-    
-    <div *ngIf="publishedExams.length === 0" class="alert alert-info">
-      <i class="bi bi-info-circle"></i> No exams available for enrollment at this time.
+      <span class="section-count">{{ getPublishedExamCount() }} published</span>
     </div>
 
-    <div class="row">
-      <div *ngFor="let exam of publishedExams" class="col-md-6 col-lg-4 mb-3">
-        <div class="card exam-card h-100" 
-             [ngClass]="{
-               'ongoing-exam-card': exam.status === ExamStatus.ONGOING,
-               'published-exam-card': exam.status === ExamStatus.PUBLISHED,
-               'draft-exam-card': exam.status === ExamStatus.DRAFT
-             }">
-          
-        
+    <div *ngIf="publishedExams.length === 0" class="empty-state">
+      <i class="bi bi-inbox"></i>
+      <h3>No exams available right now</h3>
+      <p>When new exams are published or go live, they will appear here automatically.</p>
+    </div>
 
-          <div class="card-body">
-            <div class="d-flex justify-content-between align-items-start mb-2">
-              <h5 class="card-title">{{ exam.title }}</h5>
-              <span class="badge bg-{{ getStatusColor(exam.status) }}">
-                {{ exam.status }}
-              </span>
-            </div>
-            <p class="card-text text-muted">{{ exam.description }}</p>
-            
-            <div class="exam-info">
-              <p class="info-item">
-                <i class="bi bi-calendar-event"></i>
-                <strong>Start:</strong> {{ formatDate(exam.startDate) }}
-              </p>
-              <p class="info-item">
-                <i class="bi bi-calendar-check"></i>
-                <strong>End:</strong> {{ formatDate(exam.endDate) }}
-              </p>
-              <p class="info-item">
-                <i class="bi bi-people"></i>
-                <strong>Max Students:</strong> {{ exam.maxStudents || 'Unlimited' }}
-              </p>
-              <p class="info-item">
-                <i class="bi bi-trophy"></i>
-                <strong>Passing Score:</strong> {{ exam.passingScore }}%
-              </p>
-              <p class="info-item">
-                <i class="bi bi-file-earmark-text"></i>
-                <strong>Included Tests:</strong> {{ exam.tests?.length || 0 }}
-              </p>
-            </div>
+    <div class="exam-grid" *ngIf="publishedExams.length > 0">
+      <article *ngFor="let exam of publishedExams" class="exam-card" [ngClass]="{
+        'ongoing-exam-card': exam.status === ExamStatus.ONGOING,
+        'published-exam-card': exam.status === ExamStatus.PUBLISHED,
+        'draft-exam-card': exam.status === ExamStatus.DRAFT
+      }">
+        <div class="card-topline">
+          <span class="exam-pill exam-pill-{{ getStatusColor(exam.status) }}">{{ exam.status }}</span>
+          <span class="status-chip">{{ exam.tests?.length || 0 }} tests</span>
+        </div>
 
-            <div class="card-actions mt-3">
-              <button 
-                *ngIf="!isEnrolled(exam.id!)"
-                class="btn w-100"
-                [ngClass]="{
-                  'btn-success': exam.status !== ExamStatus.ONGOING,
-                  'btn-danger': exam.status === ExamStatus.ONGOING
-                }"
-                [disabled]="!canEnroll(exam)"
-                (click)="openEnrollmentModal(exam)">
-                <i class="bi bi-person-plus"></i> 
-                {{ exam.status === ExamStatus.ONGOING ? 'Enroll Now - Live!' : 'Enroll Now' }}
-              </button>
-              <button 
-                *ngIf="isEnrolled(exam.id!)"
-                class="btn btn-secondary w-100"
-                disabled>
-                <i class="bi bi-check-circle"></i> Already Enrolled
-              </button>
-            </div>
+        <h3>{{ exam.title }}</h3>
+        <p class="card-description">{{ exam.description }}</p>
+
+        <div class="meta-grid">
+          <div class="meta-item">
+            <i class="bi bi-calendar-event"></i>
+            <span>{{ formatDate(exam.startDate) }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="bi bi-calendar-check"></i>
+            <span>{{ formatDate(exam.endDate) }}</span>
+          </div>
+          <div class="meta-item">
+            <i class="bi bi-people"></i>
+            <span>{{ exam.maxStudents || 'Unlimited' }} seats</span>
+          </div>
+          <div class="meta-item">
+            <i class="bi bi-trophy"></i>
+            <span>{{ exam.passingScore }}% pass mark</span>
           </div>
         </div>
-      </div>
+
+        <div class="card-actions">
+          <button class="btn w-100 exam-action" [ngClass]="{
+            'btn-success': exam.status !== ExamStatus.ONGOING,
+            'btn-danger': exam.status === ExamStatus.ONGOING
+          }" [disabled]="!canEnroll(exam)" (click)="takeExam(exam)">
+            <i class="bi bi-arrow-right-circle"></i>
+            {{ exam.status === ExamStatus.ONGOING ? 'Take Exam - Live' : 'Take Exam' }}
+          </button>
+        </div>
+      </article>
     </div>
-  </div>
+  </section>
 </div>
 
-<!-- Enrollment Modal -->
 <div class="modal" [class.show]="showEnrollmentModal" [style.display]="showEnrollmentModal ? 'block' : 'none'">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content enrollment-modal">
       <div class="modal-header">
-        <h5 class="modal-title">
-          <i class="bi bi-person-check"></i> Face Verification
-        </h5>
-        <button type="button" class="btn-close" (click)="closeEnrollmentModal()"></button>
+        <div>
+          <p class="modal-kicker">Face verification</p>
+          <h5 class="modal-title">Confirm Enrollment</h5>
+        </div>
+        <button type="button" class="btn-close btn-close-white" (click)="closeEnrollmentModal()"></button>
       </div>
       <div class="modal-body text-center">
-        <p class="enrollment-subtitle mb-3">Enrolling in: <strong>{{ selectedExam?.title }}</strong></p>
-        
-        <div *ngIf="errorMessage" class="alert alert-danger alert-sm">
-          <i class="bi bi-exclamation-triangle"></i> {{ errorMessage }}
+        <p class="enrollment-subtitle">Enrolling in <strong>{{ selectedExam?.title }}</strong></p>
+
+        <div *ngIf="errorMessage" class="status-banner status-banner-danger compact-banner">
+          <i class="bi bi-exclamation-triangle"></i>
+          <div><p>{{ errorMessage }}</p></div>
         </div>
-        <div *ngIf="successMessage" class="alert alert-success alert-sm">
-          <i class="bi bi-check-circle"></i> {{ successMessage }}
+        <div *ngIf="successMessage" class="status-banner status-banner-success compact-banner">
+          <i class="bi bi-check-circle"></i>
+          <div><p>{{ successMessage }}</p></div>
         </div>
 
         <div class="face-verification-card">
@@ -198,9 +212,7 @@
                 <div class="face-guide-circle"></div>
               </div>
             </div>
-            <p class="camera-hint">
-              <i class="bi bi-info-circle"></i> Position your face in the circle
-            </p>
+            <p class="camera-hint"><i class="bi bi-info-circle"></i> Position your face inside the frame</p>
             <button class="btn btn-primary btn-capture" (click)="capturePhoto()">
               <i class="bi bi-camera-fill"></i> Capture Photo
             </button>
@@ -210,23 +222,13 @@
             <div class="preview-frame">
               <img [src]="capturedImage" alt="Captured photo" class="preview-image">
             </div>
-            <p class="preview-hint">
-              <i class="bi bi-check-circle-fill text-success"></i> Photo captured successfully
-            </p>
-            <button class="btn btn-warning btn-retake mb-2" (click)="retakePhoto()">
+            <p class="preview-hint"><i class="bi bi-check-circle-fill text-success"></i> Photo captured successfully</p>
+            <button class="btn btn-outline-secondary btn-retake mb-2" (click)="retakePhoto()">
               <i class="bi bi-arrow-clockwise"></i> Retake
             </button>
-            <button 
-              class="btn btn-success btn-confirm" 
-              (click)="enrollInExam()"
-              [disabled]="enrolling">
-              <span *ngIf="!enrolling">
-                <i class="bi bi-check-circle"></i> Confirm & Enroll
-              </span>
-              <span *ngIf="enrolling">
-                <span class="spinner-border spinner-border-sm me-2"></span>
-                Verifying...
-              </span>
+            <button class="btn btn-success btn-confirm" (click)="enrollInExam()" [disabled]="enrolling">
+              <span *ngIf="!enrolling"><i class="bi bi-check-circle"></i> Confirm & Enroll</span>
+              <span *ngIf="enrolling"><span class="spinner-border spinner-border-sm me-2"></span>Verifying...</span>
             </button>
           </div>
         </div>
@@ -234,4 +236,5 @@
     </div>
   </div>
 </div>
+
 <div class="modal-backdrop" [class.show]="showEnrollmentModal" [style.display]="showEnrollmentModal ? 'block' : 'none'"></div>

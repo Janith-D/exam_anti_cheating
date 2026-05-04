@@ -342,6 +342,50 @@
   background: linear-gradient(135deg, #fff 0%, var(--color-gray-lighter) 100%);
 }
 
+.alert-card {
+  position: relative;
+}
+
+.alert-selector {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  z-index: 10;
+}
+
+.alert-selector input[type="checkbox"],
+.section-header-left input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  accent-color: #d9534f;
+}
+
+.section-header-left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.btn-icon-only {
+  padding: 5px 8px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-outline-danger {
+  background: white;
+  border: 2px solid #d9534f;
+  color: #d9534f;
+}
+
+.btn-outline-danger:hover {
+  background: #d9534f;
+  color: white;
+}
+
 .alert-header {
   display: flex;
   justify-content: space-between;

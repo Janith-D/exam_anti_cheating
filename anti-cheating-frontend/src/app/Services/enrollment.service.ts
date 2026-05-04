@@ -41,6 +41,23 @@ export class EnrollmentService {
     ).pipe(catchError(this.handleError));
   }
 
+  // Verify already enrolled user for exam access
+  verifyInExam(examId: number, studentId: number, image: File): Observable<EnrollmentResponse> {
+    const formData = new FormData();
+    formData.append('studentId', studentId.toString());
+    formData.append('image', image);
+
+    const headers = new HttpHeaders({
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    });
+
+    return this.http.post<EnrollmentResponse>(
+      `${this.apiUrl}/verify/${examId}`,
+      formData,
+      { headers }
+    ).pipe(catchError(this.handleError));
+  }
+
   // Get student's enrollments
   getStudentEnrollments(studentId: number): Observable<Enrollment[]> {
     return this.http.get<Enrollment[]>(

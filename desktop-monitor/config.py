@@ -14,7 +14,7 @@ class Config:
     API_BASE_URL = f"{BACKEND_URL}/api/desktop-monitor"
     
     # Monitoring Settings
-    SCREENSHOT_INTERVAL = 120  # seconds (2 minutes) - during exam
+    SCREENSHOT_INTERVAL = 30  # seconds - during exam (reduced for testing)
     ENROLLMENT_SCREENSHOT_INTERVAL = 5  # seconds (5 seconds) - during enrollment
     ACTIVITY_LOG_INTERVAL = 30  # seconds
     HEARTBEAT_INTERVAL = 60  # seconds

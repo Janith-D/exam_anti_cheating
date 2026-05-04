@@ -64,4 +64,9 @@ export class TestService {
   getStudentResults(studentId: number): Observable<TestResult[]> {
     return this.http.get<TestResult[]>(`${this.apiUrl}/results/student/${studentId}`);
   }
+
+  // Grade an essay submission (Admin only)
+  gradeEssay(resultId: number, scorePercentage: number): Observable<TestResult> {
+    return this.http.post<TestResult>(`${this.apiUrl}/results/${resultId}/grade`, { scorePercentage });
+  }
 }

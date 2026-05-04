@@ -51,6 +51,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
   blockedAt: string | null = null;
   blockedBy: string | null = null;
   blockCheckInterval: any = null;
+  isLaunchingMonitor = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -107,11 +108,10 @@ export class TestPageComponent implements OnInit, OnDestroy {
       return;
     }
 
-    console.log('🚀 Launching desktop monitor with:', {
-      studentId: this.currentUser.id,
-      sessionId: this.sessionId,
-      testId: this.testId
-    });
+    // Set flag to bypass beforeunload check
+    this.isLaunchingMonitor = true;
+
+    console.log('📺 Starting desktop monitor launch sequence...');
 
     // Launch desktop monitoring application
     const launched = this.desktopMonitorService.launchDesktopMonitor(
@@ -119,20 +119,46 @@ export class TestPageComponent implements OnInit, OnDestroy {
       this.sessionId
     );
 
+    // Reset flag after a short delay to allow protocol launch
+    setTimeout(() => {
+      this.isLaunchingMonitor = false;
+    }, 3000);
+
     if (launched) {
-      console.log('✅ Desktop monitor launched successfully');
+      console.log('✅ Desktop monitor launch initiated');
       this.desktopMonitorService.showDesktopMonitorNotification(
-        'Desktop monitoring has been activated for this exam. Screenshots will be taken every 2 minutes.'
+        '📹 Desktop Monitoring Active\n\nScreenshots will be captured every 30 seconds during this exam.'
       );
     } else {
       console.warn('⚠️ Failed to launch desktop monitor');
       // Check if desktop monitor is installed
       this.desktopMonitorService.checkDesktopMonitorInstalled().then(installed => {
         if (!installed) {
-          this.desktopMonitorService.promptInstallDesktopMonitor();
+          this.showDesktopMonitorInstallDialog();
         }
       });
     }
+  }
+
+  showDesktopMonitorInstallDialog(): void {
+    const message = `
+Desktop Monitor Not Ready
+
+To monitor this exam, the Desktop Monitor application must be installed and registered.
+
+Setup Instructions:
+1. Open Command Prompt as Administrator
+2. Navigate to: desktop-monitor folder
+3. Run: install-auto-launch.bat
+4. Click OK to complete setup
+5. Restart your browser and try again
+
+After setup, the desktop monitor will auto-launch whenever you take an exam.
+
+Note: You only need to do this setup once.
+    `.trim();
+
+    alert(message);
   }
 
   ngOnDestroy(): void {
@@ -216,8 +242,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
             );
             this.studentActivityService.sendActivity(testStartedActivity);
             
-            // Also log test started event to database for persistence
-            this.logEvent('TEST_STARTED', `Started test: ${this.test?.title}`);
+            // Removed redundant logEvent to avoid duplication (WebSocket handles persistence)
           },
           error: (error) => {
             console.error('Error creating exam session:', error);
@@ -247,7 +272,12 @@ export class TestPageComponent implements OnInit, OnDestroy {
       // Warning at 5 minutes remaining
       if (this.timeRemaining === 300) {
         alert('⚠️ 5 minutes remaining!');
-        this.logEvent('TIME_WARNING', '5 minutes remaining');
+        const warningActivity = this.studentActivityService.createActivity(
+          'TIME_WARNING', 'LOW', '5 minutes remaining',
+          { id: this.currentUser.id, name: this.currentUser.username, email: this.currentUser.email },
+          { sessionId: this.sessionId, testId: this.testId, testName: this.test?.title || 'Unknown Test' }
+        );
+        this.studentActivityService.sendActivity(warningActivity);
       }
     });
   }
@@ -308,28 +338,37 @@ export class TestPageComponent implements OnInit, OnDestroy {
       );
       this.studentActivityService.sendActivity(answerActivity);
       
-      // Also log to database
-      this.logEvent('ANSWER_SELECTED', `Question ${this.currentQuestionIndex + 1}: Option ${optionLetter}`);
+      // Removed redundant logEvent to avoid duplication
     }
   }
 
   nextQuestion(): void {
     if (this.currentQuestionIndex < this.questions.length - 1) {
       this.currentQuestionIndex++;
-      this.logEvent('QUESTION_NAVIGATED', `Moved to question ${this.currentQuestionIndex + 1}`);
+      this.sendNavigationActivity(`Moved to question ${this.currentQuestionIndex + 1}`);
     }
   }
 
   previousQuestion(): void {
     if (this.currentQuestionIndex > 0) {
       this.currentQuestionIndex--;
-      this.logEvent('QUESTION_NAVIGATED', `Moved to question ${this.currentQuestionIndex + 1}`);
+      this.sendNavigationActivity(`Moved to question ${this.currentQuestionIndex + 1}`);
     }
   }
 
   goToQuestion(index: number): void {
     this.currentQuestionIndex = index;
-    this.logEvent('QUESTION_NAVIGATED', `Jumped to question ${index + 1}`);
+    this.sendNavigationActivity(`Jumped to question ${index + 1}`);
+  }
+
+  private sendNavigationActivity(details: string): void {
+    if (!this.currentUser) return;
+    const navActivity = this.studentActivityService.createActivity(
+      'QUESTION_NAVIGATED', 'LOW', details,
+      { id: this.currentUser.id, name: this.currentUser.username, email: this.currentUser.email },
+      { sessionId: this.sessionId, testId: this.testId, testName: this.test?.title || 'Unknown Test' }
+    );
+    this.studentActivityService.sendActivity(navActivity);
   }
 
   // Check if student is blocked from this exam
@@ -483,8 +522,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
           // Disconnect WebSocket after submission
           this.studentActivityService.disconnect();
           
-          // Also log to database
-          this.logEvent('TEST_SUBMITTED', `Submitted with ${this.answeredCount} answers`);
+          // Removed redundant logEvent to avoid duplication
           
           // Navigate to results with the result data
           this.router.navigate(['/results'], { 
@@ -567,8 +605,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
         );
         this.studentActivityService.sendActivity(tabSwitchActivity);
         
-        // Also log to database for persistence
-        this.logEvent('TAB_SWITCH', `Tab switched (count: ${this.tabSwitchCount})`);
+        // Removed redundant logEvent to avoid duplication
         
         if (this.tabSwitchCount >= 3) {
           alert('⚠️ Warning: Multiple tab switches detected! This activity is being monitored.');
@@ -595,8 +632,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
       );
       this.studentActivityService.sendActivity(blurActivity);
       
-      // Also log to database
-      this.logEvent('WINDOW_BLUR', 'Window lost focus');
+      // Removed redundant logEvent to avoid duplication
     });
     
     window.addEventListener('focus', () => {
@@ -618,8 +654,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
       );
       this.studentActivityService.sendActivity(focusActivity);
       
-      // Also log to database
-      this.logEvent('WINDOW_FOCUS', 'Window gained focus');
+      // Removed redundant logEvent to avoid duplication
     });
   }
 
@@ -645,8 +680,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
       );
       this.studentActivityService.sendActivity(copyActivity);
       
-      // Also log to database
-      this.logEvent('COPY_ATTEMPT', 'Copy attempt detected');
+      // Removed redundant logEvent to avoid duplication
       
       e.preventDefault();
       alert('⚠️ Copying is not allowed during the test!');
@@ -673,8 +707,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
       );
       this.studentActivityService.sendActivity(pasteActivity);
       
-      // Also log to database
-      this.logEvent('PASTE_ATTEMPT', 'Paste attempt detected');
+      // Removed redundant logEvent to avoid duplication
     });
     
     document.addEventListener('contextmenu', (e) => {
@@ -698,40 +731,18 @@ export class TestPageComponent implements OnInit, OnDestroy {
       );
       this.studentActivityService.sendActivity(rightClickActivity);
       
-      // Also log to database
-      this.logEvent('RIGHT_CLICK', 'Right-click detected');
+      // Removed redundant logEvent to avoid duplication
     });
   }
 
   setupBeforeUnloadHandler(): void {
     window.addEventListener('beforeunload', (e) => {
-      if (!this.submitting) {
+      if (!this.submitting && !this.isLaunchingMonitor) {
         e.preventDefault();
         e.returnValue = 'You have an ongoing test. Are you sure you want to leave?';
       }
     });
   }
 
-  logEvent(eventType: string, details: string): void {
-    if (!this.currentUser) return;
-    
-    const event = {
-      studentId: this.currentUser.userId || this.currentUser.id,
-      examSessionId: this.sessionId || null,
-      eventType: eventType,
-      details: details,
-      timestamp: new Date().toISOString()
-    };
-    
-    console.log('Logging event:', event);
-    
-    this.eventService.logEvent(event).subscribe({
-      next: () => {
-        // Event logged successfully
-      },
-      error: (error: any) => {
-        console.error('Failed to log event:', error);
-      }
-    });
-  }
+  // Removed logEvent method since StudentActivityService handles persistence
 }

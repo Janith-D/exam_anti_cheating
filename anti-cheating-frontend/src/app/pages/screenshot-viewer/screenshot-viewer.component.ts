@@ -21,8 +21,10 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
   loading = false;
   errorMessage = '';  
+  lastRefreshedAt: Date | null = null;
   // Image blob URLs cache
   imageUrls: Map<number, string> = new Map();  
+  private refreshTimer: any = null;
   // Filter options
   filterMode: 'session' | 'student' | 'flagged' | 'all' = 'all';
   selectedStudentId: number | null = null;
@@ -64,7 +66,24 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
       this.loadFilterOptions();
       this.loadScreenshots();
       this.loadAlerts();
+      this.startAutoRefresh();
     });
+  }
+
+  private startAutoRefresh(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+
+    this.refreshTimer = setInterval(() => {
+      if (!this.loading) {
+        this.loadScreenshots();
+      }
+    }, 10000);
+  }
+
+  refreshScreenshots(): void {
+    this.loadScreenshots();
   }
 
   loadFilterOptions(): void {
@@ -92,6 +111,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
   loadScreenshots(): void {
     this.loading = true;
     this.errorMessage = '';
+    this.clearImageCache();
 
     switch (this.filterMode) {
       case 'session':
@@ -127,11 +147,21 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
     this.loadAlerts();
   }
 
+  private clearImageCache(): void {
+    this.imageUrls.forEach(url => {
+      if (url && url !== 'loading') {
+        URL.revokeObjectURL(url);
+      }
+    });
+    this.imageUrls.clear();
+  }
+
   loadScreenshotsBySession(sessionId: number): void {
     this.desktopMonitorService.getScreenshotsBySession(sessionId).subscribe({
       next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
+        this.lastRefreshedAt = new Date();
         this.preloadScreenshotImages(screenshots);
       },
       error: (error: any) => {
@@ -148,6 +178,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
         next: (screenshots: Screenshot[]) => {
           this.screenshots = screenshots;
           this.loading = false;
+          this.lastRefreshedAt = new Date();
           this.preloadScreenshotImages(screenshots);
         },
         error: (error: any) => {
@@ -161,6 +192,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
         next: (screenshots: Screenshot[]) => {
           this.screenshots = screenshots;
           this.loading = false;
+          this.lastRefreshedAt = new Date();
           this.preloadScreenshotImages(screenshots);
         },
         error: (error: any) => {
@@ -177,6 +209,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
       next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
+        this.lastRefreshedAt = new Date();
         this.preloadScreenshotImages(screenshots);
       },
       error: (error: any) => {
@@ -192,6 +225,7 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
       next: (screenshots: Screenshot[]) => {
         this.screenshots = screenshots;
         this.loading = false;
+        this.lastRefreshedAt = new Date();
         this.preloadScreenshotImages(screenshots);
       },
       error: (error: any) => {
@@ -288,11 +322,12 @@ export class ScreenshotViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    if (this.refreshTimer) {
+      clearInterval(this.refreshTimer);
+    }
+
     // Clean up blob URLs
-    this.imageUrls.forEach(url => {
-      if (url) URL.revokeObjectURL(url);
-    });
-    this.imageUrls.clear();
+    this.clearImageCache();
   }
 
   openScreenshot(screenshot: Screenshot): void {

@@ -59,15 +59,15 @@ export class DesktopMonitorService {
   ) { }
 
   /**
-   * Launch the desktop monitoring application via local HTTP API.
-   * The desktop monitor must already be running in the background.
-   * Falls back to custom protocol handler if local API is unavailable.
+   * Launch the desktop monitoring application via local HTTP API or protocol handler.
+   * First tries local API (if monitor already running).
+   * Falls back to custom protocol handler which auto-launches the monitor.
    */
   launchDesktopMonitor(studentId: number, examSessionId?: number, isEnrollment: boolean = false): boolean {
     try {
       const token = this.authService.getToken();
       if (!token) {
-        console.error('No authentication token available');
+        console.error('❌ No authentication token available');
         return false;
       }
 
@@ -82,34 +82,50 @@ export class DesktopMonitorService {
         payload.sessionId = examSessionId;
       }
 
-      console.log('Sending start command to desktop monitor local API:', { studentId, mode });
+      console.log('🖥️ Launching desktop monitor:', { studentId, sessionId: examSessionId, mode });
 
-      // Try local HTTP API first (desktop monitor already running in background)
-      fetch(`${this.localMonitorUrl}/start`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      }).then(response => {
-        if (response.ok) {
-          console.log('Desktop monitor started successfully via local API');
-        } else {
-          console.warn('Desktop monitor local API returned error, falling back to protocol handler');
+      // Try local HTTP API first (if desktop monitor already running)
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 1500);
+
+        fetch(`${this.localMonitorUrl}/start`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        }).then(response => {
+          clearTimeout(timeout);
+          if (response.ok) {
+            console.log('✓ Desktop monitor responded (already running)');
+          } else {
+            console.log('↪️ Monitor not ready, using protocol handler to auto-launch...');
+            this._launchViaProtocol(token, studentId, examSessionId, mode);
+          }
+        }).catch((err: any) => {
+          clearTimeout(timeout);
+          if (err && err.name === 'AbortError') {
+            console.log('↪️ Monitor not running, using protocol handler to auto-launch...');
+          } else {
+            console.log('↪️ Using protocol handler to auto-launch monitor...');
+          }
           this._launchViaProtocol(token, studentId, examSessionId, mode);
-        }
-      }).catch(err => {
-        console.warn('Desktop monitor local API not available, falling back to protocol handler:', err.message);
+        });
+      } catch (err: any) {
+        console.log('↪️ Using protocol handler to auto-launch monitor...');
         this._launchViaProtocol(token, studentId, examSessionId, mode);
-      });
+      }
 
       return true;
     } catch (error) {
-      console.error('Error launching desktop monitor:', error);
+      console.error('❌ Error launching desktop monitor:', error);
       return false;
     }
   }
 
   /**
-   * Fallback: launch via custom protocol handler (requires protocol registration)
+   * Launch via custom protocol handler (auto-starts desktop monitor if installed)
+   * Requires install-auto-launch.bat to have been run previously
    */
   private _launchViaProtocol(token: string, studentId: number, examSessionId?: number, mode?: string): void {
     let url = `desktop-monitor://login?token=${encodeURIComponent(token)}&studentId=${studentId}`;
@@ -122,7 +138,7 @@ export class DesktopMonitorService {
       url += `&mode=${mode}`;
     }
 
-    console.log('Launching desktop monitor via protocol:', url);
+    console.log('🔗 Triggering protocol handler:', 'desktop-monitor://...');
 
     const link = document.createElement('a');
     link.href = url;
@@ -133,6 +149,8 @@ export class DesktopMonitorService {
     setTimeout(() => {
       document.body.removeChild(link);
     }, 500);
+
+    console.log('💻 Desktop monitor should be launching in the background...');
   }
 
   /**
@@ -255,12 +273,30 @@ export class DesktopMonitorService {
    * Check if desktop monitor protocol is installed
    */
   async checkDesktopMonitorInstalled(): Promise<boolean> {
+    // First check local desktop monitor service
     try {
-      // Try to check status endpoint to verify backend is ready
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 1200);
+      const res = await fetch(`${this.localMonitorUrl}/status`, { signal: controller.signal });
+      clearTimeout(timeout);
+      if (res && res.ok) {
+        console.log('Local desktop monitor service reachable');
+        return true;
+      }
+    } catch (err: any) {
+      if (err && err.name === 'AbortError') {
+        console.warn('Local desktop monitor status check timed out');
+      } else {
+        console.warn('Local desktop monitor status check failed:', err && err.message ? err.message : err);
+      }
+    }
+
+    // Fallback: check backend-managed desktop monitor bridge
+    try {
       const status = await this.checkStatus().toPromise();
       return status?.status === 'online';
     } catch (error) {
-      console.error('Desktop monitor API not available:', error);
+      console.error('Desktop monitor API (backend) not available:', error);
       return false;
     }
   }
@@ -270,17 +306,40 @@ export class DesktopMonitorService {
    */
   promptInstallDesktopMonitor(): void {
     const message = `
-      Desktop Monitoring Application Required
-      
-      To ensure exam integrity, please install the desktop monitoring application.
-      
-      Installation Steps:
-      1. Navigate to: desktop-monitor/
-      2. Run: install.bat
-      3. Reload this page
-      4. Launch the exam again
-    `;
+Desktop Monitor Setup Required
+
+To enable automatic exam monitoring, you need to register the Desktop Monitor application.
+
+One-Time Setup Instructions:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Open Command Prompt as Administrator
+   (Right-click → Run as Administrator)
+
+2. Navigate to the desktop-monitor folder:
+   cd desktop-monitor
+
+3. Run the installer:
+   install-auto-launch.bat
+
+4. Follow the installer prompts and click OK
+
+5. Restart your browser
+
+After Setup:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+• The Desktop Monitor will auto-launch 
+  whenever you take an exam
+• No more manual startup needed
+• Screenshots will be captured and shared 
+  with proctors automatically
+
+Need Help?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Check: desktop-monitor/README.md for more details
+    `.trim();
 
     alert(message);
   }
 }
+

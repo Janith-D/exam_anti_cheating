@@ -1,1 +1,146 @@
-<p>test-results works!</p>
+<div class="admin-results-container">
+
+  <!-- Header -->
+  <div class="page-header">
+    <button class="btn btn-ghost" (click)="goBack()">← Back</button>
+    <div class="header-info">
+      <h1>Test Results</h1>
+      <p class="subtitle">Test ID: {{ testId }}</p>
+    </div>
+    <div class="pending-chip" *ngIf="pendingCount() > 0">
+      {{ pendingCount() }} Pending Review
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div *ngIf="loading" class="loading-state">
+    <div class="spinner"></div>
+    <p>Loading results...</p>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="!loading && error" class="error-banner">
+    {{ error }}
+    <button (click)="loadResults()">Retry</button>
+  </div>
+
+  <!-- Empty -->
+  <div *ngIf="!loading && !error && results.length === 0" class="empty-state">
+    <div class="empty-icon">📋</div>
+    <h3>No submissions yet</h3>
+    <p>No students have submitted this test.</p>
+  </div>
+
+  <!-- Results Table -->
+  <div *ngIf="!loading && !error && results.length > 0" class="table-card">
+    <table class="results-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Student</th>
+          <th>Score</th>
+          <th>Correct</th>
+          <th>Total Qs</th>
+          <th>Completed</th>
+          <th>Status</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let result of results; let i = index" [class.pending-row]="result.status === 'PENDING_REVIEW'">
+          <td class="row-num">{{ i + 1 }}</td>
+          <td class="student-cell">
+            <div class="student-name">{{ result.student?.username || result.student?.userName || 'Student' }}</div>
+            <div class="student-email">{{ result.student?.email || '' }}</div>
+          </td>
+          <td>
+            <span class="score-badge" [ngClass]="{
+              'badge-green':  result.scorePercentage >= 80,
+              'badge-blue':   result.scorePercentage >= 60 && result.scorePercentage < 80,
+              'badge-yellow': result.scorePercentage >= 40 && result.scorePercentage < 60,
+              'badge-red':    result.scorePercentage < 40
+            }">
+              {{ result.status === 'PENDING_REVIEW' ? '—' : result.scorePercentage.toFixed(1) + '%' }}
+            </span>
+          </td>
+          <td class="center">{{ result.status === 'PENDING_REVIEW' ? '—' : result.correctAnswers }}</td>
+          <td class="center">{{ result.totalQuestions }}</td>
+          <td class="date-cell">{{ result.completedAt | date:'MMM d, y · h:mm a' }}</td>
+          <td>
+            <span class="status-tag" [ngClass]="result.status === 'PENDING_REVIEW' ? 'tag-pending' : 'tag-graded'">
+              {{ result.status === 'PENDING_REVIEW' ? 'Pending' : 'Graded' }}
+            </span>
+          </td>
+          <td>
+            <button
+              class="btn btn-grade"
+              *ngIf="result.parsedEssays && result.parsedEssays.length > 0"
+              (click)="openGradeModal(result)"
+            >
+              {{ result.status === 'PENDING_REVIEW' ? 'Grade Essay' : 'Re-grade' }}
+            </button>
+            <span *ngIf="!result.parsedEssays || result.parsedEssays.length === 0" class="no-action">MCQ only</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Grading Modal -->
+<div class="modal-overlay" *ngIf="selectedResult" (click)="closeGradeModal()">
+  <div class="modal-card" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Grade Essay — {{ selectedResult.student?.username || selectedResult.student?.userName }}</h2>
+      <button class="btn-close" (click)="closeGradeModal()">✕</button>
+    </div>
+
+    <!-- Essay Answers -->
+    <div class="essays-section" *ngIf="selectedResult.parsedEssays && selectedResult.parsedEssays.length > 0">
+      <div class="essay-block" *ngFor="let essay of selectedResult.parsedEssays; let i = index">
+        <div class="essay-header">
+          <span class="essay-badge">Question {{ i + 1 }}</span>
+        </div>
+        <div class="essay-question-text">{{ essay.questionText }}</div>
+        
+        <div class="student-answer-container">
+          <div class="student-answer-label">Student's Answer</div>
+          <div class="essay-answer">{{ essay.answer || '(No answer provided)' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Score Input -->
+    <div class="grade-section">
+      <div class="score-input-container">
+        <label for="scoreInput">Final Score</label>
+        <div class="score-input-wrapper">
+          <input
+            id="scoreInput"
+            type="number"
+            class="modern-score-input"
+          [(ngModel)]="gradeScore"
+          min="0"
+          max="100"
+            placeholder="0–100"
+          />
+          <span class="modern-pct-label">%</span>
+        </div>
+      </div>
+      <div class="score-hint">Evaluate the answers above and assign a score (0-100).</div>
+    </div>
+
+    <!-- Feedback messages -->
+    <div class="success-msg" *ngIf="gradeSuccess">✓ {{ gradeSuccess }}</div>
+    <div class="error-msg" *ngIf="gradeError">{{ gradeError }}</div>
+
+    <!-- Actions -->
+    <div class="modal-footer">
+      <button class="btn btn-outline-cancel" (click)="closeGradeModal()" [disabled]="grading">Cancel</button>
+      <button class="btn btn-modern-primary" (click)="submitGrade()" [disabled]="grading">
+        {{ grading ? 'Saving...' : 'Submit Grade' }}
+      </button>
+    </div>
+  </div>
+</div>

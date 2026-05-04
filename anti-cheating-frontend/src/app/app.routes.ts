@@ -24,11 +24,13 @@ export const routes: Routes = [
   // Student routes
   {
     path: 'dashboard',
-    loadComponent: () => import('./pages/test-dashboard/test-dashboard.component').then(m => m.TestDashboardComponent)
+    redirectTo: '/exam-dashboard',
+    pathMatch: 'full'
   },
   {
     path: 'test-dashboard',
-    loadComponent: () => import('./pages/test-dashboard/test-dashboard.component').then(m => m.TestDashboardComponent)
+    redirectTo: '/exam-dashboard',
+    pathMatch: 'full'
   },
   {
     path: 'exam-dashboard',

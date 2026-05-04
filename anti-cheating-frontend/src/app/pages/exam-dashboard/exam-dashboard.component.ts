@@ -42,7 +42,7 @@ export class ExamDashboardComponent implements OnInit {
     private cameraService: CameraService,
     private authService: AuthService,
     private desktopMonitorService: DesktopMonitorService,
-    private router: Router
+    public router: Router
   ) {}
 
   ngOnInit(): void {
@@ -85,36 +85,37 @@ export class ExamDashboardComponent implements OnInit {
     this.loading = true;
     this.errorMessage = '';
     
-    // Load both published and ongoing exams (student-accessible endpoints)
-    Promise.all([
+    // Load both published and ongoing exams, but tolerate a single endpoint failure.
+    Promise.allSettled([
       this.examService.getPublishedExams().toPromise(),
       this.examService.getOngoingExams().toPromise()
-    ]).then(([publishedExams, ongoingExams]) => {
-      // Combine and remove duplicates
-      const allExams = [...(ongoingExams || []), ...(publishedExams || [])];
-      
-      // Remove duplicates by ID
-      const uniqueExamsMap = new Map();
-      allExams.forEach(exam => {
-        if (exam && exam.id) {
+    ]).then((results) => {
+      const successfulExams = results.reduce<Exam[]>((allExams, result) => {
+        if (result.status === 'fulfilled' && Array.isArray(result.value)) {
+          allExams.push(...result.value);
+        }
+        return allExams;
+      }, []);
+
+      const uniqueExamsMap = new Map<number, Exam>();
+      successfulExams.forEach((exam) => {
+        if (exam?.id) {
           uniqueExamsMap.set(exam.id, exam);
         }
       });
-      
-      this.publishedExams = Array.from(uniqueExamsMap.values());
-      
-      // Sort: ONGOING exams first (highlighted), then PUBLISHED
-      this.publishedExams.sort((a, b) => {
+
+      this.publishedExams = Array.from(uniqueExamsMap.values()).sort((a, b) => {
         if (a.status === ExamStatus.ONGOING && b.status !== ExamStatus.ONGOING) return -1;
         if (a.status !== ExamStatus.ONGOING && b.status === ExamStatus.ONGOING) return 1;
         return 0;
       });
-      
-      console.log('Loaded exams:', this.publishedExams);
-      this.loading = false;
-    }).catch(error => {
-      console.error('Error loading exams:', error);
-      this.errorMessage = 'Failed to load available exams. Please try again.';
+
+      const allFailed = results.every((result) => result.status === 'rejected');
+      if (allFailed) {
+        console.error('Error loading exams:', results);
+        this.errorMessage = 'Failed to load available exams. Please try again.';
+      }
+
       this.loading = false;
     });
   }
@@ -148,29 +149,17 @@ export class ExamDashboardComponent implements OnInit {
   }
 
   canEnroll(exam: Exam): boolean {
-    return !this.isEnrolled(exam.id!) && 
-           (exam.status === ExamStatus.PUBLISHED || exam.status === ExamStatus.ONGOING);
+    return exam.status === ExamStatus.PUBLISHED || exam.status === ExamStatus.ONGOING;
   }
 
   openEnrollmentModal(exam: Exam): void {
     console.log('Opening enrollment modal for:', exam.title);
     this.selectedExam = exam;
     this.showEnrollmentModal = true;
+    this.capturedImage = null;
     this.errorMessage = '';
     this.successMessage = '';
-    this.capturedImage = null;
-
-    // Launch desktop monitor for enrollment screenshot capture
-    const studentId = this.currentUser?.id || this.currentUser?.userId;
-    if (studentId) {
-      console.log('Launching desktop monitor for enrollment screenshots');
-      this.desktopMonitorService.launchDesktopMonitor(studentId, undefined, true);
-    }
-
-    // Start camera after modal is rendered
-    setTimeout(() => {
-      this.startCamera();
-    }, 300);
+    this.startCamera();
   }
 
   closeEnrollmentModal(): void {
@@ -318,20 +307,35 @@ export class ExamDashboardComponent implements OnInit {
       console.log('📝 Exam ID:', this.selectedExam.id);
       console.log('👤 Student ID:', studentId);
       
+      // Check enrollment status
+      const enrollmentStatus = this.getEnrollmentStatus(this.selectedExam.id!);
+      console.log('📊 Current enrollment status:', enrollmentStatus);
+      
+      // Determine if user is already enrolled
+      const isAlreadyEnrolled = enrollmentStatus === EnrollmentStatus.VERIFIED || 
+                                enrollmentStatus === EnrollmentStatus.APPROVED;
+      
+      if (isAlreadyEnrolled) {
+        console.log('✅ User already enrolled, using VERIFY endpoint instead of ENROLL');
+      } else {
+        console.log('⚠️ User not yet enrolled, using ENROLL endpoint');
+      }
+      
       // Convert base64 to File
       const response = await fetch(this.capturedImage);
       const blob = await response.blob();
       const file = new File([blob], 'face.jpg', { type: 'image/jpeg' });
       console.log('📸 Image file created:', file.size, 'bytes');
 
-      this.enrollmentService.enrollInExam(
-        this.selectedExam.id!,
-        studentId,
-        file
-      ).subscribe({
+      // Call appropriate endpoint based on enrollment status
+      const enrollmentRequest = isAlreadyEnrolled
+        ? this.enrollmentService.verifyInExam(this.selectedExam.id!, studentId, file)
+        : this.enrollmentService.enrollInExam(this.selectedExam.id!, studentId, file);
+
+      enrollmentRequest.subscribe({
         next: (response) => {
-          console.log('✅ Enrollment successful:', response);
-          this.successMessage = `Successfully enrolled in ${this.selectedExam!.title}! Redirecting to exam...`;
+          console.log('✅ Enrollment/Verification successful:', response);
+          this.successMessage = `Successfully verified for ${this.selectedExam!.title}! Redirecting to exam...`;
           this.enrolling = false;
           
           // Store the exam for navigation
@@ -375,6 +379,15 @@ export class ExamDashboardComponent implements OnInit {
     }
   }
 
+  takeExam(exam: Exam): void {
+    if (!exam || !exam.id) {
+      console.error('Cannot take exam: exam is null or missing ID');
+      return;
+    }
+    console.log('📝 Taking exam:', exam.title);
+    this.router.navigate(['/exam-details', exam.id]);
+  }
+
   viewExamDetails(exam: Exam | undefined | null): void {
     if (!exam || !exam.id) {
       console.error('Cannot view exam details: exam is null or missing ID');
@@ -395,6 +408,14 @@ export class ExamDashboardComponent implements OnInit {
     return this.enrollmentService.getStatusText(status);
   }
 
+  getLiveExamCount(): number {
+    return this.publishedExams.filter(exam => exam.status === ExamStatus.ONGOING).length;
+  }
+
+  getPublishedExamCount(): number {
+    return this.publishedExams.filter(exam => exam.status === ExamStatus.PUBLISHED).length;
+  }
+
   formatDate(dateString: string): string {
     return new Date(dateString).toLocaleString();
   }
@@ -406,5 +427,24 @@ export class ExamDashboardComponent implements OnInit {
 
   navigateToTestDashboard(): void {
     this.router.navigate(['/test-dashboard']);
+  }
+
+  getUserDisplayName(): string {
+    if (this.currentUser?.username) {
+      return this.currentUser.username;
+    }
+    if (this.currentUser?.userName) {
+      return this.currentUser.userName;
+    }
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        return user.username || user.userName || 'Student';
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+      }
+    }
+    return 'Student';
   }
 }

@@ -215,7 +215,8 @@ class DesktopMonitor:
                     processes.append(proc.info['name'])
                 except:
                     pass
-            return ", ".join(processes[:50])  # Limit to first 50
+            result = ", ".join(processes[:50])
+            return (result[:997] + '...') if len(result) > 1000 else result
         except Exception as e:
             logger.error(f"Error getting running processes: {e}")
             return ""
@@ -356,38 +357,71 @@ class DesktopMonitor:
             logger.error(f"Error capturing enrollment screenshot: {e}")
 
     def upload_screenshot(self, file_path, active_window, running_processes):
-        """Upload screenshot to backend"""
-        try:
-            url = f"{Config.API_BASE_URL}/screenshot"
-            
-            with open(file_path, 'rb') as f:
-                files = {'file': ('screenshot.png', f, 'image/png')}
-                data = {
-                    'studentId': self.student_id,
-                    'activeWindow': active_window,
-                    'runningProcesses': running_processes,
-                    'captureSource': 'desktop'
-                }
-                
-                if self.exam_session_id:
-                    data['examSessionId'] = self.exam_session_id
-                
-                headers = {'Authorization': f'Bearer {self.token}'}
-                
-                response = requests.post(url, files=files, data=data, headers=headers)
-                
-                if response.status_code == 200:
-                    result = response.json()
-                    if result.get('flagged'):
-                        logger.warning(f"Screenshot flagged as suspicious: {result.get('reason')}")
-                    return True
-                else:
-                    logger.error(f"Upload failed: {response.status_code} - {response.text}")
-                    return False
+        """Upload screenshot to backend with retry logic"""
+        max_retries = 3
+        for attempt in range(1, max_retries + 1):
+            try:
+                url = f"{Config.API_BASE_URL}/screenshot"
+
+                with open(file_path, 'rb') as f:
+                    files = {'file': ('screenshot.png', f, 'image/png')}
+                    data = {
+                        'studentId': self.student_id,
+                        'activeWindow': active_window,
+                        'runningProcesses': running_processes,
+                        'captureSource': 'desktop'
+                    }
+
+                    if self.exam_session_id:
+                        data['examSessionId'] = self.exam_session_id
+
+                    headers = {'Authorization': f'Bearer {self.token}'}
+
+                    logger.info(f"Uploading screenshot (attempt {attempt}/{max_retries})")
+                    logger.debug(f"  URL: {url}")
+                    logger.debug(f"  StudentId: {self.student_id}, SessionId: {self.exam_session_id}")
+                    logger.debug(f"  Token: {self.token[:20]}...{self.token[-10:] if len(self.token) > 30 else ''}")
                     
-        except Exception as e:
-            logger.error(f"Error uploading screenshot: {e}")
-            return False
+                    response = requests.post(url, files=files, data=data, headers=headers, timeout=30)
+
+                    if response.status_code == 200:
+                        result = response.json()
+                        if result.get('flagged'):
+                            logger.warning(f"Screenshot flagged as suspicious: {result.get('reason')}")
+                        else:
+                            logger.info(f"✓ Screenshot uploaded successfully (ID: {result.get('screenshotId')})")
+                        return True
+                    else:
+                        logger.error(f"Upload failed (attempt {attempt}): HTTP {response.status_code}")
+                        logger.error(f"  Response: {response.text[:500]}")
+                        
+                        # Detailed 403 debugging
+                        if response.status_code == 403:
+                            logger.error("  [403 Forbidden] Details:")
+                            logger.error(f"    - Student ID: {self.student_id}")
+                            logger.error(f"    - Exam Session ID: {self.exam_session_id}")
+                            logger.error(f"    - Token valid: {bool(self.token)}")
+                            logger.error(f"    - Mode: {self.mode}")
+                            
+                        # If we got 401/403, authentication issue
+                        if response.status_code in [401, 403]:
+                            logger.error("  This is an authentication/authorization issue - will not retry")
+                            return False
+
+            except requests.exceptions.Timeout:
+                logger.error(f"Upload timed out (attempt {attempt}/{max_retries}) - will retry")
+            except Exception as e:
+                logger.error(f"Error uploading screenshot (attempt {attempt}): {e}")
+                import traceback
+                logger.debug(traceback.format_exc())
+
+            if attempt < max_retries:
+                wait_time = 2 * attempt  # 2s, 4s, 6s
+                logger.info(f"Waiting {wait_time}s before retry...")
+                time.sleep(wait_time)
+
+        logger.error(f"Failed to upload screenshot after {max_retries} attempts")
+        return False
     
     def log_activity(self, activity_type, details, active_window=None, application_name=None, severity=1):
         """Log desktop activity to backend"""
@@ -415,13 +449,22 @@ class DesktopMonitor:
                 'Content-Type': 'application/json'
             }
             
-            response = requests.post(url, json=payload, headers=headers)
+            logger.debug(f"Logging activity: {activity_type} (severity: {severity})")
+            response = requests.post(url, json=payload, headers=headers, timeout=10)
             
-            if response.status_code != 200:
-                logger.error(f"Failed to log activity: {response.status_code} - {response.text}")
+            if response.status_code == 200:
+                logger.info(f"✓ Activity logged: {activity_type}")
+            else:
+                logger.warning(f"Failed to log activity '{activity_type}': HTTP {response.status_code}")
+                if response.status_code in [401, 403]:
+                    logger.error(f"  Authentication issue: {response.text[:200]}")
+                else:
+                    logger.debug(f"  Response: {response.text[:200]}")
                 
+        except requests.exceptions.Timeout:
+            logger.warning(f"Activity log request timed out for '{activity_type}'")
         except Exception as e:
-            logger.error(f"Error logging activity: {e}")
+            logger.error(f"Error logging activity '{activity_type}': {e}")
 
 
 def main():

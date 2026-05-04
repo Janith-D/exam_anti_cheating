@@ -16,7 +16,6 @@ import { TestResult } from '../../models/result.model';
   styleUrl: './test-dashboard.component.css'
 })
 export class TestDashboardComponent implements OnInit {
-  tests: Test[] = [];
   availableExams: any[] = [];
   enrolledExams: any[] = [];
   notEnrolledExams: any[] = [];
@@ -46,8 +45,6 @@ export class TestDashboardComponent implements OnInit {
     } else {
       this.errorMessage = 'Student ID not found. Please login again.';
     }
-    
-    this.loadTests();
   }
 
   loadAvailableExams(): void {
@@ -100,26 +97,9 @@ export class TestDashboardComponent implements OnInit {
     });
   }
 
-  loadTests(): void {
-    this.loading = true;
-    this.errorMessage = '';
-    
-    this.testService.getAllTests().subscribe({
-      next: (tests) => {
-        this.tests = tests;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading tests:', error);
-        this.errorMessage = 'Failed to load tests. Please try again.';
-        this.loading = false;
-      }
-    });
-  }
 
-  startTest(testId: number): void {
-    this.router.navigate(['/test', testId]);
-  }
+
+
 
   startExam(examId: number, sessionId: number): void {
     console.log('Starting exam:', examId, 'Session:', sessionId);

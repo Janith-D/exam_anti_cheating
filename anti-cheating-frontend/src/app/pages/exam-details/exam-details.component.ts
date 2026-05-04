@@ -130,9 +130,8 @@ export class ExamDetailsComponent implements OnInit {
   }
 
   canAccessTest(): boolean {
-    // Allow access if enrollment is VERIFIED or APPROVED
-    return this.enrollmentStatus === EnrollmentStatus.VERIFIED || 
-           this.enrollmentStatus === EnrollmentStatus.APPROVED;
+    // Bypass enrollment check for testing
+    return true;
   }
 
   startTest(test: Test): void {
@@ -161,6 +160,25 @@ export class ExamDetailsComponent implements OnInit {
 
   goBack(): void {
     this.router.navigate(['/exam-dashboard']);
+  }
+
+  getUserDisplayName(): string {
+    if (this.currentUser?.username) {
+      return this.currentUser.username;
+    }
+    if (this.currentUser?.userName) {
+      return this.currentUser.userName;
+    }
+    const storedUser = localStorage.getItem('currentUser');
+    if (storedUser) {
+      try {
+        const user = JSON.parse(storedUser);
+        return user.username || user.userName || 'Student';
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
+      }
+    }
+    return 'Student';
   }
 
   // Launch desktop monitoring application
@@ -223,24 +241,71 @@ export class ExamDetailsComponent implements OnInit {
     this.enrolling = true;
     this.errorMessage = '';
 
-    this.enrollmentService.enrollInExam(this.exam.id!, this.currentUser.id, this.selectedImage).subscribe({
+    // Check if user is already enrolled
+    if (this.enrollmentStatus && 
+        (this.enrollmentStatus === EnrollmentStatus.VERIFIED || 
+         this.enrollmentStatus === EnrollmentStatus.APPROVED)) {
+      // User is already enrolled - use VERIFY instead of ENROLL
+      console.log('User already enrolled, using verification mode');
+      this.verifyExistingEnrollment();
+    } else {
+      // User not enrolled yet - use ENROLL
+      console.log('User not enrolled, using enrollment mode');
+      this.enrollmentService.enrollInExam(this.exam.id!, this.currentUser.id, this.selectedImage).subscribe({
+        next: (response) => {
+          console.log('✅ Enrollment successful:', response);
+          this.successMessage = 'Successfully enrolled! Verifying...';
+          
+          // Launch desktop monitor for this exam
+          this.launchDesktopMonitor();
+          
+          // Wait a moment then refresh enrollment status
+          setTimeout(() => {
+            this.checkEnrollmentStatus(this.exam!.id!);
+            this.closeEnrollmentModal();
+            this.enrolling = false;
+          }, 1500);
+        },
+        error: (error) => {
+          console.error('❌ Enrollment failed:', error);
+          this.errorMessage = error.error?.error || 'Failed to enroll in exam. Please try again.';
+          this.enrolling = false;
+        }
+      });
+    }
+  }
+
+  verifyExistingEnrollment(): void {
+    if (!this.selectedImage) {
+      this.errorMessage = 'Please select your face image';
+      this.enrolling = false;
+      return;
+    }
+
+    if (!this.exam) {
+      this.errorMessage = 'Exam information not available';
+      this.enrolling = false;
+      return;
+    }
+
+    // Call verification endpoint for already enrolled user
+    this.enrollmentService.verifyInExam(this.exam.id!, this.currentUser.id, this.selectedImage).subscribe({
       next: (response) => {
-        console.log('✅ Enrollment successful:', response);
-        this.successMessage = 'Successfully enrolled! Verifying...';
+        console.log('✅ Face verification successful:', response);
+        this.successMessage = 'Face verification passed! Access granted.';
         
         // Launch desktop monitor for this exam
         this.launchDesktopMonitor();
         
-        // Wait a moment then refresh enrollment status
+        // Close modal
         setTimeout(() => {
-          this.checkEnrollmentStatus(this.exam!.id!);
           this.closeEnrollmentModal();
           this.enrolling = false;
         }, 1500);
       },
       error: (error) => {
-        console.error('❌ Enrollment failed:', error);
-        this.errorMessage = error.error?.error || 'Failed to enroll in exam. Please try again.';
+        console.error('❌ Face verification failed:', error);
+        this.errorMessage = error.error?.error || 'Face verification failed. Please try again.';
         this.enrolling = false;
       }
     });

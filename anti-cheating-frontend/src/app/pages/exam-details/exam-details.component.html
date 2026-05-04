@@ -17,86 +17,76 @@
 
   <!-- Exam Details -->
   <div *ngIf="!loading && exam" class="exam-content">
-    <!-- Header -->
-    <div class="exam-header">
-      <button class="btn btn-outline-light mb-3" (click)="goBack()">
-        <i class="bi bi-arrow-left"></i> Back to Exams
-      </button>
-      
-      <div class="d-flex justify-content-between align-items-start">
-        <div>
-          <h1 class="exam-title">{{ exam.title }}</h1>
-          <p class="exam-description">{{ exam.description }}</p>
-        </div>
-        <div class="status-badges">
-          <span class="badge bg-{{ getStatusColor(exam.status) }} status-badge">
-            {{ exam.status }}
-          </span>
-          <span 
-            *ngIf="enrollmentStatus" 
-            class="badge bg-{{ getEnrollmentStatusColor(enrollmentStatus) }} status-badge">
-            {{ getEnrollmentStatusText(enrollmentStatus) }}
-          </span>
-        </div>
-      </div>
-    </div>
+    <!-- Header (modern hero panel) -->
+    <section class="hero-panel">
+      <div class="hero-copy">
+        <button class="btn btn-outline-light mb-3" (click)="goBack()">
+          <i class="bi bi-arrow-left"></i> Back to Exams
+        </button>
 
-    <!-- Exam Information -->
-    <div class="exam-info-section">
-      <div class="row">
-        <div class="col-md-3">
-          <div class="info-card">
-            <i class="bi bi-calendar-event info-icon"></i>
-            <h6>Start Date</h6>
-            <p>{{ formatDate(exam.startDate) }}</p>
+        <span class="eyebrow">{{ exam.status }}</span>
+        <h1>{{ exam.title }}</h1>
+        <p class="hero-description">{{ exam.description }}</p>
+
+        <div class="hero-stats" style="margin-top:18px;">
+          <div class="stat-chip">
+            <span class="stat-value">{{ formatDate(exam.startDate) }}</span>
+            <span class="stat-label">Start</span>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="info-card">
-            <i class="bi bi-calendar-check info-icon"></i>
-            <h6>End Date</h6>
-            <p>{{ formatDate(exam.endDate) }}</p>
+          <div class="stat-chip">
+            <span class="stat-value">{{ formatDate(exam.endDate) }}</span>
+            <span class="stat-label">End</span>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="info-card">
-            <i class="bi bi-trophy info-icon"></i>
-            <h6>Passing Score</h6>
-            <p>{{ exam.passingScore }}%</p>
+          <div class="stat-chip">
+            <span class="stat-value">{{ exam.passingScore }}%</span>
+            <span class="stat-label">Passing</span>
           </div>
-        </div>
-        <div class="col-md-3">
-          <div class="info-card">
-            <i class="bi bi-people info-icon"></i>
-            <h6>Max Students</h6>
-            <p>{{ exam.maxStudents || 'Unlimited' }}</p>
+          <div class="stat-chip">
+            <span class="stat-value">{{ exam.maxStudents || 'Unlimited' }}</span>
+            <span class="stat-label">Seats</span>
           </div>
         </div>
       </div>
-    </div>
+
+      <div class="hero-actions-card">
+        <div class="hero-user">
+          <span class="hero-user-label">Welcome back</span>
+          <strong>{{ getUserDisplayName() }}</strong>
+          <p>Access exam tests and start when ready.</p>
+        </div>
+
+        <div class="header-actions">
+          <button *ngIf="canAccessTest()" class="btn btn-success action-button" (click)="startTest(tests[0])" [disabled]="tests.length===0">
+            <i class="bi bi-play-circle"></i>
+            Start Test
+          </button>
+          <button *ngIf="!canAccessTest()" class="btn btn-primary action-button" (click)="openEnrollmentModal()">
+            <i class="bi bi-person-plus"></i>
+            Enroll
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Exam Information card removed to match dashboard style (stats shown in hero) -->
 
     <!-- Enrollment Status Notice -->
     <div *ngIf="enrollmentStatus === EnrollmentStatus.PENDING || enrollmentStatus === EnrollmentStatus.VERIFIED" 
-         class="alert alert-warning">
+         class="status-banner status-banner-warning">
       <i class="bi bi-clock-history"></i> 
-      Your enrollment is pending approval. You will be able to access the tests once approved.
+      <div>
+        <strong>Enrollment Pending</strong>
+        <p>Your enrollment is pending approval. You will be able to access the tests once approved.</p>
+      </div>
     </div>
 
     <div *ngIf="enrollmentStatus === EnrollmentStatus.REJECTED" 
-         class="alert alert-danger">
+         class="status-banner status-banner-danger">
       <i class="bi bi-x-circle"></i> 
-      Your enrollment was rejected. Please contact the administrator for more information.
-    </div>
-
-    <div *ngIf="!enrollmentStatus" 
-         class="alert alert-info d-flex justify-content-between align-items-center">
       <div>
-        <i class="bi bi-info-circle"></i> 
-        You are not enrolled in this exam. Please enroll to access the tests.
+        <strong>Enrollment Rejected</strong>
+        <p>Your enrollment was rejected. Please contact the administrator for more information.</p>
       </div>
-      <button class="btn btn-success" (click)="openEnrollmentModal()">
-        <i class="bi bi-person-plus"></i> Enroll Now
-      </button>
     </div>
 
     <!-- Tests Section -->

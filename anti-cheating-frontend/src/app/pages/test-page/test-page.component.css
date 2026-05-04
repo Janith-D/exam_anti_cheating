@@ -1,6 +1,6 @@
 .test-container {
   min-height: 100vh;
-  background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+  background: var(--color-gray-lighter, #f4f6f8); /* neutral page background */
   padding: 2rem;
 }
 
@@ -13,13 +13,13 @@
   min-height: 60vh;
   background: white;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .spinner {
   width: 50px;
   height: 50px;
-  border: 4px solid rgba(0,0,0,0.1);
+  border: 4px solid rgba(0, 0, 0, 0.1);
   border-left-color: var(--primary-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
@@ -27,7 +27,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Alert Styles */
@@ -58,46 +60,52 @@
 
 /* Header */
 .test-header {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
+  padding: 1rem 0 2rem 0;
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  margin-bottom: 1.5rem;
+  align-items: flex-start;
+  margin-bottom: 1rem;
 }
 
 .test-info h1 {
-  font-size: 1.75rem;
-  color: var(--text-primary);
-  margin: 0 0 0.5rem 0;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-dark, #1e293b);
+  margin: 0 0 0.25rem 0;
 }
 
 .test-info p {
-  color: var(--text-secondary);
+  color: var(--color-gray, #64748b);
+  font-size: 1rem;
   margin: 0;
+  max-width: 640px;
 }
 
 .timer-container {
   text-align: center;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #4CAF50, #45a049);
+  background: linear-gradient(135deg, rgba(20,184,166,0.12), rgba(13,71,161,0.06));
   border-radius: 12px;
-  color: white;
+  color: var(--color-dark, #1e293b);
   min-width: 150px;
   transition: all 0.3s ease;
+  border: 1px solid rgba(20,184,166,0.16);
+  backdrop-filter: blur(6px);
 }
 
 .timer-container.warning {
-  background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+  background: linear-gradient(135deg, rgba(255,107,107,0.12), rgba(238,90,82,0.08));
   animation: pulse 1.5s ease-in-out infinite;
+  border-color: rgba(255,107,107,0.18);
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.05);
   }
@@ -109,9 +117,9 @@
 }
 
 .timer-display {
-  font-size: 2rem;
-  font-weight: bold;
-  font-family: 'Courier New', monospace;
+  font-size: 1.6rem;
+  font-weight: 700;
+  font-family: 'Inter', system-ui, sans-serif;
   margin: 0.25rem 0;
 }
 
@@ -122,11 +130,9 @@
 
 /* Progress Section */
 .progress-section {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
+  background: transparent;
+  padding: 1rem 0;
   margin-bottom: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
 .progress-bar {
@@ -152,11 +158,9 @@
 
 /* Question Section */
 .question-section {
-  background: white;
-  border-radius: 12px;
-  padding: 2rem;
+  background: transparent;
+  padding: 1rem 0;
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
 .question-card {
@@ -338,7 +342,7 @@
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .question-navigator h3 {
@@ -371,7 +375,7 @@
 .navigator-item:hover {
   border-color: var(--primary-color);
   transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .navigator-item.current {
@@ -484,35 +488,34 @@
 
 /* --- PREMIUM ESSAY NOTEPAD STYLES --- */
 .essay-container {
-  margin-top: 1.5rem !important;
-  background: #fff !important;
-  border-radius: 12px !important;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.05) !important;
-  padding: 5px !important;
-  position: relative !important;
+  margin-top: 1.5rem;
+  width: 100%;
 }
 
 .essay-notepad {
-  width: 100% !important;
-  padding: 20px !important;
-  border: 2px solid #e0e6ed !important;
-  border-radius: 10px !important;
-  font-family: 'Inter', 'Segoe UI', Roboto, sans-serif !important;
-  font-size: 1.1rem !important;
-  line-height: 1.6 !important;
-  color: #2c3e50 !important;
-  resize: vertical !important;
-  min-height: 350px !important;
-  background-image: linear-gradient(#f9f9f9 95%, #e0e0e0 5%) !important;
-  background-size: 100% 3rem !important;
-  line-height: 3rem !important;
-  background-attachment: local !important;
-  transition: all 0.3s ease !important;
+  width: 100%;
+  padding: 1.5rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  resize: vertical;
+  background-color: #f8fafc;
+  color: #1e293b;
+  transition: all 0.2s ease;
+  min-height: 250px;
+  box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.02);
 }
 
 .essay-notepad:focus {
-  outline: none !important;
-  border-color: #3498db !important;
-  box-shadow: 0 0 15px rgba(52, 152, 219, 0.2) !important;
-  background-color: #fff !important;
+  outline: none;
+  border-color: #3b82f6;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.essay-notepad::placeholder {
+  color: #94a3b8;
+  font-style: italic;
 }

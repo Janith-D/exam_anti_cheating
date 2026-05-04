@@ -29,6 +29,7 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
   alerts: Alert[] = [];
   alertSubscription: Subscription | null = null;
   unreadAlertsCount: number = 0;
+  selectedAlertIds: Set<number> = new Set(); // Track selected alerts for deletion
   
   // Statistics
   stats = {
@@ -248,6 +249,10 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['/admin/test-management', testId]);
   }
 
+  viewTestResults(testId: number): void {
+    this.router.navigate(['/admin/results', testId]);
+  }
+
   viewAlertDetails(alertId: number): void {
     this.router.navigate(['/admin/alerts', alertId]);
   }
@@ -268,6 +273,89 @@ export class ProctorDashboardComponent implements OnInit, OnDestroy {
         console.error('Error resolving alert:', error);
       }
     });
+  }
+
+  deleteAlert(alertId: number | undefined): void {
+    if (!alertId) return;
+    if (!confirm('Are you sure you want to delete this alert?')) return;
+
+    this.alertService.deleteAlert(alertId).subscribe({
+      next: () => {
+        this.alerts = this.alerts.filter(a => a.id !== alertId);
+        this.selectedAlertIds.delete(alertId);
+        this.updateStats();
+      },
+      error: (error: any) => {
+        console.error('Error deleting alert:', error);
+        alert('Failed to delete alert');
+      }
+    });
+  }
+
+  toggleAlertSelection(alertId: number | undefined): void {
+    if (!alertId) return;
+    if (this.selectedAlertIds.has(alertId)) {
+      this.selectedAlertIds.delete(alertId);
+    } else {
+      this.selectedAlertIds.add(alertId);
+    }
+  }
+
+  toggleAllAlerts(): void {
+    if (this.selectedAlertIds.size === this.alerts.length) {
+      this.selectedAlertIds.clear();
+    } else {
+      this.alerts.forEach(alert => {
+        if (alert.id) this.selectedAlertIds.add(alert.id);
+      });
+    }
+  }
+
+  isAlertSelected(alertId: number | undefined): boolean {
+    return !!alertId && this.selectedAlertIds.has(alertId);
+  }
+
+  deleteSelectedAlerts(): void {
+    if (this.selectedAlertIds.size === 0) return;
+    
+    const count = this.selectedAlertIds.size;
+    if (!confirm(`Are you sure you want to delete ${count} selected alert(s)?`)) return;
+
+    const idsToDelete = Array.from(this.selectedAlertIds);
+    this.alertService.deleteMultipleAlerts(idsToDelete).subscribe({
+      next: () => {
+        this.alerts = this.alerts.filter(a => !a.id || !this.selectedAlertIds.has(a.id));
+        this.selectedAlertIds.clear();
+        this.updateStats();
+        window.alert(`Successfully deleted ${count} alert(s).`);
+      },
+      error: (error: any) => {
+        console.error('Error deleting alerts:', error);
+        alert('Failed to delete selected alerts');
+      }
+    });
+  }
+
+  clearAllAlerts(): void {
+    if (!confirm('Are you sure you want to delete ALL alerts? This cannot be undone.')) return;
+
+    this.alertService.clearAllAlerts().subscribe({
+      next: (response) => {
+        this.alerts = [];
+        this.selectedAlertIds.clear();
+        this.updateStats();
+        window.alert(`Successfully cleared ${response.deletedCount} alerts.`);
+      },
+      error: (error: any) => {
+        console.error('Error clearing alerts:', error);
+        alert('Failed to clear alerts');
+      }
+    });
+  }
+
+  private updateStats(): void {
+    this.unreadAlertsCount = this.alerts.filter(a => !this.isResolvedAlert(a)).length;
+    this.stats.criticalAlerts = this.alerts.filter(a => this.isCriticalAlert(a) && !this.isResolvedAlert(a)).length;
   }
 
   getSeverityClass(severity: string): string {

@@ -30,6 +30,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class ExamSession {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

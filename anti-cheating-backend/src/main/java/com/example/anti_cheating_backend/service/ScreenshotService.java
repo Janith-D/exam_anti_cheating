@@ -88,8 +88,15 @@ public class ScreenshotService {
         screenshot.setStudent(student);
         screenshot.setExamSession(examSession);
         screenshot.setFilePath(filePath.toString());
-        screenshot.setActiveWindow(activeWindow);
-        screenshot.setRunningProcesses(runningProcesses);
+        
+        // Truncate strings to fit database columns
+        String truncatedActiveWindow = activeWindow != null && activeWindow.length() > 1000 
+            ? activeWindow.substring(0, 997) + "..." : activeWindow;
+        String truncatedRunningProcesses = runningProcesses != null && runningProcesses.length() > 1000 
+            ? runningProcesses.substring(0, 997) + "..." : runningProcesses;
+            
+        screenshot.setActiveWindow(truncatedActiveWindow);
+        screenshot.setRunningProcesses(truncatedRunningProcesses);
         screenshot.setCaptureSource(captureSource != null ? captureSource : "desktop");
         screenshot.setTimestamp(LocalDateTime.now());
         

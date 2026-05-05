@@ -79,6 +79,24 @@ public class AlertController {
         ));
     }
 
+    @DeleteMapping("/{alertId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteAlert(@PathVariable Long alertId) {
+        alertService.deleteAlert(alertId);
+        return ResponseEntity.ok(Map.of("message", "Alert deleted successfully"));
+    }
+
+    @PostMapping("/delete-multiple")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteMultipleAlerts(@RequestBody Map<String, List<Long>> payload) {
+        List<Long> alertIds = payload.get("alertIds");
+        if (alertIds == null || alertIds.isEmpty()) {
+            return ResponseEntity.badRequest().body(Map.of("error", "No alert IDs provided"));
+        }
+        alertService.deleteAlerts(alertIds);
+        return ResponseEntity.ok(Map.of("message", alertIds.size() + " alerts deleted successfully"));
+    }
+
     @GetMapping("/student/{studentId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Alert>> getAlertsByStudent(@PathVariable Long studentId) {

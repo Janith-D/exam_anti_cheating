@@ -40,7 +40,7 @@ public class StudentController {
     private EnrollmentService enrollmentService;
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ADMIN') or principal.username == #username")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> getStudentById(@PathVariable Long id) {
         try {
             Optional<Student> student = studentService.findById(id);

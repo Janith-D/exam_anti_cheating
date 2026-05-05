@@ -83,7 +83,7 @@ public class DesktopMonitorController {
      * Upload screenshot from desktop application
      */
     @PostMapping(value = "/screenshot", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'PROCTOR')")
     public ResponseEntity<?> uploadScreenshot(
             @RequestParam("studentId") Long studentId,
             @RequestParam(value = "examSessionId", required = false) Long examSessionId,
@@ -133,7 +133,7 @@ public class DesktopMonitorController {
      * Log desktop activity
      */
     @PostMapping("/activity")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasAnyRole('STUDENT', 'ADMIN', 'PROCTOR')")
     public ResponseEntity<?> logActivity(@RequestBody Map<String, Object> request) {
         try {
             Long studentId = ((Number) request.get("studentId")).longValue();
@@ -317,7 +317,8 @@ public class DesktopMonitorController {
     public ResponseEntity<?> getActivitiesByStudent(@PathVariable Long studentId) {
         try {
             List<DesktopActivity> activities = desktopActivityService.getActivitiesByStudent(studentId);
-            return ResponseEntity.ok(activities);
+            List<Map<String, Object>> result = activities.stream().map(this::toActivityMap).toList();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -331,7 +332,8 @@ public class DesktopMonitorController {
     public ResponseEntity<?> getActivitiesBySession(@PathVariable Long examSessionId) {
         try {
             List<DesktopActivity> activities = desktopActivityService.getActivitiesByExamSession(examSessionId);
-            return ResponseEntity.ok(activities);
+            List<Map<String, Object>> result = activities.stream().map(this::toActivityMap).toList();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -345,7 +347,8 @@ public class DesktopMonitorController {
     public ResponseEntity<?> getHighSeverityActivities() {
         try {
             List<DesktopActivity> activities = desktopActivityService.getHighSeverityActivities();
-            return ResponseEntity.ok(activities);
+            List<Map<String, Object>> result = activities.stream().map(this::toActivityMap).toList();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
@@ -389,6 +392,33 @@ public class DesktopMonitorController {
             sessionMap.put("status", s.getExamSession().getStatus());
             map.put("examSession", sessionMap);
         }
+        return map;
+    }
+    private Map<String, Object> toActivityMap(DesktopActivity a) {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", a.getId());
+        map.put("timestamp", a.getTimestamp());
+        map.put("activityType", a.getActivityType());
+        map.put("details", a.getDetails());
+        map.put("activeWindow", a.getActiveWindow());
+        map.put("applicationName", a.getApplicationName());
+        map.put("severityLevel", a.getSeverityLevel());
+        map.put("isProcessed", a.getIsProcessed());
+        
+        if (a.getStudent() != null) {
+            Map<String, Object> studentMap = new HashMap<>();
+            studentMap.put("id", a.getStudent().getId());
+            studentMap.put("userName", a.getStudent().getUserName());
+            map.put("student", studentMap);
+        }
+        
+        if (a.getExamSession() != null) {
+            Map<String, Object> sessionMap = new HashMap<>();
+            sessionMap.put("id", a.getExamSession().getId());
+            sessionMap.put("examName", a.getExamSession().getExamName());
+            map.put("examSession", sessionMap);
+        }
+        
         return map;
     }
 }

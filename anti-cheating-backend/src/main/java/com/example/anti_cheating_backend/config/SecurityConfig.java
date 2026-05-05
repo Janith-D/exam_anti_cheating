@@ -2,7 +2,6 @@ package com.example.anti_cheating_backend.config;
 
 import java.util.Arrays;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
@@ -35,7 +34,6 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler;
     private final OAuth2AuthenticationFailureHandler oAuth2AuthenticationFailureHandler;
 
-    @Autowired
     public SecurityConfig(JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                           @Lazy JwtAuthenticationFilter jwtAuthenticationFilter,
                           @Lazy OAuth2AuthenticationSuccessHandler oAuth2AuthenticationSuccessHandler,
@@ -62,16 +60,36 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource())) // Enable CORS with configuration
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers("/api/desktop-monitor/authenticate").permitAll()
-                        .requestMatchers("/api/desktop-monitor/status").permitAll()
-                        .requestMatchers("/health").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/ws/**").permitAll()
-                        .anyRequest().authenticated()
-                );
+                .authorizeHttpRequests(auth -> {
+                    auth.requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll();
+                    auth.requestMatchers("/api/auth/**").permitAll();
+                    
+                    // Desktop Monitor endpoints
+                    auth.requestMatchers("/api/desktop-monitor/authenticate", "/api/desktop-monitor/status").permitAll();
+                    // Students can upload screenshots and log activity during exams
+                    auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/desktop-monitor/screenshot").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/desktop-monitor/activity").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
+                    // Students can view their own screenshots and activities
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/screenshots/student/**").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/activities/student/**").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
+                    // Admin-only screenshot/activity retrieval endpoints
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/screenshots/**").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/activities/**").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/desktop-monitor/**").hasAuthority("ROLE_ADMIN");
+                    
+                    // Student-accessible exam endpoints (public GET routes)
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/exams/published").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/exams/ongoing").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN");
+                    // Admin-only endpoints (creation, modification, deletion)
+                    auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/exams").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/exams/**").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/exams/**").hasAuthority("ROLE_ADMIN");
+                    // Other admin endpoints
+                    auth.requestMatchers("/api/students", "/api/students/**", "/api/sessions", "/api/sessions/**").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll();
+                    auth.requestMatchers("/health", "/error", "/ws/**").permitAll();
+                    auth.anyRequest().authenticated();
+                });
 
             http.oauth2Login(oauth2 -> oauth2
                 .successHandler(oAuth2AuthenticationSuccessHandler)

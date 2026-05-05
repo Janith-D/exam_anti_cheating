@@ -49,6 +49,14 @@ public class AlertService {
         return total;
     }
 
+    public void deleteAlert(Long alertId) {
+        alertRepo.deleteById(alertId);
+    }
+
+    public void deleteAlerts(List<Long> alertIds) {
+        alertRepo.deleteAllByIdInBatch(alertIds);
+    }
+
     public Alert resolveAlert(Long alertId, String resolvedBy) {
         Alert alert = alertRepo.findById(alertId)
                 .orElseThrow(() -> new RuntimeException("Alert not found"));

@@ -2,7 +2,10 @@ package com.example.anti_cheating_backend.entity;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -19,6 +22,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TestResult {
+
+    public enum ResultStatus {
+        GRADED,
+        PENDING_REVIEW
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -32,7 +41,11 @@ public class TestResult {
     private double totalQuestions;
     private double scorePercentage;
     private LocalDateTime completedAt;
-    
-    @jakarta.persistence.Column(columnDefinition = "TEXT")
+
+    @Column(length = 20)
+    @Enumerated(EnumType.STRING)
+    private ResultStatus status = ResultStatus.GRADED;
+
+    @Column(columnDefinition = "TEXT")
     private String essayAnswersJson;
 }

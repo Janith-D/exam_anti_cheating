@@ -139,6 +139,33 @@ public class EnrollmentController {
         }
     }
 
+    // Verify already enrolled student for exam access
+    @PostMapping(value = "/verify/{examId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('STUDENT')")
+    public ResponseEntity<Map<String, Object>> verifyInExam(
+            @PathVariable Long examId,
+            @RequestParam("studentId") Long studentId,
+            @RequestParam("image") MultipartFile image) {
+        try {
+            String imageBase64 = "data:image/jpeg;base64," + Base64.getEncoder().encodeToString(image.getBytes());
+            Enrollment enrollment = enrollmentService.verifyInExam(studentId, examId, imageBase64);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Face verification successful");
+            response.put("enrollmentId", enrollment.getId());
+            response.put("examId", examId);
+            response.put("status", enrollment.getStatus());
+            response.put("verificationScore", enrollment.getVerificationScore());
+            response.put("isVerified", enrollment.getIsVerified());
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(errorResponse);
+        }
+    }
+
     @GetMapping("/student/{studentId}/exams")
     @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public ResponseEntity<?> getStudentEnrollments(@PathVariable Long studentId) {

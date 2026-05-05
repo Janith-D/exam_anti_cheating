@@ -4,6 +4,7 @@ import com.example.anti_cheating_backend.entity.Question;
 import com.example.anti_cheating_backend.entity.Student;
 import com.example.anti_cheating_backend.entity.Test;
 import com.example.anti_cheating_backend.entity.TestResult;
+import com.example.anti_cheating_backend.entity.TestResult.ResultStatus;
 import com.example.anti_cheating_backend.repo.QuestionRepo;
 import com.example.anti_cheating_backend.repo.StudentRepo;
 import com.example.anti_cheating_backend.repo.TestRepo;
@@ -82,13 +83,15 @@ public class TestResultService {
         result.setTest(test);
         result.setStudent(student);
         result.setCorrectAnswers(correctAnswers);
-        result.setTotalQuestions(mcqCount > 0 ? mcqCount : questions.size()); // Fallback to avoid dividing by 0 if all are essays
+        result.setTotalQuestions(mcqCount > 0 ? mcqCount : questions.size());
         result.setScorePercentage(mcqCount > 0 ? (double) correctAnswers / mcqCount * 100 : 0);
         result.setCompletedAt(LocalDateTime.now());
         result.setEssayAnswersJson(essayAnswersJson);
+        // If any essay questions exist, require admin grading
+        result.setStatus(essayAnswers.isEmpty() ? ResultStatus.GRADED : ResultStatus.PENDING_REVIEW);
 
         TestResult savedResult = testResultRepo.save(result);
-        LOGGER.info("Created test result for student " + studentId + " on test " + testId + ": " + savedResult.getScorePercentage() + "%");
+        LOGGER.info("Created test result for student " + studentId + " on test " + testId + ": " + savedResult.getScorePercentage() + "% [" + savedResult.getStatus() + "]");
         return savedResult;
     }
 
@@ -98,5 +101,15 @@ public class TestResultService {
 
     public List<TestResult> getResultsByStudent(Long studentId) {
         return testResultRepo.findByStudentId(studentId);
+    }
+
+    public TestResult gradeEssay(Long resultId, double scorePercentage) {
+        TestResult result = testResultRepo.findById(resultId)
+                .orElseThrow(() -> new RuntimeException("Result not found: " + resultId));
+        result.setScorePercentage(scorePercentage);
+        result.setStatus(ResultStatus.GRADED);
+        TestResult saved = testResultRepo.save(result);
+        LOGGER.info("Essay graded for result " + resultId + ": " + scorePercentage + "%");
+        return saved;
     }
 }

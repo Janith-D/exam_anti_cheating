@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -195,75 +196,10 @@ public class AuthService implements UserDetailsService {
 
         Student student = studentRepo.findByUserName(userName);
         
-        // Check if user is ADMIN - admins don't need face verification
-        boolean isAdmin = student.getRole() == Enums.UserRole.ADMIN;
-        LOGGER.info("User role: " + student.getRole() + ", isAdmin: " + isAdmin);
-        
-        boolean verified = true; // Default to verified for admins
-        
-        // Only require face verification for STUDENTS
-        if (!isAdmin) {
-            LOGGER.info("User is STUDENT, checking face enrollment...");
-            
-            // Get ALL enrollments for the student (including exam enrollments and face enrollment)
-            java.util.List<Enrollment> enrollments = enrollmentRepo.findAllByStudentId(student.getId());
-            
-            LOGGER.info("Found " + enrollments.size() + " enrollments for student " + student.getId());
-            
-            // Find the face enrollment (the one without an exam, or the oldest one)
-            Enrollment faceEnrollment = null;
-            for (Enrollment e : enrollments) {
-                try {
-                    // Check if exam is null or has invalid ID
-                    if (e.getExam() == null) {
-                        LOGGER.info("Found enrollment " + e.getId() + " with null exam (face-only enrollment)");
-                        if (e.getFaceEmbedding() != null && !e.getFaceEmbedding().isEmpty()) {
-                            faceEnrollment = e;
-                            break;
-                        }
-                    }
-                } catch (Exception ex) {
-                    // Exam reference might be invalid (e.g., exam_id = 0), skip this enrollment
-                    LOGGER.warning("Skipping enrollment " + e.getId() + " due to invalid exam reference: " + ex.getMessage());
-                    if (e.getFaceEmbedding() != null && !e.getFaceEmbedding().isEmpty()) {
-                        faceEnrollment = e;
-                        break;
-                    }
-                }
-            }
-            
-            // If no face-only enrollment found, use the first one with face embedding
-            if (faceEnrollment == null && !enrollments.isEmpty()) {
-                for (Enrollment e : enrollments) {
-                    try {
-                        if (e.getFaceEmbedding() != null && !e.getFaceEmbedding().isEmpty()) {
-                            LOGGER.info("Using enrollment " + e.getId() + " with face embedding");
-                            faceEnrollment = e;
-                            break;
-                        }
-                    } catch (Exception ex) {
-                        LOGGER.warning("Error accessing enrollment " + e.getId() + ": " + ex.getMessage());
-                    }
-                }
-            }
-            
-            if (faceEnrollment == null || faceEnrollment.getFaceEmbedding() == null) {
-                throw new RuntimeException("No face enrollment found for student. Please register with face verification first.");
-            }
-
-            // Verify face for students only
-            if (mlServiceEnabled) {
-                verified = verifyFace(student.getId(), imageBase64, faceEnrollment.getFaceEmbedding(), audioBase64);
-            } else {
-                LOGGER.info("ML service disabled, skipping face verification");
-                verified = true;
-            }
-            if (!verified) {
-                throw new RuntimeException("Face verification failed during login");
-            }
-        } else {
-            LOGGER.info("User is ADMIN, skipping face verification");
-        }
+        // Login only requires username/password
+        // Face/Voice verification is ONLY for enrollment, not for login
+        boolean verified = true;
+        LOGGER.info("User " + userName + " authenticated via password. Biometric verification skipped for login.");
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);
@@ -409,15 +345,11 @@ public class AuthService implements UserDetailsService {
         
         boolean faceMatch = Boolean.TRUE.equals(result.get("match"));
         boolean liveness = Boolean.TRUE.equals(result.get("liveness"));
-        
-        // Check if voice audio was provided, reject login if someone tries to bypass voice!
-        if (audioBase64 == null || audioBase64.isEmpty()) {
-            LOGGER.warning("Voice audio missing from login request! Rejecting to prevent bypass.");
-            throw new RuntimeException("Voice verification is mandatory. Audio sample missing.");
-        }
-        
         boolean voiceMatch = Boolean.TRUE.equals(result.get("voice"));
+        
         LOGGER.info("Verification results - Face: " + faceMatch + ", Liveness: " + liveness + ", Voice: " + voiceMatch);
+        
+        // All checks required for full verification
         return faceMatch && liveness && voiceMatch;
     }
 
@@ -441,7 +373,7 @@ public class AuthService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User.builder()
                 .username(student.getUserName())
                 .password(student.getPassword())
-                .authorities("ROLE_" + student.getRole().name())
+                .authorities(new SimpleGrantedAuthority("ROLE_" + student.getRole().name()))
                 .build();
     }
 }

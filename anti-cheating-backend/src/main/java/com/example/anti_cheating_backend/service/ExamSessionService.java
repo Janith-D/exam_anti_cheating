@@ -60,22 +60,12 @@ public class ExamSessionService {
         return examSessionRepo.save(session);
     }
     
+    @Transactional
     public List<ExamSession> getActiveSessions(){
         try {
             LocalDateTime now = LocalDateTime.now();
             System.out.println("🔍 Checking for active sessions at: " + now);
-            return getActiveSessionsTransactional(now);
-        } catch (Exception e) {
-            System.err.println("❌ Error in getActiveSessions: " + e.getMessage());
-            e.printStackTrace();
-            // Return empty list instead of throwing exception
-            return new ArrayList<>();
-        }
-    }
-
-    @Transactional
-    protected List<ExamSession> getActiveSessionsTransactional(LocalDateTime now) {
-        try {
+            
             // Mark expired sessions as completed
             System.out.println("🔄 Updating expired sessions...");
             int updatedCount = examSessionRepo.completeExpiredActiveSessions(
@@ -95,8 +85,9 @@ public class ExamSessionService {
             
             return activeSessions != null ? activeSessions : new ArrayList<>();
         } catch (Exception e) {
-            System.err.println("❌ Error in getActiveSessionsTransactional: " + e.getMessage());
+            System.err.println("❌ Error in getActiveSessions: " + e.getMessage());
             e.printStackTrace();
+            // Return empty list instead of throwing exception
             return new ArrayList<>();
         }
     }

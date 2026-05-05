@@ -144,49 +144,93 @@ public class EnrollmentService {
             return createMockExamEnrollment(student, exam, existingEnrollment);
         }
 
-        // Call ML service for face verification
+        // Determine which ML endpoint to use
+        String mlEndpoint;
+        boolean isReVerification = existingEnrollment.isPresent();
+        
+        if (isReVerification) {
+            mlEndpoint = "/verify";
+            LOGGER.info("Student " + studentId + " already has enrollment record, using /verify endpoint");
+        } else {
+            mlEndpoint = "/enroll";
+            LOGGER.info("New enrollment for student " + studentId + ", using /enroll endpoint");
+        }
+
+        // Call ML service
         Map<String, Object> payload = Map.of("studentId", studentId, "image", imageBase64);
-        LOGGER.info("Sending enrollment request to ML service for exam " + examId);
+        LOGGER.info("Sending " + mlEndpoint + " request to ML service for exam " + examId);
         
         ResponseEntity<Map> response;
         try {
-            response = restTemplate.postForEntity(mlService + "/enroll", payload, Map.class);
+            response = restTemplate.postForEntity(mlService + mlEndpoint, payload, Map.class);
         } catch (RestClientException e) {
             LOGGER.severe("ML service connection failed: " + e.getMessage());
             throw new RuntimeException("ML service connection failed: " + e.getMessage());
         }
 
         if (!response.getStatusCode().is2xxSuccessful()) {
-            LOGGER.severe("ML enrollment failed: HTTP " + response.getStatusCode());
-            throw new RuntimeException("ML enrollment failed: HTTP " + response.getStatusCode());
+            LOGGER.severe("ML " + mlEndpoint + " failed: HTTP " + response.getStatusCode());
+            throw new RuntimeException("ML " + mlEndpoint + " failed: HTTP " + response.getStatusCode());
         }
 
         Map<String, Object> result = response.getBody();
-        LOGGER.info("ML service response: " + (result != null ? result : "null"));
+        LOGGER.info("ML service " + mlEndpoint + " response: " + (result != null ? result : "null"));
         
-        if (result == null || !Boolean.TRUE.equals(result.get("success")) || 
-            (result.get("embedding") == null && result.get("embeddin") == null)) {
-            String errorMsg = "Enrollment failed: Invalid ML service response";
-            if (result != null) {
-                errorMsg += " - success: " + result.get("success");
+        // Handle response based on endpoint
+        if (isReVerification) {
+            // Verification response
+            if (result == null || !Boolean.TRUE.equals(result.get("success"))) {
+                String errorMsg = "Verification failed: " + (result != null && result.get("error") != null ? 
+                                result.get("error") : "Invalid ML service response");
+                LOGGER.severe(errorMsg);
+                throw new RuntimeException(errorMsg);
             }
-            LOGGER.severe(errorMsg);
-            throw new RuntimeException(errorMsg);
+            
+            // Update existing enrollment with verification result
+            Enrollment enrollment = existingEnrollment.get();
+            enrollment.setLastVerification(LocalDateTime.now());
+            enrollment.setIsVerified(true);
+            
+            // Extract similarity score from ML service response
+            double similarityScore = 0.0;
+            if (result.containsKey("similarity")) {
+                Object similarity = result.get("similarity");
+                if (similarity instanceof Number) {
+                    similarityScore = ((Number) similarity).doubleValue();
+                }
+            }
+            enrollment.setVerificationScore(Math.min(similarityScore, 1.0));
+            enrollment.setStatus(Enums.EnrollmentStatus.VERIFIED);
+            
+            LOGGER.info("Verification successful for student " + studentId + " in exam " + examId);
+            return enrollmentRepo.save(enrollment);
+        } else {
+            // Enrollment response
+            if (result == null || !Boolean.TRUE.equals(result.get("success")) || 
+                (result.get("embedding") == null && result.get("embeddin") == null)) {
+                String errorMsg = "Enrollment failed: Invalid ML service response";
+                if (result != null) {
+                    errorMsg += " - success: " + result.get("success");
+                }
+                LOGGER.severe(errorMsg);
+                throw new RuntimeException(errorMsg);
+            }
+
+            // Create new enrollment
+            Enrollment enrollment = new Enrollment();
+            enrollment.setStudent(student);
+            enrollment.setExam(exam);
+            enrollment.setFaceEmbedding(result.get("embedding") != null ? 
+                                        result.get("embedding").toString() : 
+                                        result.get("embeddin").toString());
+            enrollment.setEnrollmentDate(LocalDateTime.now());
+            enrollment.setIsVerified(true);
+            enrollment.setVerificationScore((Double) result.getOrDefault("quality", 1.0));
+            enrollment.setStatus(Enums.EnrollmentStatus.VERIFIED);
+
+            LOGGER.info("Enrollment successful for student " + studentId + " in exam " + examId);
+            return enrollmentRepo.save(enrollment);
         }
-
-        // Reuse existing enrollment if present, otherwise create new
-        Enrollment enrollment = existingEnrollment.orElse(new Enrollment());
-        enrollment.setStudent(student);
-        enrollment.setExam(exam);
-        enrollment.setFaceEmbedding(result.get("embedding") != null ? 
-                                    result.get("embedding").toString() : 
-                                    result.get("embeddin").toString());
-        enrollment.setEnrollmentDate(LocalDateTime.now());
-        enrollment.setIsVerified(true);
-        enrollment.setVerificationScore((Double) result.getOrDefault("quality", 1.0));
-        enrollment.setStatus(Enums.EnrollmentStatus.VERIFIED);
-
-        return enrollmentRepo.save(enrollment);
     }
 
     private Enrollment createMockExamEnrollment(Student student, Exam exam, Optional<Enrollment> existingEnrollment) {
@@ -199,6 +243,75 @@ public class EnrollmentService {
         enrollment.setIsVerified(true);
         enrollment.setVerificationScore(1.0);
         enrollment.setStatus(Enums.EnrollmentStatus.APPROVED);
+        return enrollmentRepo.save(enrollment);
+    }
+
+    // Verify already enrolled student for exam access
+    public Enrollment verifyInExam(Long studentId, Long examId, String imageBase64) {
+        Student student = studentRepo.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found: " + studentId));
+
+        Exam exam = examRepo.findById(examId)
+                .orElseThrow(() -> new RuntimeException("Exam not found: " + examId));
+
+        // Check if student is already enrolled with APPROVED or VERIFIED status
+        Optional<Enrollment> existingEnrollment = enrollmentRepo.findByStudentIdAndExamId(studentId, examId);
+        if (!existingEnrollment.isPresent()) {
+            throw new RuntimeException("Student is not enrolled in this exam. Please enroll first.");
+        }
+
+        Enrollment enrollment = existingEnrollment.get();
+        
+        // Verify using ML service /verify endpoint (not /enroll)
+        if (!mlServiceEnabled) {
+            LOGGER.info("ML service disabled, using mock verification for exam: " + examId);
+            enrollment.setLastVerification(LocalDateTime.now());
+            enrollment.setIsVerified(true);
+            enrollment.setVerificationScore(1.0);
+            return enrollmentRepo.save(enrollment);
+        }
+
+        Map<String, Object> payload = Map.of("studentId", studentId, "image", imageBase64);
+        LOGGER.info("Sending verification request to ML service for exam " + examId);
+        
+        ResponseEntity<Map> response;
+        try {
+            response = restTemplate.postForEntity(mlService + "/verify", payload, Map.class);
+        } catch (RestClientException e) {
+            LOGGER.severe("ML service connection failed: " + e.getMessage());
+            throw new RuntimeException("ML service connection failed: " + e.getMessage());
+        }
+
+        if (!response.getStatusCode().is2xxSuccessful()) {
+            LOGGER.severe("ML verification failed: HTTP " + response.getStatusCode());
+            throw new RuntimeException("ML verification failed: " + response.getStatusCode());
+        }
+
+        Map<String, Object> result = response.getBody();
+        LOGGER.info("ML service verification response: " + (result != null ? result : "null"));
+        
+        if (result == null || !Boolean.TRUE.equals(result.get("success"))) {
+            String errorMsg = "Verification failed: " + (result != null && result.get("error") != null ? 
+                            result.get("error") : "Invalid ML service response");
+            throw new RuntimeException(errorMsg);
+        }
+
+        // Update enrollment with verification result
+        enrollment.setLastVerification(LocalDateTime.now());
+        enrollment.setIsVerified(true);
+        
+        // Extract similarity score from ML service response
+        double similarityScore = 0.0;
+        if (result.containsKey("similarity")) {
+            Object similarity = result.get("similarity");
+            if (similarity instanceof Number) {
+                similarityScore = ((Number) similarity).doubleValue();
+            }
+        }
+        enrollment.setVerificationScore(Math.min(similarityScore, 1.0));
+        
+        // Keep existing enrollment status, just update verification
+        LOGGER.info("Verification successful for student " + studentId + " in exam " + examId);
         return enrollmentRepo.save(enrollment);
     }
 

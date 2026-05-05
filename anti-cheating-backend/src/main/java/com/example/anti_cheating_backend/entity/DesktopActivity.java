@@ -1,4 +1,5 @@
 package com.example.anti_cheating_backend.entity;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class DesktopActivity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

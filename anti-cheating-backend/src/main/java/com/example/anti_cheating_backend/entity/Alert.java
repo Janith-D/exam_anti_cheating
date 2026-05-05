@@ -26,6 +26,7 @@ import lombok.ToString;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Alert {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

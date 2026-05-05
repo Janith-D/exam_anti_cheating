@@ -241,6 +241,9 @@ public class EventService {
             System.out.println("Activity saved: " + savedEvent.getType() + " for student " + 
                              (student != null ? student.getId() : "unknown"));
             
+            // Apply rules to trigger alerts (e.g. excessive tab switching)
+            applyRules(savedEvent);
+            
             return savedEvent;
             
         } catch (Exception e) {

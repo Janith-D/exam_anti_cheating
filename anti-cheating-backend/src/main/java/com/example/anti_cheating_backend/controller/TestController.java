@@ -144,7 +144,7 @@ public class TestController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<List<Test>> getAvailableTests() {
         try {
             List<Test> tests = testService.getAvailableTests();
@@ -250,6 +250,27 @@ public class TestController {
         } catch (RuntimeException e) {
             LOGGER.severe("Error fetching results for student " + studentId + ": " + e.getMessage());
             return ResponseEntity.badRequest().body(null);
+        }
+    }
+
+    /**
+     * Admin endpoint: Grade an essay submission.
+     * Body: { "scorePercentage": 75.0 }
+     */
+    @PostMapping("/results/{resultId}/grade")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> gradeEssay(@PathVariable Long resultId, @RequestBody Map<String, Double> body) {
+        try {
+            Double score = body.get("scorePercentage");
+            if (score == null || score < 0 || score > 100) {
+                return ResponseEntity.badRequest().body(Map.of("error", "scorePercentage must be between 0 and 100"));
+            }
+            TestResult result = testResultService.gradeEssay(resultId, score);
+            LOGGER.info("Admin graded result " + resultId + " with score " + score + "%");
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            LOGGER.severe("Error grading essay for result " + resultId + ": " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 }

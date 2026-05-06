@@ -71,15 +71,19 @@
               {{ result.status === 'PENDING_REVIEW' ? 'Pending' : 'Graded' }}
             </span>
           </td>
-          <td>
-            <button
-              class="btn btn-grade"
-              *ngIf="result.parsedEssays && result.parsedEssays.length > 0"
-              (click)="openGradeModal(result)"
-            >
-              {{ result.status === 'PENDING_REVIEW' ? 'Grade Essay' : 'Re-grade' }}
-            </button>
-            <span *ngIf="!result.parsedEssays || result.parsedEssays.length === 0" class="no-action">MCQ only</span>
+          <td class="action-cell">
+            <div class="action-buttons">
+              <button
+                class="btn btn-grade"
+                *ngIf="result.parsedEssays && result.parsedEssays.length > 0"
+                (click)="openGradeModal(result)"
+              >
+                {{ result.status === 'PENDING_REVIEW' ? 'Grade Essay' : 'Re-grade' }}
+              </button>
+              <button class="btn-delete-icon" (click)="deleteResult(result)" title="Delete Result">
+                <span class="icon">🗑️</span>
+              </button>
+            </div>
           </td>
         </tr>
       </tbody>

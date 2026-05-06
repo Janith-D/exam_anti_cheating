@@ -146,6 +146,22 @@ export class TestResultsComponent implements OnInit {
     });
   }
 
+  deleteResult(result: TestResult) {
+    if (!result.id) return;
+    
+    const studentName = result.student?.username || result.student?.userName || 'this student';
+    if (confirm(`Are you sure you want to delete the result for student "${studentName}"? This action cannot be undone.`)) {
+      this.testService.deleteTestResult(result.id).subscribe({
+        next: () => {
+          this.results = this.results.filter(r => r.id !== result.id);
+        },
+        error: (err) => {
+          alert('Failed to delete result: ' + (err.error?.message || err.message));
+        }
+      });
+    }
+  }
+
   pendingCount(): number {
     return this.results.filter(r => r.status === 'PENDING_REVIEW').length;
   }

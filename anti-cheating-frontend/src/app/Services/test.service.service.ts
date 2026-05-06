@@ -69,4 +69,9 @@ export class TestService {
   gradeEssay(resultId: number, scorePercentage: number): Observable<TestResult> {
     return this.http.post<TestResult>(`${this.apiUrl}/results/${resultId}/grade`, { scorePercentage });
   }
+
+  // Delete test result (Admin only)
+  deleteTestResult(resultId: number): Observable<any> {
+    return this.http.delete<any>(`${this.apiUrl}/results/${resultId}`);
+  }
 }

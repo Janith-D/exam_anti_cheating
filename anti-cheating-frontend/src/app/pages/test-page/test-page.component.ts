@@ -52,6 +52,7 @@ export class TestPageComponent implements OnInit, OnDestroy {
   blockedBy: string | null = null;
   blockCheckInterval: any = null;
   isLaunchingMonitor = false;
+  private monitorLaunched = false; // tracks if desktop monitor was actually started
 
   constructor(
     private route: ActivatedRoute,
@@ -114,52 +115,32 @@ export class TestPageComponent implements OnInit, OnDestroy {
     console.log('📺 Starting desktop monitor launch sequence...');
 
     // Launch desktop monitoring application
-    const launched = this.desktopMonitorService.launchDesktopMonitor(
+    this.desktopMonitorService.launchDesktopMonitor(
       this.currentUser.id,
       this.sessionId
     );
+    this.monitorLaunched = true;
 
     // Reset flag after a short delay to allow protocol launch
+    // And verify if it actually connected!
     setTimeout(() => {
       this.isLaunchingMonitor = false;
-    }, 3000);
-
-    if (launched) {
-      console.log('✅ Desktop monitor launch initiated');
-      this.desktopMonitorService.showDesktopMonitorNotification(
-        '📹 Desktop Monitoring Active\n\nScreenshots will be captured every 30 seconds during this exam.'
-      );
-    } else {
-      console.warn('⚠️ Failed to launch desktop monitor');
-      // Check if desktop monitor is installed
+      
       this.desktopMonitorService.checkDesktopMonitorInstalled().then(installed => {
         if (!installed) {
-          this.showDesktopMonitorInstallDialog();
+          console.warn('⚠️ Desktop monitor not detected after launch');
+          this.desktopMonitorService.promptInstallDesktopMonitor();
+        } else {
+          console.log('✅ Desktop monitor launch verified');
+          this.desktopMonitorService.showDesktopMonitorNotification(
+            '📹 Desktop Monitoring Active\n\nScreenshots will be captured every 30 seconds during this exam.'
+          );
         }
       });
-    }
+    }, 4000); // 4 seconds is usually enough for the protocol handler to start the app
   }
 
-  showDesktopMonitorInstallDialog(): void {
-    const message = `
-Desktop Monitor Not Ready
 
-To monitor this exam, the Desktop Monitor application must be installed and registered.
-
-Setup Instructions:
-1. Open Command Prompt as Administrator
-2. Navigate to: desktop-monitor folder
-3. Run: install-auto-launch.bat
-4. Click OK to complete setup
-5. Restart your browser and try again
-
-After setup, the desktop monitor will auto-launch whenever you take an exam.
-
-Note: You only need to do this setup once.
-    `.trim();
-
-    alert(message);
-  }
 
   ngOnDestroy(): void {
     if (this.timerSubscription) {
@@ -173,6 +154,12 @@ Note: You only need to do this setup once.
     
     // Disconnect WebSocket when component is destroyed
     this.studentActivityService.disconnect();
+
+    // Stop the desktop monitor ONLY if it was actually launched this session
+    if (this.monitorLaunched) {
+      this.desktopMonitorService.stopMonitor();
+      this.monitorLaunched = false;
+    }
   }
 
   loadTestAndQuestions(): void {

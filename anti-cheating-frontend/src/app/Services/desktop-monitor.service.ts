@@ -154,6 +154,37 @@ export class DesktopMonitorService {
   }
 
   /**
+   * Stop the desktop monitor (called when student exits exam).
+   * Sends POST to local monitor's /stop endpoint.
+   */
+  stopMonitor(): void {
+    console.log('🛑 Stopping desktop monitor...');
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 2000);
+
+      fetch(`${this.localMonitorUrl}/stop`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        signal: controller.signal
+      }).then(response => {
+        clearTimeout(timeout);
+        if (response.ok) {
+          console.log('✓ Desktop monitor stopped successfully.');
+        } else {
+          console.warn('⚠️ Desktop monitor /stop returned non-OK status:', response.status);
+        }
+      }).catch((err: any) => {
+        clearTimeout(timeout);
+        // Monitor may already be stopped or not running — this is fine
+        console.log('ℹ️ Desktop monitor was not running or could not be reached:', err?.message || err);
+      });
+    } catch (err: any) {
+      console.log('ℹ️ Could not reach desktop monitor to stop it:', err?.message || err);
+    }
+  }
+
+  /**
    * Check if desktop monitoring API is available
    */
   checkStatus(): Observable<DesktopMonitorStatus> {
@@ -291,14 +322,9 @@ export class DesktopMonitorService {
       }
     }
 
-    // Fallback: check backend-managed desktop monitor bridge
-    try {
-      const status = await this.checkStatus().toPromise();
-      return status?.status === 'online';
-    } catch (error) {
-      console.error('Desktop monitor API (backend) not available:', error);
-      return false;
-    }
+    // Do NOT fallback to backend status! The backend status only tells us if the backend API is up,
+    // not if the student's local desktop monitor application is running.
+    return false;
   }
 
   /**

@@ -196,10 +196,21 @@ public class AuthService implements UserDetailsService {
 
         Student student = studentRepo.findByUserName(userName);
         
-        // Login only requires username/password
-        // Face/Voice verification is ONLY for enrollment, not for login
         boolean verified = true;
-        LOGGER.info("User " + userName + " authenticated via password. Biometric verification skipped for login.");
+        if (student.getRole() == Enums.UserRole.STUDENT && imageBase64 != null) {
+            Enrollment enrollment = enrollmentRepo.findByStudentId(student.getId());
+            if (enrollment != null && enrollment.getFaceEmbedding() != null) {
+                verified = verifyFace(student.getId(), imageBase64, enrollment.getFaceEmbedding(), audioBase64);
+                if (!verified) {
+                    throw new RuntimeException("Biometric verification failed");
+                }
+                LOGGER.info("Biometric verification successful for user " + userName);
+            } else {
+                LOGGER.warning("User " + userName + " has no enrollment data. Skipping biometric verification.");
+            }
+        } else {
+            LOGGER.info("User " + userName + " authenticated via password. Biometric verification skipped for login.");
+        }
 
         Map<String, Object> response = new HashMap<>();
         response.put("token", jwt);

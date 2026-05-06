@@ -112,4 +112,12 @@ public class TestResultService {
         LOGGER.info("Essay graded for result " + resultId + ": " + scorePercentage + "%");
         return saved;
     }
+
+    public void deleteResult(Long resultId) {
+        if (!testResultRepo.existsById(resultId)) {
+            throw new RuntimeException("Result not found: " + resultId);
+        }
+        testResultRepo.deleteById(resultId);
+        LOGGER.info("Deleted test result with ID: " + resultId);
+    }
 }

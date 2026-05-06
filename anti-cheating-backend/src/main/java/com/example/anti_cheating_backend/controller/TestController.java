@@ -201,7 +201,7 @@ public class TestController {
     }
 
     @PostMapping("/{testId}/submit")
-    @PreAuthorize("hasRole('STUDENT')")
+    @PreAuthorize("hasRole('STUDENT') or hasRole('ADMIN')")
     public ResponseEntity<TestResult> submitTest(@PathVariable Long testId, @RequestBody Map<Long, String> answers) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -270,6 +270,19 @@ public class TestController {
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             LOGGER.severe("Error grading essay for result " + resultId + ": " + e.getMessage());
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/results/{resultId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<?> deleteTestResult(@PathVariable Long resultId) {
+        try {
+            LOGGER.info("Admin deleting test result: " + resultId);
+            testResultService.deleteResult(resultId);
+            return ResponseEntity.ok(Map.of("message", "Test result deleted successfully"));
+        } catch (RuntimeException e) {
+            LOGGER.severe("Error deleting test result " + resultId + ": " + e.getMessage());
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }

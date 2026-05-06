@@ -69,9 +69,10 @@ public class SecurityConfig {
                     // Students can upload screenshots and log activity during exams
                     auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/desktop-monitor/screenshot").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
                     auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/desktop-monitor/activity").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
-                    // Students can view their own screenshots and activities
+                    // Students can view their own screenshots and activities (MUST come before the admin-only /screenshots/** rule)
                     auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/screenshots/student/**").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
                     auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/activities/student/**").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN", "ROLE_PROCTOR");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/screenshots/*/download").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN");
                     // Admin-only screenshot/activity retrieval endpoints
                     auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/screenshots/**").hasAuthority("ROLE_ADMIN");
                     auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/desktop-monitor/activities/**").hasAuthority("ROLE_ADMIN");
@@ -85,7 +86,17 @@ public class SecurityConfig {
                     auth.requestMatchers(org.springframework.http.HttpMethod.PUT, "/api/exams/**").hasAuthority("ROLE_ADMIN");
                     auth.requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/exams/**").hasAuthority("ROLE_ADMIN");
                     // Other admin endpoints
-                    auth.requestMatchers("/api/students", "/api/students/**", "/api/sessions", "/api/sessions/**").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers("/api/students", "/api/students/**").hasAuthority("ROLE_ADMIN");
+                    // Test & Results endpoints
+                    auth.requestMatchers(org.springframework.http.HttpMethod.GET, "/api/test/**").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/test/*/submit").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/test/results/*/grade").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/test/results/**").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.POST, "/api/test").hasAuthority("ROLE_ADMIN");
+                    auth.requestMatchers(org.springframework.http.HttpMethod.DELETE, "/api/test/**").hasAuthority("ROLE_ADMIN");
+                    
+                    // Session endpoints - students can create/view their own sessions
+                    auth.requestMatchers("/api/sessions/**").hasAnyAuthority("ROLE_STUDENT", "ROLE_ADMIN");
                     auth.requestMatchers("/oauth2/**", "/login/oauth2/**").permitAll();
                     auth.requestMatchers("/health", "/error", "/ws/**").permitAll();
                     auth.anyRequest().authenticated();

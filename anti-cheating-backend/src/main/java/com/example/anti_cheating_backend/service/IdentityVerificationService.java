@@ -492,8 +492,10 @@ public class IdentityVerificationService {
             return Enums.IdentityDecision.BLOCK;
         }
 
-        if (mlReasonCodes.contains("VOICE_SIMILARITY_LOW")) {
-            reasonCodes.add("POLICY_BLOCK_VOICE_MISMATCH");
+        if (mlReasonCodes.contains("VOICE_SIMILARITY_LOW") || 
+            mlReasonCodes.contains("VOICE_IDENTITY_AMBIGUOUS") || 
+            mlReasonCodes.contains("VOICE_VERIFICATION_ERROR")) {
+            reasonCodes.add("POLICY_BLOCK_VOICE_ISSUE");
             return Enums.IdentityDecision.BLOCK;
         }
 
